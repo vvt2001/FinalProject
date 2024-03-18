@@ -13,6 +13,7 @@ namespace FinalProject_Data.Model
         public string Address { get; set; }
         public List<Cart> Carts { get; set; }
         public List<Receipt> Receipts { get; set; }
+        public string test_migrate { get; set; }
 
 }
 }

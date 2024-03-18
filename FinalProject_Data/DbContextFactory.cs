@@ -11,7 +11,7 @@ namespace FinalProject_Data
         public DatabaseContext CreateDbContext(string[] args)
         {
 
-            var connectionString = "Server=DESKTOP-51D23TA;Database=FinalProject_MeetingScheduler;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True";
+            var connectionString = "Server=VVT;Database=FinalProject_MeetingScheduler;User Id=vvt1508;Password=123456a@;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True";
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
             optionsBuilder.UseSqlServer(connectionString);
