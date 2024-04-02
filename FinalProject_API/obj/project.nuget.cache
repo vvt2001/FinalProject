@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "R+s8LKhtmMjUG0gAleZQfuUhxWM9q+TTA52zyo5gFz70VUgI0zYPi4C1PmEHD/5kzGk9cAOGxF8S+qXq819rAQ==",
+  "dgSpecHash": "gIEVgbzkEvRdphn2+4OBBlmGea1dMF2GZCcI9xiWwRzBqgm9HAFCnGCjhD2rGktHfilmVRypDHXsWAJtd8PNOQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_API\\FinalProject_API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\AD\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\AD\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\AD\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
+    "C:\\Users\\AD\\.nuget\\packages\\bouncycastle.cryptography\\2.3.0\\bouncycastle.cryptography.2.3.0.nupkg.sha512",
     "C:\\Users\\AD\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\AD\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\6.0.28\\microsoft.aspnetcore.jsonpatch.6.0.28.nupkg.sha512",
     "C:\\Users\\AD\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\6.0.28\\microsoft.aspnetcore.mvc.newtonsoftjson.6.0.28.nupkg.sha512",

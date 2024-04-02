@@ -30,7 +30,7 @@ namespace FinalProject_API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<IProductServices, ProductServices>();
+            services.AddTransient<IMeetingServices, MeetingServices>();
             services.AddTransient<IAccountServices, AccountServices>();
 
             services.AddDbContext<DatabaseContext>(option => option.UseSqlServer("Server=VVT\\SQLEXPRESS;Database=Ecommerce;Trusted_Connection=True;"));

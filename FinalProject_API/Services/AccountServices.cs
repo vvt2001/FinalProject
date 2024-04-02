@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FinalProject_API.Common;
 using FinalProject_Data;
 using FinalProject_Data.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace FinalProject_API.Services
 {
     public interface IAccountServices
     {
-        Account Create(Account Account);
-        void Delete(int id);
-        Account Get(int id);
-        Account Edit(int id, string password, string phonenumber, string address);
+        Task<User> Get(string user_id);
+        Task<bool> ChangePassword(string current_password, string new_password, string actor_id);
+        bool VerifyPassword(User user, string password);
+        UserHash CreatePassword(string passwordText);
+        bool ValidatePassword(string passwordText);
     }
     public class AccountServices : IAccountServices
     {
@@ -22,35 +25,71 @@ namespace FinalProject_API.Services
         {
             _context = context;
         }
-        public Account Create(Account Account)
+
+        public async Task<bool> ChangePassword(string current_password, string new_password, string actor_id)
         {
-            _context.Add(Account);
-            _context.SaveChanges();
-            return Account;
+            var account = await Get(actor_id);
+
+            if (VerifyPassword(account, current_password))
+            {
+                var userinfo = CreatePassword(new_password);
+
+                account.salt = userinfo.salt;
+                account.hash = userinfo.hash;
+
+                _context.users.Update(account);
+                return await _context.SaveChangesAsync() > 0;
+            }
+            return false;
         }
 
-        public void Delete(int id)
+        public async Task<User> Get(string user_id)
         {
-            var Account = _context.Accounts.Where(x => x.ID == id).Include(x=>x.Carts).FirstOrDefault();
-            _context.Accounts.Remove(Account);
-            _context.SaveChanges();
+            var user = await _context.users.AsNoTracking().FirstOrDefaultAsync(o => o.ID == user_id);
+            if (user != null)
+            {
+                return user;
+            }
+            throw new InvalidProgramException("Tài khoản không tồn tại");
         }
 
-        public Account Edit(int id, string password, string phonenumber, string address)
+        public bool VerifyPassword(User user, string password)
         {
-            var account = _context.Accounts.Find(id);
-            account.Password = password;
-            account.Phonenumber = phonenumber;
-            account.Address = address;
-            _context.Entry(account).State = EntityState.Modified;
-            _context.SaveChanges();
-            return account;
+            /* valid password */
+            if (!Crypto.Verify(password, user.salt, user.hash))
+            {
+                throw new InvalidProgramException($"Mật khẩu không chính xác.");
+            }
+
+            return true;
         }
 
-        public Account Get(int id)
+        public UserHash CreatePassword(string passwordText)
         {
-            var Account = _context.Accounts.Where(Account => Account.ID == id).FirstOrDefault();
-            return Account;
+            /*** validate password ***/
+            if (!ValidatePassword(passwordText))
+            {
+                throw new InvalidProgramException("Mật khẩu không hợp lệ");
+            }
+            /*************************/
+            var result = new UserHash();
+            result.salt = Crypto.CreateSalt();
+            result.hash = Crypto.Hash(passwordText, result.salt);
+
+            return result;
+        }
+
+        public bool ValidatePassword(string passwordText)
+        {
+            var validator = new PasswordValidator
+            {
+                MinLength = 8,
+                RequireDigit = true,
+                RequireLowercase = true,
+                RequireNonLetterOrDigit = true,
+                RequireUppercase = true
+            };
+            return validator.Validate(passwordText);
         }
     }
 }

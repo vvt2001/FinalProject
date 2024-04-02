@@ -82,3 +82,5 @@ C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\refint\F
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalProject_API.pdb
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalProject_API.genruntimeconfig.cache
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\ref\FinalProject_API.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\AutoMapper.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\BouncyCastle.Cryptography.dll

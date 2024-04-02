@@ -22,155 +22,253 @@ namespace FinalProject_Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("FinalProject_Data.Model.Account", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Address")
+                    b.Property<string>("email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("meeting_id")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phonenumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("test_migrate")
+                    b.Property<string>("username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("attendees");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Cart", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee_Meeting", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("attendee_id")
+                        .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    b.Property<string>("meeting_id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AccountID")
-                        .HasColumnType("int");
+                    b.HasKey("attendee_id", "meeting_id");
 
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
+                    b.HasIndex("meeting_id");
 
-                    b.Property<int>("ProductQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("AccountID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("Carts");
+                    b.ToTable("attendee_meetings");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Product", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee_MeetingForm", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("attendee_id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingform_id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("attendee_id", "meetingform_id");
+
+                    b.HasIndex("meetingform_id");
+
+                    b.ToTable("attendee_meetingforms");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("duration")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("meeting_description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Price")
+                    b.Property<string>("meeting_title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("meetingform_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingtime_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("platform")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
-
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("FinalProject_Data.Model.Receipt", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("AccountID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime>("starttime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("TotalSum")
+                    b.Property<int>("trangthai")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AccountID");
+                    b.HasIndex("meetingform_id")
+                        .IsUnique();
 
-                    b.ToTable("Receipts");
+                    b.ToTable("meetings");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Cart", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.MeetingForm", b =>
                 {
-                    b.HasOne("FinalProject_Data.Model.Account", "Account")
-                        .WithMany("Carts")
-                        .HasForeignKey("AccountID")
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("meeting_description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("meeting_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("meeting_title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("platform")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("starttime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("trangthai")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("meetingforms");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.MeetingTime", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("duration")
+                        .HasColumnType("int");
+
+                    b.Property<string>("meetingID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingform_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingtime_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("time")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("trangthai")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("meetingID");
+
+                    b.HasIndex("meetingform_id");
+
+                    b.ToTable("meetingtimes");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee_Meeting", b =>
+                {
+                    b.HasOne("FinalProject_Data.Model.Attendee", "attendee")
+                        .WithMany()
+                        .HasForeignKey("attendee_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FinalProject_Data.Model.Product", "Product")
-                        .WithMany("Carts")
-                        .HasForeignKey("ProductID")
+                    b.HasOne("FinalProject_Data.Model.Meeting", "meeting")
+                        .WithMany("attendee_meetings")
+                        .HasForeignKey("meeting_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Account");
+                    b.Navigation("attendee");
 
-                    b.Navigation("Product");
+                    b.Navigation("meeting");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Receipt", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee_MeetingForm", b =>
                 {
-                    b.HasOne("FinalProject_Data.Model.Account", "Account")
-                        .WithMany("Receipts")
-                        .HasForeignKey("AccountID")
+                    b.HasOne("FinalProject_Data.Model.Attendee", "attendee")
+                        .WithMany()
+                        .HasForeignKey("attendee_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Account");
+                    b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
+                        .WithMany("attendee_meetingforms")
+                        .HasForeignKey("meetingform_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("attendee");
+
+                    b.Navigation("meetingform");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Account", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
                 {
-                    b.Navigation("Carts");
+                    b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
+                        .WithOne("meeting")
+                        .HasForeignKey("FinalProject_Data.Model.Meeting", "meetingform_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Receipts");
+                    b.Navigation("meetingform");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Product", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.MeetingTime", b =>
                 {
-                    b.Navigation("Carts");
+                    b.HasOne("FinalProject_Data.Model.Meeting", "meeting")
+                        .WithMany()
+                        .HasForeignKey("meetingID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
+                        .WithMany("times")
+                        .HasForeignKey("meetingform_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("meeting");
+
+                    b.Navigation("meetingform");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
+                {
+                    b.Navigation("attendee_meetings");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.MeetingForm", b =>
+                {
+                    b.Navigation("attendee_meetingforms");
+
+                    b.Navigation("meeting")
+                        .IsRequired();
+
+                    b.Navigation("times");
                 });
 #pragma warning restore 612, 618
         }

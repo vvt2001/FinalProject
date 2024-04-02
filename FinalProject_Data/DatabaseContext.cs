@@ -1,6 +1,7 @@
 ﻿using FinalProject_Data.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Emit;
 
 namespace FinalProject_Data
 {
@@ -10,23 +11,30 @@ namespace FinalProject_Data
         {
             
         }
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(builder);
-            // quan he 1 nhieu
-            builder.Entity<Cart>().HasOne(cart => cart.Account).WithMany(account => account.Carts).HasForeignKey(cart => cart.AccountID);
-            builder.Entity<Cart>().HasOne(cart => cart.Product).WithMany(product => product.Carts).HasForeignKey(cart => cart.ProductID);
-            builder.Entity<Receipt>().HasOne(receipt => receipt.Account).WithMany(account => account.Receipts).HasForeignKey(receipt => receipt.AccountID);
+            base.OnModelCreating(modelBuilder);
+            //Meeting
+            modelBuilder.ApplyConfiguration(new Meeting_configuration());
+            modelBuilder.ApplyConfiguration(new MeetingForm_configuration());
+            modelBuilder.ApplyConfiguration(new MeetingTime_configuration());
+
+            //Attendee
+            modelBuilder.ApplyConfiguration(new Attendee_configuration());
+            modelBuilder.ApplyConfiguration(new Attendee_Meeting_configuration());
+            modelBuilder.ApplyConfiguration(new Attendee_MeetingForm_configuration());
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
-            
+            base.OnConfiguring(optionsBuilder);   
         }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<Cart> Carts { get; set; }
-        public DbSet<Receipt> Receipts { get; set; }
+        public DbSet<User> users { get; set; }
+        public DbSet<Meeting> meetings { get; set; }
+        public DbSet<MeetingForm> meetingforms { get; set; }
+        public DbSet<MeetingTime> meetingtimes { get; set; }
+        public DbSet<Attendee> attendees { get; set; }
+        public DbSet<Attendee_Meeting> attendee_meetings { get; set; }
+        public DbSet<Attendee_MeetingForm> attendee_meetingforms { get; set; }
 
     }
 }

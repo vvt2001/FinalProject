@@ -8,6 +8,6 @@ namespace FinalProject_Data.Model
     public class Entity
     {
         [Key]
-        public int ID { get; set; }
+        public string ID { get; set; }
     }
 }
