@@ -7,11 +7,18 @@ using FinalProject_Data.Model;
 using FinalProject_API.View.User;
 using FinalProject_API.Common;
 using FinalProject_Data.Enum;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using FinalProject_API.View.Authentication;
 
 namespace FinalProject_API.Services
 {
     public interface IUserService
     {
+        Task<LoginResponse> Authenticate(LoginRequest request);
         Task<string> Create(UserCreating nguoiDungCreating, string actor_id);
         Task<User> Get(string id, string actor_id);
         Task<List<User>> GetAll();
@@ -21,17 +28,42 @@ namespace FinalProject_API.Services
     {
         private readonly DatabaseContext _context;
         private readonly IMapper _mapper;
-        private readonly IUserService _userService;
         private readonly IAccountServices _accountService;
         private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
-        public UserService(DatabaseContext context, IMapper mapper, IUserService userService, IAccountServices accountService, IWebHostEnvironment env)
+        public UserService(DatabaseContext context, IMapper mapper, IAccountServices accountService, IWebHostEnvironment env, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;
-            _userService = userService;
             _accountService = accountService;
             _env = env;
+            _configuration = configuration;
+        }
+
+
+
+        public async Task<LoginResponse> Authenticate(LoginRequest request)
+        {
+            var user = await GetByUserName(request.UserName);
+
+            if (!Crypto.Verify(request.Password, user.salt, user.hash))
+            {
+                throw new InvalidProgramException($"Mật khẩu không chính xác.");                
+            }
+
+            var access_token = RenderAccessToken(user);
+            if (access_token != null)
+            {
+                return new LoginResponse
+                {
+                    id = user.ID,
+                    name = user.name,
+                    email = user.email,
+                    access_token = access_token
+                };
+            }
+            throw new Exception("Đăng nhập không thành công");
         }
 
         public async Task<User> Get(string id, string actor_id)
@@ -93,6 +125,40 @@ namespace FinalProject_API.Services
                 return $"Tên đăng nhập '{creating.user_name}'";
             }
             return null;
+        }
+
+        private string RenderAccessToken(User user, DateTime? expire = null)
+        {
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(CustomJwtClaimType.Email, user.email),
+                new Claim(CustomJwtClaimType.Name, user.name),
+                new Claim(CustomJwtClaimType.Exp, DateTime.Now.AddDays(30).ToShortDateString()),
+                new Claim(CustomJwtClaimType.UserId, user.ID)
+            };
+
+            string issuer = _configuration.GetValue<string>("TokenAuthentication:Issuer");
+            string secretSercurityKey = _configuration.GetValue<string>("TokenAuthentication:SecretSercurityKey");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretSercurityKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(issuer,
+                issuer,
+                claims,
+                expires: expire ?? DateTime.Now.AddDays(30), //DateTime.Now.AddDays(30),
+                signingCredentials: creds);
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<User> GetByUserName(string username)
+        {
+            var user = await _context.users.FirstOrDefaultAsync(o => o.username == username);
+            if (user != null)
+            {
+                return user;
+            }
+            throw new InvalidProgramException("Người dùng không tồn tại");
         }
     }
 }
