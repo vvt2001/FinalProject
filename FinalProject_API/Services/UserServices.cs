@@ -16,7 +16,7 @@ using FinalProject_API.View.Authentication;
 
 namespace FinalProject_API.Services
 {
-    public interface IUserService
+    public interface IUserServices
     {
         Task<LoginResponse> Authenticate(LoginRequest request);
         Task<string> Create(UserCreating nguoiDungCreating, string actor_id);
@@ -24,7 +24,7 @@ namespace FinalProject_API.Services
         Task<List<User>> GetAll();
     }
 
-    public class UserService : IUserService
+    public class UserServices : IUserServices
     {
         private readonly DatabaseContext _context;
         private readonly IMapper _mapper;
@@ -32,7 +32,7 @@ namespace FinalProject_API.Services
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
 
-        public UserService(DatabaseContext context, IMapper mapper, IAccountServices accountService, IWebHostEnvironment env, IConfiguration configuration)
+        public UserServices(DatabaseContext context, IMapper mapper, IAccountServices accountService, IWebHostEnvironment env, IConfiguration configuration)
         {
             _context = context;
             _mapper = mapper;

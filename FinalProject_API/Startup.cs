@@ -31,7 +31,7 @@ namespace FinalProject_API
         {
             services.AddControllers();
             services.AddTransient<IMeetingServices, MeetingServices>();
-            services.AddTransient<IAccountServices, AccountServices>();
+            services.AddTransient<IUserServices, AccountServices>();
 
             services.AddDbContext<DatabaseContext>(option => option.UseSqlServer("Server=VVT\\SQLEXPRESS;Database=Ecommerce;Trusted_Connection=True;"));
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
