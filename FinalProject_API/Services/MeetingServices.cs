@@ -18,6 +18,7 @@ namespace FinalProject_API.Services
     {
         Task<string> CreateForm(MeetingFormCreating creating, string actor_id);
         Task<MeetingForm> GetForm(string form_id, string actor_id);
+        Task<List<MeetingForm>> GetAllForm(string actor_id);
         Task<bool> VoteForm(MeetingFormVoting voting);
         Task<bool> BookMeeting(string form_id, string actor_id);
     }
@@ -60,6 +61,12 @@ namespace FinalProject_API.Services
             {
                 throw new InvalidProgramException("Không tìm thấy lịch họp");
             }
+        }
+
+        public async Task<List<MeetingForm>> GetAllForm(string actor_id)
+        {
+            var forms = await _context.meetingforms.Where(o => o.owner_id == actor_id).ToListAsync();
+            return forms;
         }
 
         public async Task<bool> VoteForm(MeetingFormVoting voting)

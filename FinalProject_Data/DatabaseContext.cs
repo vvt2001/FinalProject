@@ -23,6 +23,9 @@ namespace FinalProject_Data
             modelBuilder.ApplyConfiguration(new Attendee_configuration());
             modelBuilder.ApplyConfiguration(new Attendee_Meeting_configuration());
             modelBuilder.ApplyConfiguration(new Attendee_MeetingForm_configuration());
+
+            //User
+            modelBuilder.ApplyConfiguration(new User_configuration());
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -22,12 +22,12 @@ namespace FinalProject_API.Controllers
             _userServices = userServices;
         }
 
-        [HttpPost("create-form")]
-        public async Task<ActionResult> Create([FromBody] UserCreating creating, string actor_id)
+        [HttpPost("create")]
+        public async Task<ActionResult> Create([FromBody] UserCreating creating)
         {
             try
             {
-                return Ok(new Response<string>(await _userServices.Create(creating, actor_id)));
+                return Ok(new Response<string>(await _userServices.Create(creating)));
             }
             catch (Exception ex)
             {

@@ -84,3 +84,9 @@ C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalPro
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\ref\FinalProject_API.dll
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\AutoMapper.dll
 C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\BouncyCastle.Cryptography.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Microsoft.OpenApi.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalProject_API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

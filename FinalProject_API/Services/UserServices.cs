@@ -19,7 +19,7 @@ namespace FinalProject_API.Services
     public interface IUserServices
     {
         Task<LoginResponse> Authenticate(LoginRequest request);
-        Task<string> Create(UserCreating nguoiDungCreating, string actor_id);
+        Task<string> Create(UserCreating creating);
         Task<User> Get(string id, string actor_id);
         Task<List<User>> GetAll();
     }
@@ -27,21 +27,15 @@ namespace FinalProject_API.Services
     public class UserServices : IUserServices
     {
         private readonly DatabaseContext _context;
-        private readonly IMapper _mapper;
         private readonly IAccountServices _accountService;
-        private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
 
-        public UserServices(DatabaseContext context, IMapper mapper, IAccountServices accountService, IWebHostEnvironment env, IConfiguration configuration)
+        public UserServices(DatabaseContext context, IAccountServices accountService, IConfiguration configuration)
         {
             _context = context;
-            _mapper = mapper;
             _accountService = accountService;
-            _env = env;
             _configuration = configuration;
         }
-
-
 
         public async Task<LoginResponse> Authenticate(LoginRequest request)
         {
@@ -85,7 +79,7 @@ namespace FinalProject_API.Services
                 .ToListAsync();
         }
 
-        public async Task<string> Create(UserCreating creating, string actor_id)
+        public async Task<string> Create(UserCreating creating)
         {
             try
             {
@@ -138,14 +132,16 @@ namespace FinalProject_API.Services
                 new Claim(CustomJwtClaimType.UserId, user.ID)
             };
 
-            string issuer = _configuration.GetValue<string>("TokenAuthentication:Issuer");
-            string secretSercurityKey = _configuration.GetValue<string>("TokenAuthentication:SecretSercurityKey");
+            string issuer = _configuration.GetSection("JwtSetting:Issuer").Value!;
+            string audience = _configuration.GetSection("JwtSetting:Audience").Value!;
+            string secretSercurityKey = _configuration.GetSection("JwtSetting:Token").Value!;
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretSercurityKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(issuer,
-                issuer,
-                claims,
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
                 expires: expire ?? DateTime.Now.AddDays(30), //DateTime.Now.AddDays(30),
                 signingCredentials: creds);
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -2,6 +2,7 @@
 using FinalProject_API.View.Meeting;
 using FinalProject_API.Wrappers;
 using FinalProject_Data.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_API.Controllers
 {
+    [Authorize]
     [Route("meeting")]
     [ApiController]
     public class MeetingController : ApiControllerBase
@@ -40,6 +42,19 @@ namespace FinalProject_API.Controllers
             try
             {
                 return Ok(new Response<MeetingForm>(await _meetingServices.GetForm(form_id, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("get-all-form")]
+        public async Task<ActionResult> GetAllForm(string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<List<MeetingForm>>(await _meetingServices.GetAllForm(actor_id)));
             }
             catch (Exception ex)
             {

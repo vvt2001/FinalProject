@@ -14,6 +14,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using FinalProject_Data;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using eArchive.Service.Common;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FinalProject_API
 {
@@ -30,10 +34,38 @@ namespace FinalProject_API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddTransient<IMeetingServices, MeetingServices>();
-            services.AddTransient<IUserServices, AccountServices>();
 
-            services.AddDbContext<DatabaseContext>(option => option.UseSqlServer("Server=VVT\\SQLEXPRESS;Database=Ecommerce;Trusted_Connection=True;"));
+            /* services */
+            services.AddTransient<IMeetingServices, MeetingServices>();
+            services.AddTransient<IAccountServices, AccountServices>();
+            services.AddTransient<IUserServices, UserServices>();
+
+            /* auto mapper */
+            services.AddAutoMapper(k => k.AddProfile<AutoMapperProfile>(), typeof(Startup));
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidIssuer = Configuration.GetSection("JwtSetting:Issuer").Value!,
+                    ValidAudience = Configuration.GetSection("JwtSetting:Audience").Value!,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("JwtSetting:Token").Value!)),
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                };
+            });
+
+            var connectionString = "Server=VVT;Database=FinalProject_MeetingScheduler;User Id=vvt1508;Password=123456a@;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True";
+
+            services.AddDbContext<DatabaseContext>(option => option.UseSqlServer(connectionString));
+
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
@@ -49,6 +81,7 @@ namespace FinalProject_API
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
