@@ -11,37 +11,36 @@ import {
 import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
+import { useState } from 'react';
 
-export default function Form({ customers }: { customers: CustomerField[] }) {
+export default function Form() {
     const initialState = { message: null, errors: {} };
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
+    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 
-    const handleAddTime = () => {
-        const newTimes = [...times];
-        newTimes.push('');
-        setTimes(newTimes);
+    // State to store the selected datetime value
+    const [selectedDateTime, setSelectedDateTime] = useState('');
+
+    // Function to handle changes in the datetime input
+    const handleDateTimeChange = (event) => {
+        setSelectedDateTime(event.target.value);
     };
 
-    const handleTimeChange = (index: number, value: string) => {
-        const newTimes = [...times];
-        newTimes[index] = value;
-        setTimes(newTimes);
-    };
   return (
       <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Meeting Title */}
         <div className="mb-4">
-            <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-            Choose an amount
+            <label htmlFor="title" className="mb-2 block text-sm font-medium">
+            Choose a title
             </label>
             <div className="relative mt-2 rounded-md">
             <div className="relative">
                 <input
-                id="amount"
-                name="amount"
-                type="number"
+                id="title"
+                name="title"
+                type="string"
                 step="0.01"
                 placeholder="Enter meeting title"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -53,15 +52,15 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
 
         {/* Meeting Descriptions (optional) */}
         <div className="mb-4">
-            <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-                Choose an amount
+            <label htmlFor="description" className="mb-2 block text-sm font-medium">
+                Write a description
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
                     <input
-                        id="amount"
-                        name="amount"
-                        type="number"
+                        id="description"
+                        name="description"
+                        type="string"
                         step="0.01"
                         placeholder="Enter meeting description"
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -73,15 +72,15 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
 
         {/* Location (optional) */}
         <div className="mb-4">
-            <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-                Choose an amount
+            <label htmlFor="location" className="mb-2 block text-sm font-medium">
+                Choose a location
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
                     <input
-                        id="amount"
-                        name="amount"
-                        type="number"
+                        id="location"
+                        name="location"
+                        type="string"
                         step="0.01"
                         placeholder="Enter meeting location"
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -91,15 +90,15 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             </div>
         </div>
 
-        {/* Customer Name */}
+        {/* Meeting Platform */}
         <div className="mb-4">
-            <label htmlFor="customer" className="mb-2 block text-sm font-medium">
+            <label htmlFor="platform" className="mb-2 block text-sm font-medium">
                 Choose platform
             </label>
             <div className="relative">
                 <select
-                    id="customer"
-                    name="customerId"
+                    id="platform"
+                    name="platformid"
                     className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     defaultValue=""
                     aria-describedby="customer-error"
@@ -107,13 +106,12 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                     <option value="" disabled>
                         Select an online meeting platform
                     </option>
-                    {customers.map((customer) => (
-                        <option key={customer.id} value={customer.id}>
-                            {customer.name}
+                    {platformOptions.map((option, index) => (
+                        <option key={index} value={index}>
+                            {option}
                         </option>
                     ))}
                 </select>
-                <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
             </div>
             <div id="customer-error" aria-live="polite" aria-atomic="true">
                 {state.errors?.customerId &&
@@ -127,15 +125,15 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
 
         {/* Duration (minutes) */}
         <div className="mb-4">
-            <label htmlFor="amount" className="mb-2 block text-sm font-medium">
-                Choose an amount
+            <label htmlFor="duration" className="mb-2 block text-sm font-medium">
+                Choose a duration
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
                     <input
-                        id="amount"
-                        name="amount"
-                        type="number"
+                        id="duration"
+                        name="duration"
+                        type="text"
                         step="0.01"
                         placeholder="Enter meeting duration"
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -145,16 +143,27 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
             </div>
         </div>
 
-        {times.map((time, index) => (
-            <div key={index}>
-                <label>
-                    Time:
-                    <input type="datetime-local" value={time} onChange={(e) => handleTimeChange(index, e.target.value)} />
-                </label>
-                <br />
+        {/* Times */}
+        <div className="mb-4">
+          <label htmlFor="datetime" className="mb-2 block text-sm font-medium">
+            Choose a date and time
+          </label>
+          <div className="relative mt-2 rounded-md">
+            <div className="relative">
+              <input
+                id="datetime"
+                name="datetime"
+                type="datetime-local" // Change type to datetime-local
+                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                value={selectedDateTime} // Bind value to state
+                onChange={handleDateTimeChange} // Handle changes
+                required
+              />
             </div>
-        ))}
-        <button onClick={handleAddTime}>Add Time</button>
+          </div>
+        </div>
+
+        {/*<button onClick={handleAddTime}>Add Time</button>*/}
 
       </div>
       <div className="mt-6 flex justify-end gap-4">

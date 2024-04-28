@@ -104,6 +104,7 @@ export async function createMeetingForm(prevState: State, formData: FormData) {
             body: JSON.stringify({
                 meeting_title: formData.get('meeting_title'),
                 meeting_description: formData.get('meeting_description'),
+                location: formData.get('location'),
                 times: JSON.parse(formData.get('times') || '[]'),
                 duration: parseInt(formData.get('duration') || '0', 10),
                 platform: parseInt(formData.get('platform') || '0', 10),
