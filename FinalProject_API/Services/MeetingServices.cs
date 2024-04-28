@@ -19,6 +19,8 @@ namespace FinalProject_API.Services
         Task<string> CreateForm(MeetingFormCreating creating, string actor_id);
         Task<MeetingForm> GetForm(string form_id, string actor_id);
         Task<List<MeetingForm>> GetAllForm(string actor_id);
+        Task<List<MeetingForm>> SearchForm(MeetingFormSearching searching, string actor_id);
+        Task<bool> Delete(string id, string actor_id);
         Task<bool> VoteForm(MeetingFormVoting voting);
         Task<bool> BookMeeting(string form_id, string actor_id);
     }
@@ -38,13 +40,35 @@ namespace FinalProject_API.Services
 
         public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
         {
-            var new_meeting_form = _mapper.Map<MeetingFormCreating, MeetingForm>(creating);
+            var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
             new_meeting_form.URL = "<invite_url>";
             new_meeting_form.trangthai = (int)trangthai_MeetingForm.Moi;
+            new_meeting_form.meeting_title = creating.meeting_title;
+            new_meeting_form.meeting_description = creating.meeting_description;
+            new_meeting_form.location = creating.location;
+            new_meeting_form.platform = creating.platform;
             new_meeting_form.owner_id = actor_id;
 
+            var meetingtimes = new List<MeetingTime>();
+            foreach (var time in creating.times)
+            {
+                var meetingtime = new MeetingTime();
+
+                meetingtime.ID = SlugID.New();
+                meetingtime.meetingform_id = new_meeting_form.ID;
+                meetingtime.time = time;
+                meetingtime.duration = creating.duration;
+                meetingtime.trangthai = (int)trangthai_MeetingTime.moi;
+
+                meetingtimes.Add(meetingtime);
+
+                _context.meetingtimes.Add(meetingtime);
+            }
+
+            new_meeting_form.times = meetingtimes;
             _context.meetingforms.Add(new_meeting_form);
+
             await _context.SaveChangesAsync();
 
             return new_meeting_form.ID;
@@ -67,6 +91,18 @@ namespace FinalProject_API.Services
         {
             var forms = await _context.meetingforms.Where(o => o.owner_id == actor_id).ToListAsync();
             return forms;
+        }
+
+        public async Task<List<MeetingForm>> SearchForm(MeetingFormSearching searching, string actor_id)
+        {
+            var query = _context.meetingforms
+                        .Where(o => o.owner_id == actor_id)
+                        .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searching.meeting_title))
+                query = query.Where(k => k.meeting_title.Contains(searching.meeting_title));
+
+            return await query.ToListAsync();
         }
 
         public async Task<bool> VoteForm(MeetingFormVoting voting)
@@ -102,7 +138,7 @@ namespace FinalProject_API.Services
         public async Task<bool> BookMeeting(string form_id, string actor_id)
         {
             var form = await _context.meetingforms.Include(o => o.attendee_meetingforms).FirstOrDefaultAsync(o => o.ID == form_id);
-            var prefered_time = await _context.meetingtimes.Where(o => o.meetingtime_id == form_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
+            var prefered_time = await _context.meetingtimes.Where(o => o.meetingform_id == form_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
 
             form.starttime = prefered_time.time;
             form.duration = prefered_time.duration;
@@ -111,7 +147,6 @@ namespace FinalProject_API.Services
             var meeting = _mapper.Map<MeetingForm, Meeting>(form);
             meeting.starttime = form.starttime ?? DateTime.Now;
             meeting.duration = form.duration ?? 60;
-            meeting.meetingform_id = form_id;
             meeting.ID = SlugID.New();
             meeting.trangthai = (int)trangthai_Meeting.Moi;
 
@@ -124,7 +159,21 @@ namespace FinalProject_API.Services
             }
             _context.meetings.Add(meeting);
 
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> Delete(string id, string actor_id)
+        {
+            var form = await _context.meetingforms.FirstOrDefaultAsync(o => o.ID == id);
+            if (form != null)
+            {
+                await _context.meetingtimes.Where(o => o.meetingform_id == id).ExecuteDeleteAsync();
+                await _context.meetingforms.Where(o => o.ID == id).ExecuteDeleteAsync();
+                return true;
+            }
+            throw new InvalidProgramException("Mẫu cuộc họp không tồn tại");
         }
     }
 }

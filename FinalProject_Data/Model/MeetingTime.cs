@@ -11,7 +11,6 @@ namespace FinalProject_Data.Model
     public class MeetingTime : MeetingTime_properties
     {
         public MeetingForm meetingform { get; set; }
-        public Meeting meeting { get; set; }
     }
     public class MeetingTime_properties : Entity
     {
@@ -19,7 +18,6 @@ namespace FinalProject_Data.Model
         public DateTime time { get; set; }
         public int duration { get; set; }
         public string meetingform_id { get; set; }
-        public string meetingtime_id { get; set; }
         public int trangthai { get; set; }
     }
     public class MeetingTime_configuration : IEntityTypeConfiguration<MeetingTime>

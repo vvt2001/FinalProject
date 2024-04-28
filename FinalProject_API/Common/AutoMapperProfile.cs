@@ -9,7 +9,6 @@ namespace eArchive.Service.Common
     {
         public AutoMapperProfile()
         {
-            CreateMap<MeetingFormCreating, MeetingForm>();
             CreateMap<MeetingForm, Meeting>();
         }
     }

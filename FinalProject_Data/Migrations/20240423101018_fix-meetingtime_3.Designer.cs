@@ -4,6 +4,7 @@ using FinalProject_Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinalProject_Data.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240423101018_fix-meetingtime_3")]
+    partial class fixmeetingtime_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,6 +89,10 @@ namespace FinalProject_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("meetingform_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("owner_id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -100,6 +107,9 @@ namespace FinalProject_Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("meetingform_id")
+                        .IsUnique();
 
                     b.HasIndex("owner_id");
 
@@ -119,6 +129,10 @@ namespace FinalProject_Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("meeting_description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("meeting_id")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -251,11 +265,19 @@ namespace FinalProject_Data.Migrations
 
             modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
                 {
+                    b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
+                        .WithOne("meeting")
+                        .HasForeignKey("FinalProject_Data.Model.Meeting", "meetingform_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FinalProject_Data.Model.User", "owner")
                         .WithMany()
                         .HasForeignKey("owner_id")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("meetingform");
 
                     b.Navigation("owner");
                 });
@@ -290,6 +312,9 @@ namespace FinalProject_Data.Migrations
             modelBuilder.Entity("FinalProject_Data.Model.MeetingForm", b =>
                 {
                     b.Navigation("attendee_meetingforms");
+
+                    b.Navigation("meeting")
+                        .IsRequired();
 
                     b.Navigation("times");
                 });

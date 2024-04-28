@@ -12,7 +12,6 @@ namespace FinalProject_Data.Model
     {
         public ICollection<MeetingTime> times { get; set; }
         public ICollection<Attendee_MeetingForm> attendee_meetingforms { get; set; }
-        public Meeting meeting { get; set; }
         public User owner { get; set; }
     }
     public class MeetingForm_properties : Entity
@@ -22,9 +21,9 @@ namespace FinalProject_Data.Model
         public string URL { get; set; }
         public string meeting_title { get; set; }
         public string meeting_description { get; set; }
+        public string location { get; set; }
         public int platform { get; set; }
         public int trangthai { get; set; }
-        public string meeting_id { get; set; }
         public string owner_id { get; set; }
     }
     public class MeetingForm_configuration : IEntityTypeConfiguration<MeetingForm>

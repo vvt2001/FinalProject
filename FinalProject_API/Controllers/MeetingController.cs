@@ -1,10 +1,12 @@
 ﻿using FinalProject_API.Services;
 using FinalProject_API.View.Meeting;
 using FinalProject_API.Wrappers;
+using FinalProject_Data.Enum;
 using FinalProject_Data.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace FinalProject_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("meeting")]
     [ApiController]
     public class MeetingController : ApiControllerBase
@@ -55,6 +57,32 @@ namespace FinalProject_API.Controllers
             try
             {
                 return Ok(new Response<List<MeetingForm>>(await _meetingServices.GetAllForm(actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("search-form")]
+        public async Task<ActionResult> SearchForm([FromQuery] MeetingFormSearching request, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<List<MeetingForm>>(await _meetingServices.SearchForm(request, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpDelete("delete-form/{id}")]
+        public async Task<ActionResult> Delete(string id, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _meetingServices.Delete(id, actor_id)));
             }
             catch (Exception ex)
             {
