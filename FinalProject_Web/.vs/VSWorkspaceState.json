@@ -1,0 +1,17 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\dashboard",
+    "\\app\\dashboard\\meetingforms",
+    "\\app\\dashboard\\meetingforms\\create",
+    "\\app\\lib",
+    "\\app\\login",
+    "\\app\\ui",
+    "\\app\\ui\\dashboard",
+    "\\app\\ui\\invoices",
+    "\\app\\ui\\meetingforms"
+  ],
+  "SelectedNode": "\\app\\lib\\data.ts",
+  "PreviewInSolutionExplorer": false
+}
