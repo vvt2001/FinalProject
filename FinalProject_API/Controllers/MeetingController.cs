@@ -38,6 +38,19 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [HttpPut("update-form")]
+        public async Task<ActionResult> Update([FromBody] MeetingFormUpdating updating, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _meetingServices.UpdateForm(updating, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
         [HttpGet("get-form/{form_id}")]
         public async Task<ActionResult> GetForm(string form_id, string actor_id)
         {
@@ -69,7 +82,7 @@ namespace FinalProject_API.Controllers
         {
             try
             {
-                return Ok(new Response<List<MeetingForm>>(await _meetingServices.SearchForm(request, actor_id)));
+                return Ok(await _meetingServices.SearchForm(request, actor_id));
             }
             catch (Exception ex)
             {

@@ -1,34 +1,34 @@
-import Form from '@/app/ui/invoices/edit-form';
+import Form from '@/app/ui/meetingforms/vote-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
+import { fetchMeetingFormById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Invoices | Acme Dashboard',
+    title: 'Meetings | Scheduler Dashboard',
 };
 export default async function Page({ params }: { params: { id: string } }) {
     const id = params.id;
-    const [invoice, customers] = await Promise.all([
-        fetchInvoiceById(id),
-        fetchCustomers(),
+    const [meetingform] = await Promise.all([
+        fetchMeetingFormById(id),
     ]);
-    if (!invoice) {
+
+    if (!meetingform) {
         notFound();
     }
     return (
         <main>
             <Breadcrumbs
                 breadcrumbs={[
-                    { label: 'Invoices', href: '/dashboard/invoices' },
+                    { label: 'Meetings', href: '/dashboard/meetingforms' },
                     {
-                        label: 'Edit Invoice',
-                        href: `/dashboard/invoices/${id}/edit`,
+                        label: 'Vote Meeting',
+                        href: `/dashboard/meetingforms/${id}/vote`,
                         active: true,
                     },
                 ]}
             />
-            <Form invoice={invoice} customers={customers} />
+            <Form meetingform={meetingform} />
         </main>
     );
 }

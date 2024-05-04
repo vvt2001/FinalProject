@@ -95,3 +95,13 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+export type MeetingForm = {
+    id: string;
+    meeting_title: string;
+    meeting_description: string;
+    location: string;
+    platform: number;
+    duration: number;
+    times: Date[];
+};

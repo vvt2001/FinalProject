@@ -31,43 +31,23 @@ namespace FinalProject_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("attendees");
-                });
-
-            modelBuilder.Entity("FinalProject_Data.Model.Attendee_Meeting", b =>
-                {
-                    b.Property<string>("attendee_id")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("meeting_id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("attendee_id", "meeting_id");
-
-                    b.HasIndex("meeting_id");
-
-                    b.ToTable("attendee_meetings");
-                });
-
-            modelBuilder.Entity("FinalProject_Data.Model.Attendee_MeetingForm", b =>
-                {
-                    b.Property<string>("attendee_id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("meetingform_id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("attendee_id", "meetingform_id");
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("meeting_id");
 
                     b.HasIndex("meetingform_id");
 
-                    b.ToTable("attendee_meetingforms");
+                    b.ToTable("attendees");
                 });
 
             modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
@@ -79,11 +59,9 @@ namespace FinalProject_Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("location")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("meeting_description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("meeting_title")
@@ -119,15 +97,13 @@ namespace FinalProject_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("duration")
+                    b.Property<int>("duration")
                         .HasColumnType("int");
 
                     b.Property<string>("location")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("meeting_description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("meeting_title")
@@ -219,40 +195,17 @@ namespace FinalProject_Data.Migrations
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("FinalProject_Data.Model.Attendee_Meeting", b =>
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee", b =>
                 {
-                    b.HasOne("FinalProject_Data.Model.Attendee", "attendee")
-                        .WithMany()
-                        .HasForeignKey("attendee_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("FinalProject_Data.Model.Meeting", "meeting")
-                        .WithMany("attendee_meetings")
-                        .HasForeignKey("meeting_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("attendee");
-
-                    b.Navigation("meeting");
-                });
-
-            modelBuilder.Entity("FinalProject_Data.Model.Attendee_MeetingForm", b =>
-                {
-                    b.HasOne("FinalProject_Data.Model.Attendee", "attendee")
-                        .WithMany()
-                        .HasForeignKey("attendee_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("attendee")
+                        .HasForeignKey("meeting_id");
 
                     b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
-                        .WithMany("attendee_meetingforms")
-                        .HasForeignKey("meetingform_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("attendee")
+                        .HasForeignKey("meetingform_id");
 
-                    b.Navigation("attendee");
+                    b.Navigation("meeting");
 
                     b.Navigation("meetingform");
                 });
@@ -292,12 +245,12 @@ namespace FinalProject_Data.Migrations
 
             modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
                 {
-                    b.Navigation("attendee_meetings");
+                    b.Navigation("attendee");
                 });
 
             modelBuilder.Entity("FinalProject_Data.Model.MeetingForm", b =>
                 {
-                    b.Navigation("attendee_meetingforms");
+                    b.Navigation("attendee");
 
                     b.Navigation("times");
                 });

@@ -21,8 +21,6 @@ namespace FinalProject_Data
 
             //Attendee
             modelBuilder.ApplyConfiguration(new Attendee_configuration());
-            modelBuilder.ApplyConfiguration(new Attendee_Meeting_configuration());
-            modelBuilder.ApplyConfiguration(new Attendee_MeetingForm_configuration());
 
             //User
             modelBuilder.ApplyConfiguration(new User_configuration());
@@ -36,8 +34,5 @@ namespace FinalProject_Data
         public DbSet<MeetingForm> meetingforms { get; set; }
         public DbSet<MeetingTime> meetingtimes { get; set; }
         public DbSet<Attendee> attendees { get; set; }
-        public DbSet<Attendee_Meeting> attendee_meetings { get; set; }
-        public DbSet<Attendee_MeetingForm> attendee_meetingforms { get; set; }
-
     }
 }

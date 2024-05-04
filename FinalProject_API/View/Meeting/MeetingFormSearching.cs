@@ -1,7 +1,10 @@
-﻿namespace FinalProject_API.View.Meeting
+﻿using FinalProject_API.Filter;
+using System.ComponentModel.DataAnnotations;
+
+namespace FinalProject_API.View.Meeting
 {
-    public class MeetingFormSearching
+    public class MeetingFormSearching : PaginationFilter
     {
-        public string meeting_title { get; set; }
+        public string? meeting_title { get; set; }
     }
 }

@@ -35,6 +35,19 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [HttpPut("Update")]
+        public async Task<ActionResult> Update([FromBody] UserUpdating updating, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _userServices.Update(updating, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
         [HttpGet("get/{id}")]
         public async Task<ActionResult> Get(string id, string actor_id)
         {

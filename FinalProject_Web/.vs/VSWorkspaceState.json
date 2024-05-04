@@ -1,14 +1,13 @@
 {
   "ExpandedNodes": [
     "",
-    "\\app\\dashboard",
-    "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\create",
-    "\\app\\lib",
+    "\\app",
+    "\\app\\dashboard\\meetingforms\\[id]",
+    "\\app\\guest\\[id]",
+    "\\app\\guest\\[id]\\vote",
     "\\app\\login",
-    "\\app\\ui",
-    "\\app\\ui\\meetingforms"
+    "\\app\\ui"
   ],
-  "SelectedNode": "\\next.config.js",
+  "SelectedNode": "\\app\\ui\\login-form.tsx",
   "PreviewInSolutionExplorer": false
 }

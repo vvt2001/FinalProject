@@ -7,24 +7,32 @@ import { MeetingFormTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchMeetingFormPages } from '@/app/lib/data';
 
-export default async function Page(page?: string) {
-    const currentPage = Number(page) || 1;
+export default async function Page({
+    searchParams,
+}: {
+    searchParams?: {
+        query?: string;
+        page?: string;
+    };
+}) {
+    const query = searchParams?.query || '';
+    const currentPage = Number(searchParams?.page) || 1;
     const totalPages = await fetchMeetingFormPages();
 
     return (
         <div className="w-full">
             <div className="flex w-full items-center justify-between">
-                <h1 className={`${lusitana.className} text-2xl`}>Meeting Forms</h1>
+                <h1 className={`${lusitana.className} text-2xl`}>Meetings</h1>
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-                <Search placeholder="Search meeting forms..." />
+                <Search placeholder="Search meetings ..." />
                 <CreateMeetingForm />
             </div>
-              <Suspense key={currentPage} fallback={<MeetingFormTableSkeleton />}>
-                <Table currentPage={currentPage} />
-              </Suspense> 
+            <Suspense key={currentPage} fallback={<MeetingFormTableSkeleton />}>
+                <Table query={query} currentPage={currentPage} />
+            </Suspense>
             <div className="mt-5 flex w-full justify-center">
-                 <Pagination totalPages={totalPages} /> 
+                <Pagination totalPages={totalPages} />
             </div>
         </div>
     );

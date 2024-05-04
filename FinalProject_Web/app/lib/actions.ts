@@ -8,22 +8,58 @@ import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { axios } from 'axios';
 
-//const FormSchema = z.object({
-//    id: z.string(),
-//    customerId: z.string({
-//        invalid_type_error: 'Please select a customer.',
-//    }),
-//    amount: z.coerce
-//        .number()
-//        .gt(0, { message: 'Please enter an amount greater than $0.' }),
-//    status: z.enum(['pending', 'paid'], {
-//        invalid_type_error: 'Please select an invoice status.',
-//    }),
-//    date: z.string(),
-//});
+const FormSchema = z.object({
+    id: z.string(),
+    customerId: z.string({
+        invalid_type_error: 'Please select a customer.',
+    }),
+    amount: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than $0.' }),
+    status: z.enum(['pending', 'paid'], {
+        invalid_type_error: 'Please select an invoice status.',
+    }),
+    date: z.string(),
+});
 
-//const CreateInvoice = FormSchema.omit({ id: true, date: true });
-//const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const MeetingFormSchema = z.object({
+    id: z.string(),
+    meeting_title: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meeting_description: z.string(),
+    location: z.string(),
+    duration: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+    platform: z.coerce.number({
+        invalid_type_error: 'Please select a meeting platform.',
+    }),
+    times: z.array(
+        z.coerce.date({
+            message: 'Please select a date and time for the meeting.',
+        })
+    ),
+});
+
+const VotingFormSchema = z.object({
+    meetingform_id: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meetingtime_ids: z.array(
+        z.string({
+            message: 'Please vote atleast one date and time for the meeting.',
+        })
+    ),
+    name: z.string(),
+    email: z.string(),
+});
+
+const CreateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
+const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
+const VoteMeetingForm = VotingFormSchema;
 
 export type State = {
     errors?: {
@@ -74,27 +110,29 @@ export async function createInvoice(prevState: State, formData: FormData) {
 }
 
 export async function createMeetingForm(prevState: State, formData: FormData) {
-    //// Validate form using Zod
-    //const validatedFields = CreateInvoice.safeParse({
-    //    meeting_title: formData.get('meeting_title'),
-    //    meeting_description: formData.get('meeting_description'),
-    //    location: formData.get('location'),
-    //    times: formData.get('times'),
-    //    duration: formData.get('duration'),
-    //    platform: formData.get('platform'),
-    //});
+    // Validate form using Zod
+    const validatedFields = CreateMeetingForm.safeParse({
+        meeting_title: formData.get('meeting_title'),
+        meeting_description: formData.get('meeting_description'),
+        location: formData.get('location'),
+        times: formData.getAll('times'),
+        duration: formData.get('duration'),
+        platform: formData.get('platform'),
+    });
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Create Meeting Form.',
-    //    };
-    //}
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create Meeting Form.',
+        };
+    }
 
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
+        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+
         const response = await fetch('http://localhost:7057/meeting/create-form?actor_id=4efyqow4ywdutzb52oymalf5d', {
             method: 'POST',
             headers: {
@@ -102,28 +140,17 @@ export async function createMeetingForm(prevState: State, formData: FormData) {
                 // Add any additional headers if needed
             },
             body: JSON.stringify({
-                meeting_title: formData.get('meeting_title'),
-                meeting_description: formData.get('meeting_description'),
-                location: formData.get('location'),
-                times: JSON.parse(formData.get('times') || '[]'),
-                duration: parseInt(formData.get('duration') || '0', 10),
-                platform: parseInt(formData.get('platform') || '0', 10),
+                meeting_title: meeting_title,
+                meeting_description: meeting_description,
+                location: location,
+                times: times,
+                duration: parseInt(duration || '0', 10),
+                platform: parseInt(platform || '0', 10),
             }),
         });
 
-        // Check if the request was successful
-        if (response.ok) {
-            // Revalidate cache and redirect if successful
-            revalidatePath('/dashboard/meetingforms');
-            redirect('/dashboard/meetingforms');
-        } else {
-            // Handle error response
-            const responseData = await response.json();
-            return {
-                message: responseData.message || 'Failed to create meeting form.',
-            };
-        }
     } catch (error) {
+
         // Handle any errors that occur during the request
         console.error('Error creating meeting form:', error);
         return {
@@ -132,8 +159,58 @@ export async function createMeetingForm(prevState: State, formData: FormData) {
     }
 
     // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+    revalidatePath('/dashboard');
+    redirect('/dashboard');
+}
+
+export async function voteMeetingForm(requestBody) {
+    // Validate form using Zod
+    const validatedFields = VoteMeetingForm.safeParse({
+        meetingform_id: requestBody.meetingform_id,
+        meetingtime_ids: requestBody.meetingtime_ids,
+        name: requestBody.name,
+        email: requestBody.email,
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create Meeting Form.',
+        };
+    }
+
+    // Insert data into the database
+    try {
+        // Make a POST request to your server API endpoint
+        const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
+
+        const response = await fetch('http://localhost:7057/meeting/vote-form?actor_id=4efyqow4ywdutzb52oymalf5d', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                meetingform_id: meetingform_id,
+                meetingtime_ids: meetingtime_ids,
+                name: name,
+                email: email,
+            }),
+        });
+
+    } catch (error) {
+
+        // Handle any errors that occur during the request
+        console.error('Error creating meeting form:', error);
+        return {
+            message: 'Failed to create meeting form.',
+        };
+    }
+
+    // Revalidate the cache for the invoices page and redirect the user.
+    revalidatePath('/dashboard');
+    redirect('/dashboard');
 }
 
 //export async function updateInvoice(id: string, formData: FormData) {
@@ -192,6 +269,61 @@ export async function updateInvoice(
 
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
+}
+
+export async function updateMeetingForm(
+    id: string,
+    prevState: State,
+    formData: FormData,
+) {
+    // Validate form using Zod
+    const validatedFields = UpdateMeetingForm.safeParse({
+        meeting_title: formData.get('meeting_title'),
+        meeting_description: formData.get('meeting_description'),
+        location: formData.get('location'),
+        times: formData.getAll('times'),
+        duration: formData.get('duration'),
+        platform: formData.get('platform'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update Meeting Form.',
+        };
+    }
+
+    const { customerId, amount, status } = validatedFields.data;
+    const amountInCents = amount * 100;
+
+    try {
+        // Make a PUT request to your server API endpoint
+        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+
+        const response = await fetch('http://localhost:7057/meeting/update-form?actor_id=4efyqow4ywdutzb52oymalf5d', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                id: id,
+                meeting_title: meeting_title,
+                meeting_description: meeting_description,
+                location: location,
+                times: times,
+                duration: parseInt(duration || '0', 10),
+                platform: parseInt(platform || '0', 10),
+            }),
+        });
+
+    } catch (error) {
+        return { message: 'Database Error: Failed to Update Meeting Form.' };
+    }
+
+    revalidatePath('/dashboard');
+    redirect('/dashboard');
 }
 
 export async function deleteInvoice(id: string) {

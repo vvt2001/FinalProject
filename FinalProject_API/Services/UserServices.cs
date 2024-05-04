@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FinalProject_API.View.Authentication;
+using FinalProject_Data.Enum.Meeting;
 
 namespace FinalProject_API.Services
 {
@@ -22,6 +23,7 @@ namespace FinalProject_API.Services
         Task<string> Create(UserCreating creating);
         Task<User> Get(string id, string actor_id);
         Task<List<User>> GetAll();
+        Task<bool> Update(UserUpdating updating, string actor_id);
     }
 
     public class UserServices : IUserServices
@@ -87,7 +89,7 @@ namespace FinalProject_API.Services
                 {
                     ID = SlugID.New(),
                     name = creating.name,
-                    username = creating.user_name,
+                    username = creating.username,
                     email = creating.email
                 };
                 var password = creating.password;
@@ -112,11 +114,26 @@ namespace FinalProject_API.Services
             }
         }
 
+        public async Task<bool> Update(UserUpdating updating, string actor_id)
+        {
+            var user = await _context.users.AsNoTracking().FirstOrDefaultAsync(o => o.ID == updating.id);
+            if (user != null)
+            {
+                user.name = updating.name;
+                user.username = updating.username;
+                user.email = updating.email;
+
+                _context.users.Update(user);
+                return await _context.SaveChangesAsync() > 0;
+            }
+            throw new InvalidProgramException("Người dùng không tồn tại");
+        }
+
         private string? GetFieldDuplicate(string exceptMessage, UserCreating creating)
         {
             if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.username)}"))
             {
-                return $"Tên đăng nhập '{creating.user_name}'";
+                return $"Tên đăng nhập '{creating.username}'";
             }
             return null;
         }

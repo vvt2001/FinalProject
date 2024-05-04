@@ -1,11 +1,17 @@
 import Image from 'next/image';
-import { UpdateMeetingForm, DeleteMeetingForm } from '@/app/ui/meetingforms/buttons';
+import { UpdateMeetingForm, DeleteMeetingForm, VoteMeetingForm, CopyVoteUrl } from '@/app/ui/meetingforms/buttons';
 import MeetingFormStatus from '@/app/ui/meetingforms/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeetingForms } from '@/app/lib/data';
 
-export default async function MeetingFormsTable(currentPage: number) {
-    const meetingforms = await fetchFilteredMeetingForms(currentPage);
+export default async function MeetingFormsTable({
+    query,
+    currentPage,
+}: {
+    query: string;
+    currentPage: number;
+}) {
+    const meetingforms = await fetchFilteredMeetingForms(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">
@@ -31,9 +37,10 @@ export default async function MeetingFormsTable(currentPage: number) {
                     <p className="text-xl font-medium">
                       {meetingform.url}
                     </p>
-                    <p>{meetingform.id}</p>
+                    <p>{meetingform.duration}</p>
                   </div>
                   <div className="flex justify-end gap-2">
+                    <CopyVoteUrl url={meetingform.url} />
                     <UpdateMeetingForm id={meetingform.id} />
                     <DeleteMeetingForm id={meetingform.id} />
                   </div>
@@ -51,13 +58,13 @@ export default async function MeetingFormsTable(currentPage: number) {
                   Description
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  URL
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
                   Duration
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Status
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  URL
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -79,16 +86,17 @@ export default async function MeetingFormsTable(currentPage: number) {
                     {meetingform.meeting_description}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    {meetingform.url}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {meetingform.id}
+                    {meetingform.duration}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <MeetingFormStatus status={meetingform.trangthai} />
                   </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {meetingform.url}
+                  </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
+                      <CopyVoteUrl url={meetingform.url} />
                       <UpdateMeetingForm id={meetingform.id} />
                       <DeleteMeetingForm id={meetingform.id} />
                     </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { CustomerField } from '@/app/lib/definitions';
 import Link from 'next/link';
 import {
   CheckIcon,
@@ -18,28 +17,61 @@ export default function Form() {
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
     const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 
-    // State to store the selected datetime value
-    const [selectedDateTime, setSelectedDateTime] = useState('');
+    // State to store the selected datetime values
+    const [selectedDateTimes, setSelectedDateTimes] = useState([]);
 
     // Function to handle changes in the datetime input
-    const handleDateTimeChange = (event) => {
-        setSelectedDateTime(event.target.value);
+    const handleDateTimeChange = (index, event) => {
+        const newDateTimes = [...selectedDateTimes];
+        newDateTimes[index] = event.target.value;
+        setSelectedDateTimes(newDateTimes);
     };
 
-  return (
-      <form action={dispatch}>
+    // Function to add a new datetime input
+    const addDateTimeInput = () => {
+        setSelectedDateTimes([...selectedDateTimes, '']);
+    };
+
+    // Function to remove a datetime input
+    const removeDateTimeInput = (index) => {
+        const newDateTimes = [...selectedDateTimes];
+        newDateTimes.splice(index, 1);
+        setSelectedDateTimes(newDateTimes);
+    };
+
+    //// Function to handle form submission
+    //const handleSubmit = async (event) => {
+    //    event.preventDefault(); // Prevent default form submission
+
+    //    // Create FormData object
+    //    const formData = new FormData(event.target);
+
+    //    // Append selectedDateTimes to formData
+    //    selectedDateTimes.forEach((times, index) => {
+    //        formData.append(`times`, times);
+    //    });
+
+    //    // Call createMeetingForm function with form data
+    //    const result = await createMeetingForm(state, formData);
+
+    //    // Update state with result
+    //    dispatch(result);
+    //};
+
+    return (
+    <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Meeting Title */}
         <div className="mb-4">
-            <label htmlFor="title" className="mb-2 block text-sm font-medium">
-            Choose a title
+            <label htmlFor="meeting_title" className="mb-2 block text-sm font-medium">
+                Choose a title
             </label>
             <div className="relative mt-2 rounded-md">
             <div className="relative">
                 <input
-                id="title"
-                name="title"
+                id="meeting_title"
+                name="meeting_title"
                 type="string"
                 step="0.01"
                 placeholder="Enter meeting title"
@@ -52,19 +84,18 @@ export default function Form() {
 
         {/* Meeting Descriptions (optional) */}
         <div className="mb-4">
-            <label htmlFor="description" className="mb-2 block text-sm font-medium">
+            <label htmlFor="meeting_description" className="mb-2 block text-sm font-medium">
                 Write a description
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
                     <input
-                        id="description"
-                        name="description"
+                        id="meeting_description"
+                        name="meeting_description"
                         type="string"
                         step="0.01"
                         placeholder="Enter meeting description"
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        required
                     />
                 </div>
             </div>
@@ -84,7 +115,6 @@ export default function Form() {
                         step="0.01"
                         placeholder="Enter meeting location"
                         className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        required
                     />
                 </div>
             </div>
@@ -98,7 +128,7 @@ export default function Form() {
             <div className="relative">
                 <select
                     id="platform"
-                    name="platformid"
+                    name="platform"
                     className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
                     defaultValue=""
                     aria-describedby="customer-error"
@@ -113,20 +143,12 @@ export default function Form() {
                     ))}
                 </select>
             </div>
-            <div id="customer-error" aria-live="polite" aria-atomic="true">
-                {state.errors?.customerId &&
-                    state.errors.customerId.map((error: string) => (
-                        <p className="mt-2 text-sm text-red-500" key={error}>
-                            {error}
-                        </p>
-                    ))}
-            </div>
         </div>
 
         {/* Duration (minutes) */}
         <div className="mb-4">
             <label htmlFor="duration" className="mb-2 block text-sm font-medium">
-                Choose a duration
+                Meeting duration (minutes)
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
@@ -143,27 +165,31 @@ export default function Form() {
             </div>
         </div>
 
-        {/* Times */}
-        <div className="mb-4">
-          <label htmlFor="datetime" className="mb-2 block text-sm font-medium">
-            Choose a date and time
-          </label>
-          <div className="relative mt-2 rounded-md">
-            <div className="relative">
-              <input
-                id="datetime"
-                name="datetime"
-                type="datetime-local" // Change type to datetime-local
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                value={selectedDateTime} // Bind value to state
-                onChange={handleDateTimeChange} // Handle changes
-                required
-              />
+        <Button className="mb-4" type="button" onClick={addDateTimeInput}>Add meeting times</Button>
+        {/* Render datetime inputs */}
+        {selectedDateTimes.map((times, index) => (
+            <div key={index} className="mb-4">
+                <label htmlFor={`times-${index}`} className="mb-2 block text-sm font-medium">
+                    Choose a date and time
+                </label>
+                <div className= "flex flex-col md:flex-row items-start md:items-center">
+                <div className="relative mt-2 rounded-md">
+                        <div className="relative">
+                            <input
+                                id={`times-${index}`}
+                                name={`times`}
+                                type="datetime-local" // Change type to datetime-local
+                                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                                value={times} // Bind value to state
+                                onChange={(event) => handleDateTimeChange(index, event)} // Handle changes
+                                required
+                            />
+                        </div>
+                    </div>
+                    <Button className="ml-4" type="button" onClick={() => removeDateTimeInput(index)}>x</Button>
+                </div>
             </div>
-          </div>
-        </div>
-
-        {/*<button onClick={handleAddTime}>Add Time</button>*/}
+        ))}
 
       </div>
       <div className="mt-6 flex justify-end gap-4">

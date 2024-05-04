@@ -3453,19 +3453,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {}
+    "C:\\Users\\AD\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Admin\\Documents\\GitHub\\FinalProject\\FinalProject_API\\FinalProject_API.csproj",
+      "projectUniqueName": "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_API\\FinalProject_API.csproj",
       "projectName": "FinalProject_API",
-      "projectPath": "C:\\Users\\Admin\\Documents\\GitHub\\FinalProject\\FinalProject_API\\FinalProject_API.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Admin\\Documents\\GitHub\\FinalProject\\FinalProject_API\\obj\\",
+      "projectPath": "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_API\\FinalProject_API.csproj",
+      "packagesPath": "C:\\Users\\AD\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_API\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\AD\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -3479,8 +3479,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Users\\Admin\\Documents\\GitHub\\FinalProject\\FinalProject_Data\\FinalProject_Data.csproj": {
-              "projectPath": "C:\\Users\\Admin\\Documents\\GitHub\\FinalProject\\FinalProject_Data\\FinalProject_Data.csproj"
+            "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_Data\\FinalProject_Data.csproj": {
+              "projectPath": "C:\\Users\\AD\\source\\repos\\FinalProject\\FinalProject_Data\\FinalProject_Data.csproj"
             }
           }
         }
@@ -3546,8 +3546,7 @@
           "net47",
           "net471",
           "net472",
-          "net48",
-          "net481"
+          "net48"
         ],
         "assetTargetFallback": true,
         "warn": true,
@@ -3559,7 +3558,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.315\\RuntimeIdentifierGraph.json"
       }
     }
   }
