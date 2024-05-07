@@ -2,12 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\dashboard\\meetingforms\\[id]",
-    "\\app\\guest\\[id]",
-    "\\app\\guest\\[id]\\vote",
-    "\\app\\login",
-    "\\app\\ui"
+    "\\app\\dashboard",
+    "\\app\\dashboard\\(overview)",
+    "\\app\\dashboard\\meetingforms",
+    "\\app\\dashboard\\meetingforms\\create",
+    "\\app\\lib",
+    "\\app\\ui",
+    "\\app\\ui\\dashboard",
+    "\\app\\ui\\guest"
   ],
-  "SelectedNode": "\\app\\ui\\login-form.tsx",
   "PreviewInSolutionExplorer": false
 }

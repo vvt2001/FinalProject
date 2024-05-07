@@ -8,19 +8,6 @@ import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { axios } from 'axios';
 
-const FormSchema = z.object({
-    id: z.string(),
-    customerId: z.string({
-        invalid_type_error: 'Please select a customer.',
-    }),
-    amount: z.coerce
-        .number()
-        .gt(0, { message: 'Please enter an amount greater than $0.' }),
-    status: z.enum(['pending', 'paid'], {
-        invalid_type_error: 'Please select an invoice status.',
-    }),
-    date: z.string(),
-});
 
 const MeetingFormSchema = z.object({
     id: z.string(),
@@ -55,59 +42,28 @@ const VotingFormSchema = z.object({
     email: z.string(),
 });
 
-const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const BookingFormSchema = z.object({
+    meetingform_id: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+});
+
 const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
+const BookMeetingForm = BookingFormSchema;
 
 export type State = {
     errors?: {
-        customerId?: string[];
-        amount?: string[];
-        status?: string[];
+        meeting_title?: string[];
+        meeting_description?: string[];
+        location?: string[];
+        duration?: string[];
+        platform?: string[];
+        times?: string[];
     };
     message?: string | null;
 };
-
-export async function createInvoice(prevState: State, formData: FormData) {
-    // Validate form using Zod
-    const validatedFields = CreateInvoice.safeParse({
-        customerId: formData.get('customerId'),
-        amount: formData.get('amount'),
-        status: formData.get('status'),
-    });
-
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Invoice.',
-        };
-    }
-
-    // Prepare data for insertion into the database
-    const { customerId, amount, status } = validatedFields.data;
-    const amountInCents = amount * 100;
-    const date = new Date().toISOString().split('T')[0];
-
-    // Insert data into the database
-    try {
-        await sql`
-      INSERT INTO invoices (customer_id, amount, status, date)
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    `;
-    } catch (error) {
-        // If a database error occurs, return a more specific error.
-        return {
-            message: 'Database Error: Failed to Create Invoice.',
-        };
-    }
-
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
-}
 
 export async function createMeetingForm(prevState: State, formData: FormData) {
     // Validate form using Zod
@@ -213,62 +169,48 @@ export async function voteMeetingForm(requestBody) {
     redirect('/dashboard');
 }
 
-//export async function updateInvoice(id: string, formData: FormData) {
-//    const { customerId, amount, status } = UpdateInvoice.parse({
-//        customerId: formData.get('customerId'),
-//        amount: formData.get('amount'),
-//        status: formData.get('status'),
-//    });
-
-//    const amountInCents = amount * 100;
-
-//    try {
-//        await sql`
-//        UPDATE invoices
-//        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-//        WHERE id = ${id}
-//      `;
-//    } catch (error) {
-//        return { message: 'Database Error: Failed to Update Invoice.' };
-//    }
-
-//    revalidatePath('/dashboard/invoices');
-//    redirect('/dashboard/invoices');
-//}
-
-export async function updateInvoice(
-    id: string,
-    prevState: State,
-    formData: FormData,
-) {
-    const validatedFields = UpdateInvoice.safeParse({
-        customerId: formData.get('customerId'),
-        amount: formData.get('amount'),
-        status: formData.get('status'),
+export async function bookMeetingForm(requestBody) {
+    // Validate form using Zod
+    const validatedFields = VoteMeetingForm.safeParse({
+        meetingform_id: requestBody.meetingform_id,
     });
 
+    // If form validation fails, return errors early. Otherwise, continue.
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Update Invoice.',
+            message: 'Missing Fields. Failed to Create Meeting Form.',
         };
     }
 
-    const { customerId, amount, status } = validatedFields.data;
-    const amountInCents = amount * 100;
-
+    // Insert data into the database
     try {
-        await sql`
-      UPDATE invoices
-      SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-      WHERE id = ${id}
-    `;
+        // Make a POST request to your server API endpoint
+        const { meetingform_id } = validatedFields.data;
+
+        const response = await fetch('http://localhost:7057/meeting/book-meeting?actor_id=4efyqow4ywdutzb52oymalf5d', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                meetingform_id: meetingform_id,
+            }),
+        });
+
     } catch (error) {
-        return { message: 'Database Error: Failed to Update Invoice.' };
+
+        // Handle any errors that occur during the request
+        console.error('Error creating meeting form:', error);
+        return {
+            message: 'Failed to create meeting form.',
+        };
     }
 
-    revalidatePath('/dashboard/invoices');
-    redirect('/dashboard/invoices');
+    // Revalidate the cache for the invoices page and redirect the user.
+    revalidatePath('/dashboard');
+    redirect('/dashboard');
 }
 
 export async function updateMeetingForm(
@@ -324,18 +266,6 @@ export async function updateMeetingForm(
 
     revalidatePath('/dashboard');
     redirect('/dashboard');
-}
-
-export async function deleteInvoice(id: string) {
-    throw new Error('Failed to Delete Invoice');
-
-    try {
-        await sql`DELETE FROM invoices WHERE id = ${id}`;
-        revalidatePath('/dashboard/invoices');
-        return { message: 'Deleted Invoice.' };
-    } catch (error) {
-        return { message: 'Database Error: Failed to Delete Invoice.' };
-    }
 }
 
 export async function deleteMeetingForm(id: string) {

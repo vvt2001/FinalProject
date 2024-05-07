@@ -8,8 +8,8 @@ namespace FinalProject_Data.Enum.Meeting
 {
     public enum type_Platform
     {
-        Teams = 1,
-        Zoom,
+        Zoom = 0,
+        Teams,
         Meet,
     }
 }

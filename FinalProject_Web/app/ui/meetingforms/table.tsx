@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { UpdateMeetingForm, DeleteMeetingForm, VoteMeetingForm, CopyVoteUrl } from '@/app/ui/meetingforms/buttons';
+import { UpdateMeetingForm, DeleteMeetingForm, CopyVoteUrl, BookMeeting } from '@/app/ui/meetingforms/buttons';
 import MeetingFormStatus from '@/app/ui/meetingforms/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeetingForms } from '@/app/lib/data';
@@ -12,6 +12,8 @@ export default async function MeetingFormsTable({
     currentPage: number;
 }) {
     const meetingforms = await fetchFilteredMeetingForms(query, currentPage);
+
+    console.log(meetingforms);
 
   return (
     <div className="mt-6 flow-root">
@@ -35,12 +37,13 @@ export default async function MeetingFormsTable({
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {meetingform.url}
+                      {meetingform.attendee.length}
                     </p>
                     <p>{meetingform.duration}</p>
                   </div>
                   <div className="flex justify-end gap-2">
                     <CopyVoteUrl url={meetingform.url} />
+                    <BookMeeting id={meetingform.id} />
                     <UpdateMeetingForm id={meetingform.id} />
                     <DeleteMeetingForm id={meetingform.id} />
                   </div>
@@ -51,22 +54,22 @@ export default async function MeetingFormsTable({
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
-                <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+                <th scope="col" className="px-4 py-5 font-medium sm:pl-6 text-center">
                   Title
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="px-3 py-5 font-medium text-center">
                   Description
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="px-3 py-5 font-medium text-center">
                   Duration
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th scope="col" className="px-3 py-5 font-medium text-center">
                   Status
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  URL
+                <th scope="col" className="px-3 py-5 font-medium text-center">
+                  Attendee count
                 </th>
-                <th scope="col" className="relative py-3 pl-6 pr-3">
+                <th scope="col" className="relative py-3 pl-6 pr-3 text-center">
                   <span className="sr-only">Edit</span>
                 </th>
               </tr>
@@ -77,26 +80,27 @@ export default async function MeetingFormsTable({
                   key={meetingform.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
                 >
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                    <div className="flex items-center gap-3">
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 text-center">
+                    <div className="flex items-center gap-3 text-center">
                       <p>{meetingform.meeting_title}</p>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-3 text-center ">
                     {meetingform.meeting_description}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-3 text-center">
                     {meetingform.duration}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
+                  <td className="whitespace-nowrap px-3 py-3 text-center">
                     <MeetingFormStatus status={meetingform.trangthai} />
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {meetingform.url}
+                  <td className="whitespace-nowrap px-3 py-3 text-center">
+                    {meetingform.attendee.length}
                   </td>
-                  <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                  <td className="whitespace-nowrap py-3 pl-6 pr-3 text-center">
                     <div className="flex justify-end gap-3">
                       <CopyVoteUrl url={meetingform.url} />
+                      <BookMeeting id={meetingform.id} />
                       <UpdateMeetingForm id={meetingform.id} />
                       <DeleteMeetingForm id={meetingform.id} />
                     </div>

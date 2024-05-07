@@ -24,7 +24,7 @@ namespace FinalProject_API.Services
         Task<PagedResponse<List<MeetingForm>>> SearchForm(MeetingFormSearching searching, string actor_id);
         Task<bool> Delete(string id, string actor_id);
         Task<bool> VoteForm(MeetingFormVoting voting);
-        Task<bool> BookMeeting(string form_id, string actor_id);
+        Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id);
         Task<bool> UpdateForm(MeetingFormUpdating updating, string actor_id);
     }
     public class MeetingServices : IMeetingServices
@@ -120,7 +120,7 @@ namespace FinalProject_API.Services
 
         public async Task<MeetingForm> GetForm(string form_id, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.times).FirstOrDefaultAsync(o => o.ID == form_id);
+            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == form_id);
             if(form != null)
             {
                 return form;
@@ -133,7 +133,7 @@ namespace FinalProject_API.Services
 
         public async Task<List<MeetingForm>> GetAllForm(string actor_id)
         {
-            var forms = await _context.meetingforms.Where(o => o.owner_id == actor_id).ToListAsync();
+            var forms = await _context.meetingforms.Include(o => o.attendee).Where(o => o.owner_id == actor_id).ToListAsync();
             return forms;
         }
 
@@ -146,6 +146,7 @@ namespace FinalProject_API.Services
             };
 
             var query = _context.meetingforms
+                        .Include(o => o.attendee)
                         .Include(o => o.times)
                         .Where(o => o.owner_id == actor_id)
                         .AsQueryable();
@@ -191,10 +192,10 @@ namespace FinalProject_API.Services
             }
         }
 
-        public async Task<bool> BookMeeting(string form_id, string actor_id)
+        public async Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == form_id);
-            var prefered_time = await _context.meetingtimes.Where(o => o.meetingform_id == form_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
+            var form = await _context.meetingforms.Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == booking.meetingform_id);
+            var prefered_time = await _context.meetingtimes.Where(o => o.meetingform_id == booking.meetingform_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
 
             form.starttime = prefered_time.time;
             form.duration = prefered_time.duration;

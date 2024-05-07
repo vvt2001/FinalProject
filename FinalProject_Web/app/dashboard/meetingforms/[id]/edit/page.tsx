@@ -1,11 +1,11 @@
 import Form from '@/app/ui/meetingforms/edit-form';
-import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
+import Breadcrumbs from '@/app/ui/meetingforms/breadcrumbs';
 import { fetchMeetingFormById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Meetings | Scheduler Dashboard',
+    title: 'Edit Meeting | Scheduler',
 };
 export default async function Page({ params }: { params: { id: string } }) {
     const id = params.id;

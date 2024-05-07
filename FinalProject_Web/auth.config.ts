@@ -8,11 +8,17 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const isOnMenu = nextUrl.pathname.startsWith('/dashboard');
+            const isOnGuest = nextUrl.pathname.startsWith('/guest');
+
+            if (isOnGuest) {
+                return true;
+            }
 
             if (isOnMenu) {
                 if (isLoggedIn) return true;
                 return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn) {
+            }
+            else if (isLoggedIn) {
                 return Response.redirect(new URL('/dashboard', nextUrl));
             }
 

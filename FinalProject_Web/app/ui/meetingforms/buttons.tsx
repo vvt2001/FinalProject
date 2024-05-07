@@ -1,7 +1,7 @@
 // @ts-ignore
 'use client';
 
-import { PencilIcon, PlusIcon, TrashIcon, LinkIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon, LinkIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteMeetingForm } from '@/app/lib/actions';
 import { useState, useEffect } from 'react';
@@ -28,6 +28,17 @@ export function UpdateMeetingForm({ id }: { id: string }) {
       <PencilIcon className="w-5" />
     </Link>
   );
+}
+
+export function BookMeeting({ id }: { id: string }) {
+    return (
+        <Link
+            href={`/dashboard/meetingforms/${id}/book`}
+            className="rounded-md border p-2 hover:bg-gray-100"
+        >
+            <CalendarIcon className="w-5" />
+        </Link>
+    );
 }
 
 export function VoteMeetingForm({ id }: { id: string }) {

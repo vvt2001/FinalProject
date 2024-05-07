@@ -117,11 +117,11 @@ namespace FinalProject_API.Controllers
         }
 
         [HttpPost("book-meeting")]
-        public async Task<ActionResult> BookMeeting(string form_id, string actor_id)
+        public async Task<ActionResult> BookMeeting([FromBody] MeetingFormBooking booking, string actor_id)
         {
             try
             {
-                return Ok(new Response<bool>(await _meetingServices.BookMeeting(form_id, actor_id)));
+                return Ok(new Response<bool>(await _meetingServices.BookMeeting(booking, actor_id)));
             }
             catch (Exception ex)
             {
