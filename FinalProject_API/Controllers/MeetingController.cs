@@ -25,6 +25,7 @@ namespace FinalProject_API.Controllers
             _meetingServices = meetingServices;
         }
 
+        [Authorize]
         [HttpPost("create-form")]
         public async Task<ActionResult> Create([FromBody] MeetingFormCreating creating, string actor_id)
         {

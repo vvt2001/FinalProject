@@ -6,11 +6,13 @@
     "\\app\\dashboard\\meetingforms",
     "\\app\\dashboard\\meetingforms\\[id]",
     "\\app\\dashboard\\meetingforms\\[id]\\book",
+    "\\app\\lib",
     "\\app\\login",
     "\\app\\ui",
     "\\app\\ui\\dashboard",
     "\\app\\ui\\guest",
     "\\app\\ui\\meetingforms"
   ],
+  "SelectedNode": "\\app\\ui\\dashboard\\sidenav.tsx",
   "PreviewInSolutionExplorer": false
 }

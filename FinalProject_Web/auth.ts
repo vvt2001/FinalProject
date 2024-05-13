@@ -1,3 +1,5 @@
+'use_server';
+
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
@@ -6,10 +8,63 @@ import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 
-async function getUser(email: string): Promise<User | undefined> {
+//async function getUser(username: string, password: string): Promise<User | undefined> {
+//    try {
+//        const user = await sql<User>`SELECT * FROM users WHERE email=${username}`;
+//        return user.rows[0];
+//    } catch (error) {
+//        console.error('Failed to fetch user:', error);
+//        throw new Error('Failed to fetch user.');
+//    }
+//}
+
+function storeUserInfo(user) {
+    console.log(user);
+    localStorage.setItem('user_info', user);
+}
+
+async function getUser(username: string, password: string): Promise<User | undefined> {
+    const apiUrl = 'http://localhost:7057/user/authenticate'; // Replace with your actual API URL
     try {
-        const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-        return user.rows[0];
+        console.log(username);
+        console.log(password);
+
+        const response = await fetch('http://localhost:7057/user/authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                Username: username,
+                Password: password,
+            }),
+        });
+        const responseData = await response.json();
+
+        // Extract the array of invoices from the response data
+        const userData = responseData.data;
+
+        if (!response.ok) {
+            console.log("checkpoint 3");
+
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log("checkpoint 2");
+
+
+        // Map the fetched data to the MeetingForm type definition
+        const user: User = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            access_token: userData.access_token,
+        };
+
+        storeUserInfo(user);
+
+        return user;
+
     } catch (error) {
         console.error('Failed to fetch user:', error);
         throw new Error('Failed to fetch user.');
@@ -22,16 +77,14 @@ export const { auth, signIn, signOut } = NextAuth({
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
+                    .object({ username: z.string(), password: z.string().min(6) })
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
-                    const user = await getUser(email);
-                    if (!user) return null;
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
+                    const { username, password } = parsedCredentials.data;
+                    const user = await getUser(username, password);
 
-                    if (passwordsMatch) return user;
+                    if (user) return user;
                 }
 
                 console.log('Invalid credentials');
