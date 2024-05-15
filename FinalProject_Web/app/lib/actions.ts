@@ -88,14 +88,12 @@ export async function createMeetingForm(prevState: State, formData: FormData) {
     try {
         // Make a POST request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
-        const userInfo = localStorage.getItem('user_info');
 
-        const response = await fetch(`http://localhost:7057/meeting/create-form?actor_id=${userInfo.id}`, {
+        const response = await fetch(`http://localhost:7057/meeting/create-form?actor_id=4efyqow4ywdutzb52oymalf5d`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 // Add any additional headers if needed
-                'Authorization': `Bearer ${userInfo.access_token}`
             },
             body: JSON.stringify({
                 meeting_title: meeting_title,

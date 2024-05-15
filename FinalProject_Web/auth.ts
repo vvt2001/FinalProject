@@ -1,27 +1,9 @@
-'use_server';
-
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
-import bcrypt from 'bcrypt';
-
-//async function getUser(username: string, password: string): Promise<User | undefined> {
-//    try {
-//        const user = await sql<User>`SELECT * FROM users WHERE email=${username}`;
-//        return user.rows[0];
-//    } catch (error) {
-//        console.error('Failed to fetch user:', error);
-//        throw new Error('Failed to fetch user.');
-//    }
-//}
-
-function storeUserInfo(user) {
-    console.log(user);
-    localStorage.setItem('user_info', user);
-}
 
 async function getUser(username: string, password: string): Promise<User | undefined> {
     const apiUrl = 'http://localhost:7057/user/authenticate'; // Replace with your actual API URL
@@ -60,8 +42,6 @@ async function getUser(username: string, password: string): Promise<User | undef
             email: userData.email,
             access_token: userData.access_token,
         };
-
-        storeUserInfo(user);
 
         return user;
 
