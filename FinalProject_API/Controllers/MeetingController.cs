@@ -25,6 +25,7 @@ namespace FinalProject_API.Controllers
             _meetingServices = meetingServices;
         }
 
+        [Authorize]
         [HttpPost("create-form")]
         public async Task<ActionResult> Create([FromBody] MeetingFormCreating creating, string actor_id)
         {
@@ -38,6 +39,7 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("update-form")]
         public async Task<ActionResult> Update([FromBody] MeetingFormUpdating updating, string actor_id)
         {
@@ -90,6 +92,7 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("delete-form/{id}")]
         public async Task<ActionResult> Delete(string id, string actor_id)
         {
@@ -116,6 +119,7 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost("book-meeting")]
         public async Task<ActionResult> BookMeeting([FromBody] MeetingFormBooking booking, string actor_id)
         {

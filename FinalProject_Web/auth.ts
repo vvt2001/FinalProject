@@ -4,6 +4,7 @@ import { authConfig } from './auth.config';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import type { User } from '@/app/lib/definitions';
+import { cookies } from "next/headers";
 
 async function getUser(username: string, password: string): Promise<User | undefined> {
     const apiUrl = 'http://localhost:7057/user/authenticate'; // Replace with your actual API URL
@@ -42,6 +43,25 @@ async function getUser(username: string, password: string): Promise<User | undef
             email: userData.email,
             access_token: userData.access_token,
         };
+
+        cookies().set(
+            {
+                name: "actor_id",
+                value: user.id,
+                httpOnly: true,
+                path: "/",
+                maxAge: 60 * 60 * 24 * 30 * 1000,
+                expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+            },
+            {
+                name: "access_token",
+                value: user.access_token,
+                httpOnly: true,
+                path: "/",
+                maxAge: 60 * 60 * 24 * 30 * 1000,
+                expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+            }
+        );
 
         return user;
 
