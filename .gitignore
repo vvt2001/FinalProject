@@ -33,3 +33,4 @@
 
 # Custom
 FinalProject_Data/DbContextFactory.cs
+*.vsidx
