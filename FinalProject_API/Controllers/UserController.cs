@@ -61,7 +61,7 @@ namespace FinalProject_API.Controllers
             }
         }
 
-        [HttpGet("authenticate")]
+        [HttpPost("authenticate")]
         public async Task<ActionResult> Authenticate([FromBody] LoginRequest request)
         {
             try

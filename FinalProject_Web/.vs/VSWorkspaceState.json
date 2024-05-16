@@ -2,15 +2,13 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\dashboard",
-    "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\[id]",
-    "\\app\\dashboard\\meetingforms\\[id]\\book",
-    "\\app\\login",
+    "\\app\\lib",
     "\\app\\ui",
     "\\app\\ui\\dashboard",
     "\\app\\ui\\guest",
-    "\\app\\ui\\meetingforms"
+    "\\app\\ui\\meetingforms",
+    "\\scripts"
   ],
+  "SelectedNode": "\\app\\ui\\dashboard\\sidenav.tsx",
   "PreviewInSolutionExplorer": false
 }
