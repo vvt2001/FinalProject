@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { axios } from 'axios';
-
+import { cookies } from "next/headers";
 
 const MeetingFormSchema = z.object({
     id: z.string(),
@@ -52,6 +52,9 @@ const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
+const cookieStore = cookies();
+const actor_id = cookieStore.get("actor_id").value;
+const access_token = cookieStore.get("access_token").value;
 
 export type State = {
     errors?: {
@@ -89,11 +92,12 @@ export async function createMeetingForm(prevState: State, formData: FormData) {
         // Make a POST request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting/create-form?actor_id=4efyqow4ywdutzb52oymalf5d`, {
+        const response = await fetch(`http://localhost:7057/meeting/create-form?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 // Add any additional headers if needed
+                Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
                 meeting_title: meeting_title,
@@ -141,7 +145,7 @@ export async function voteMeetingForm(requestBody) {
         // Make a POST request to your server API endpoint
         const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
 
-        const response = await fetch('http://localhost:7057/meeting/vote-form?actor_id=4efyqow4ywdutzb52oymalf5d', {
+        const response = await fetch(`http://localhost:7057/meeting/vote-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -188,7 +192,7 @@ export async function bookMeetingForm(requestBody) {
         // Make a POST request to your server API endpoint
         const { meetingform_id } = validatedFields.data;
 
-        const response = await fetch('http://localhost:7057/meeting/book-meeting?actor_id=4efyqow4ywdutzb52oymalf5d', {
+        const response = await fetch(`http://localhost:7057/meeting/book-meeting?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -243,11 +247,12 @@ export async function updateMeetingForm(
         // Make a PUT request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
-        const response = await fetch('http://localhost:7057/meeting/update-form?actor_id=4efyqow4ywdutzb52oymalf5d', {
+        const response = await fetch(`http://localhost:7057/meeting/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 // Add any additional headers if needed
+                Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
                 id: id,
@@ -269,7 +274,7 @@ export async function updateMeetingForm(
 }
 
 export async function deleteMeetingForm(id: string) {
-    const apiUrl = `http://localhost:7057/meeting/delete-form/${id}?actor_id=4efyqow4ywdutzb52oymalf5d`; 
+    const apiUrl = `http://localhost:7057/meeting/delete-form/${id}?actor_id=${actor_id}`; 
 
     try {
         // Make an HTTP DELETE request to your delete API endpoint
