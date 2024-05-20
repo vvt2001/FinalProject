@@ -31,14 +31,16 @@ namespace FinalProject_API.Services
     {
         private readonly DatabaseContext _context;
         private readonly IMapper _mapper;
-
+        private readonly IOnlineMeetingServices _onlineMeetingServices;
         public MeetingServices(
             DatabaseContext context,
-            IMapper mapper
-            )
+            IMapper mapper,
+            IOnlineMeetingServices onlineMeetingServices
+        )
         {
             _context = context;
             _mapper = mapper;
+            _onlineMeetingServices = onlineMeetingServices;
         }
 
         public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
@@ -216,7 +218,7 @@ namespace FinalProject_API.Services
 
             await _context.SaveChangesAsync();
 
-            return true;
+            return await _onlineMeetingServices.CreateGoogleMeetMeeting(meeting, actor_id);
         }
 
         public async Task<bool> Delete(string id, string actor_id)

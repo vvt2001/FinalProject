@@ -188,3 +188,9 @@ C:\Users\Admin\Documents\GitHub\FinalProject\FinalProject_API\obj\Debug\net6.0\r
 C:\Users\Admin\Documents\GitHub\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalProject_API.pdb
 C:\Users\Admin\Documents\GitHub\FinalProject\FinalProject_API\obj\Debug\net6.0\FinalProject_API.genruntimeconfig.cache
 C:\Users\Admin\Documents\GitHub\FinalProject\FinalProject_API\obj\Debug\net6.0\ref\FinalProject_API.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Google.Apis.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Google.Apis.Auth.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Google.Apis.Calendar.v3.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\Google.Apis.Core.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\System.Management.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Management.dll

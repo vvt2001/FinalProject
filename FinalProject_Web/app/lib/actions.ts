@@ -53,8 +53,9 @@ const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
 const cookieStore = cookies();
-const actor_id = cookieStore.get("actor_id").value;
-const access_token = cookieStore.get("access_token").value;
+
+const actor_id = cookieStore.get("actor_id")?.value;
+const access_token = cookieStore.get("access_token")?.value;
 
 export type State = {
     errors?: {
@@ -175,7 +176,7 @@ export async function voteMeetingForm(requestBody) {
 
 export async function bookMeetingForm(requestBody) {
     // Validate form using Zod
-    const validatedFields = VoteMeetingForm.safeParse({
+    const validatedFields = BookMeetingForm.safeParse({
         meetingform_id: requestBody.meetingform_id,
     });
 
@@ -191,12 +192,12 @@ export async function bookMeetingForm(requestBody) {
     try {
         // Make a POST request to your server API endpoint
         const { meetingform_id } = validatedFields.data;
-
         const response = await fetch(`http://localhost:7057/meeting/book-meeting?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 // Add any additional headers if needed
+                Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
                 meetingform_id: meetingform_id,
@@ -283,6 +284,7 @@ export async function deleteMeetingForm(id: string) {
             headers: {
                 'Content-Type': 'application/json',
                 // Add any additional headers if required
+                Authorization: `Bearer ${access_token}` 
             },
         });
 

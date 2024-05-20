@@ -63,6 +63,11 @@ async function getUser(username: string, password: string): Promise<User | undef
             }
         );
 
+        cookies().set('actor_id', user.id);
+        cookies().set('access_token', user.access_token);
+
+        console.log(cookies().get("actor_id").value);
+
         return user;
 
     } catch (error) {

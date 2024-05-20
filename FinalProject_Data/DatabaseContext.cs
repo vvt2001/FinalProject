@@ -34,5 +34,6 @@ namespace FinalProject_Data
         public DbSet<MeetingForm> meetingforms { get; set; }
         public DbSet<MeetingTime> meetingtimes { get; set; }
         public DbSet<Attendee> attendees { get; set; }
+        public DbSet<GoogleMeetCredentials> googlemeetcredentials { get; set; }
     }
 }

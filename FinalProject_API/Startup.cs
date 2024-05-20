@@ -39,6 +39,7 @@ namespace FinalProject_API
             services.AddTransient<IMeetingServices, MeetingServices>();
             services.AddTransient<IAccountServices, AccountServices>();
             services.AddTransient<IUserServices, UserServices>();
+            services.AddTransient<IOnlineMeetingServices, OnlineMeetingServices>();
 
             /* auto mapper */
             services.AddAutoMapper(k => k.AddProfile<AutoMapperProfile>(), typeof(Startup));
