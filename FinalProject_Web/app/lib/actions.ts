@@ -52,12 +52,13 @@ const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
+
 const cookieStore = cookies();
 
 const actor_id = cookieStore.get("actor_id")?.value;
 const access_token = cookieStore.get("access_token")?.value;
 
-export type State = {
+export type MeetingState = {
     errors?: {
         meeting_title?: string[];
         meeting_description?: string[];
@@ -69,7 +70,17 @@ export type State = {
     message?: string | null;
 };
 
-export async function createMeetingForm(prevState: State, formData: FormData) {
+export type AccountState = {
+    errors?: {
+        name?: string[];
+        email?: string[];
+        username?: string[];
+        password?: string[];
+        confirm_password?: string[];
+    };
+    message?: string | null;
+};
+export async function createMeetingForm(prevState: MeetingState, formData: FormData) {
     // Validate form using Zod
     const validatedFields = CreateMeetingForm.safeParse({
         meeting_title: formData.get('meeting_title'),
@@ -220,7 +231,7 @@ export async function bookMeetingForm(requestBody) {
 
 export async function updateMeetingForm(
     id: string,
-    prevState: State,
+    prevState: MeetingState,
     formData: FormData,
 ) {
     // Validate form using Zod
@@ -323,4 +334,41 @@ export async function authenticate(
         }
         throw error;
     }
+}
+
+export async function register(
+    prevState: AccountState,
+    formData: FormData,
+) {
+    // Insert data into the database
+    try {
+        // Make a POST request to your server API endpoint
+
+        const response = await fetch(`http://localhost:7057/user/create`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                name: formData.get('name'),
+                email: formData.get('email'),
+                username: formData.get('username'),
+                password: formData.get('password'),
+                confirm_password: formData.get('confirm_password'),
+            }),
+        });
+
+    } catch (error) {
+
+        // Handle any errors that occur during the request
+        console.error('Error registering:', error);
+        return {
+            message: 'Failed to register.',
+        };
+    }
+
+    // Revalidate the cache for the invoices page and redirect the user.
+    revalidatePath('/login');
+    redirect('/login');
 }

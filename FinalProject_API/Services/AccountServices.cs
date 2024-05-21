@@ -83,11 +83,17 @@ namespace FinalProject_API.Services
         {
             var validator = new PasswordValidator
             {
-                MinLength = 8,
-                RequireDigit = true,
-                RequireLowercase = true,
-                RequireNonLetterOrDigit = true,
-                RequireUppercase = true
+                //MinLength = 8,
+                //RequireDigit = true,
+                //RequireLowercase = true,
+                //RequireNonLetterOrDigit = true,
+                //RequireUppercase = true
+
+                MinLength = 0,
+                RequireDigit = false,
+                RequireLowercase = false,
+                RequireNonLetterOrDigit = false,
+                RequireUppercase = false
             };
             return validator.Validate(passwordText);
         }

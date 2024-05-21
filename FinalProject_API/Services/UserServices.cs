@@ -85,6 +85,10 @@ namespace FinalProject_API.Services
         {
             try
             {
+                if (creating.password != creating.confirm_password)
+                {
+                    throw new InvalidProgramException("Xác nhận mật khẩu không chính xác");
+                }
                 var user = new User
                 {
                     ID = SlugID.New(),
