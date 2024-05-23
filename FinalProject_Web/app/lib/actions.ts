@@ -340,11 +340,12 @@ export async function register(
     prevState: AccountState,
     formData: FormData,
 ) {
+    let response;
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
 
-        const response = await fetch(`http://localhost:7057/user/create`, {
+        response = await fetch(`http://localhost:7057/user/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -359,8 +360,15 @@ export async function register(
             }),
         });
 
-    } catch (error) {
+        // Check the response status code
+        if (!response.ok) {
+            // Handle the error response
+            const errorData = await response.json();
+            console.error('Error registering:', errorData);
+            throw new Error(`Failed to register: ${errorData.message || response.statusText}`);
+        }
 
+    } catch (error) {
         // Handle any errors that occur during the request
         console.error('Error registering:', error);
         return {
@@ -368,7 +376,9 @@ export async function register(
         };
     }
 
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/login');
-    redirect('/login');
+    if (response.ok) {
+        // Revalidate the cache for the invoices page and redirect the user.
+        revalidatePath('/login');
+        redirect('/login');
+    }
 }
