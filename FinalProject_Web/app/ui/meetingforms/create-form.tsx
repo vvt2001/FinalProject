@@ -192,6 +192,9 @@ export default function Form() {
         ))}
 
       </div>
+            {state.message && (
+                <div className="text-red-500 mt-4">{state.message}</div>
+            )}
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/meetingforms"

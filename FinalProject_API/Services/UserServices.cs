@@ -139,6 +139,14 @@ namespace FinalProject_API.Services
             {
                 return $"Tên đăng nhập '{creating.username}'";
             }
+            if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.email)}"))
+            {
+                return $"Email '{creating.email}'";
+            }
+            if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.name)}"))
+            {
+                return $"Tên người dùng '{creating.name}'";
+            }
             return null;
         }
 

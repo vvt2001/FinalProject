@@ -4,7 +4,6 @@ import { lusitana } from '@/app/ui/fonts';
 import {
     AtSymbolIcon,
     KeyIcon,
-    ExclamationCircleIcon,
     UserIcon,
 } from '@heroicons/react/24/outline';
 import { UserPlusIcon } from '@heroicons/react/20/solid';
@@ -120,12 +119,14 @@ export default function RegisterForm() {
                                 required
                                 minLength={6}
                             />
-                            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w/[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                         </div>
                     </div>
                 </div>
+                {state.message && (
+                    <div className="text-red-500 mt-4">{state.message}</div>
+                )}
                 <RegisterButton />
-
                 <div className="text-center mt-2">
                     <Link href="/login">
                         <div className="text-blue-500">Back to Login</div>

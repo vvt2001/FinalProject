@@ -26,12 +26,51 @@ namespace FinalProject_API.Controllers
         }
 
         [Authorize]
-        [HttpPost("create-form")]
-        public async Task<ActionResult> Create([FromBody] MeetingFormCreating creating, string actor_id)
+        [HttpPut("update-meeting")]
+        public async Task<ActionResult> UpdateMeeting([FromBody] MeetingUpdating updating, string actor_id)
         {
             try
             {
-                return Ok(new Response<string>(await _meetingServices.CreateForm(creating, actor_id)));
+                return Ok(new Response<bool>(await _meetingServices.UpdateMeeting(updating, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("get-meeting/{meeting_id}")]
+        public async Task<ActionResult> GetMeeting(string meeting_id, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<Meeting>(await _meetingServices.GetMeeting(meeting_id, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("get-all-meeting")]
+        public async Task<ActionResult> GetAllMeeting(string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<List<Meeting>>(await _meetingServices.GetAllMeeting(actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [HttpGet("search-meeting")]
+        public async Task<ActionResult> SearchMeeting([FromQuery] MeetingSearching request, string actor_id)
+        {
+            try
+            {
+                return Ok(await _meetingServices.SearchMeeting(request, actor_id));
             }
             catch (Exception ex)
             {
@@ -40,92 +79,12 @@ namespace FinalProject_API.Controllers
         }
 
         [Authorize]
-        [HttpPut("update-form")]
-        public async Task<ActionResult> Update([FromBody] MeetingFormUpdating updating, string actor_id)
+        [HttpDelete("delete-meeting/{id}")]
+        public async Task<ActionResult> DeleteMeeting(string id, string actor_id)
         {
             try
             {
-                return Ok(new Response<bool>(await _meetingServices.UpdateForm(updating, actor_id)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [HttpGet("get-form/{form_id}")]
-        public async Task<ActionResult> GetForm(string form_id, string actor_id)
-        {
-            try
-            {
-                return Ok(new Response<MeetingForm>(await _meetingServices.GetForm(form_id, actor_id)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [HttpGet("get-all-form")]
-        public async Task<ActionResult> GetAllForm(string actor_id)
-        {
-            try
-            {
-                return Ok(new Response<List<MeetingForm>>(await _meetingServices.GetAllForm(actor_id)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [HttpGet("search-form")]
-        public async Task<ActionResult> SearchForm([FromQuery] MeetingFormSearching request, string actor_id)
-        {
-            try
-            {
-                return Ok(await _meetingServices.SearchForm(request, actor_id));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [Authorize]
-        [HttpDelete("delete-form/{id}")]
-        public async Task<ActionResult> Delete(string id, string actor_id)
-        {
-            try
-            {
-                return Ok(new Response<bool>(await _meetingServices.Delete(id, actor_id)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [HttpPut("vote-form")]
-        public async Task<ActionResult> VoteForm([FromBody] MeetingFormVoting voting)
-        {
-            try
-            {
-                return Ok(new Response<bool>(await _meetingServices.VoteForm(voting)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
-
-        [Authorize]
-        [HttpPost("book-meeting")]
-        public async Task<ActionResult> BookMeeting([FromBody] MeetingFormBooking booking, string actor_id)
-        {
-            try
-            {
-                return Ok(new Response<bool>(await _meetingServices.BookMeeting(booking, actor_id)));
+                return Ok(new Response<bool>(await _meetingServices.DeleteMeeting(id, actor_id)));
             }
             catch (Exception ex)
             {

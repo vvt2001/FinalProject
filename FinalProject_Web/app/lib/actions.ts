@@ -1,4 +1,4 @@
-'use server';
+﻿'use server';
 
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
@@ -98,13 +98,13 @@ export async function createMeetingForm(prevState: MeetingState, formData: FormD
             message: 'Missing Fields. Failed to Create Meeting Form.',
         };
     }
-
+    let response;
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting/create-form?actor_id=${actor_id}`, {
+        response = await fetch(`http://localhost:7057/meeting-form/create-form?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,19 +120,30 @@ export async function createMeetingForm(prevState: MeetingState, formData: FormD
                 platform: parseInt(platform || '0', 10),
             }),
         });
+        console.log(response);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Lỗi tạo lịch họp:', errorData);
+            return {
+                ...prevState,
+                message: `Lỗi tạo lịch họp: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
+        }
 
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Error creating meeting form:', error);
+        console.error('Lỗi tạo lịch họp:', error);
         return {
-            message: 'Failed to create meeting form.',
+            message: 'Lỗi tạo lịch họp.',
         };
     }
-
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard');
-    redirect('/dashboard');
+    if (response.ok) {
+        // Revalidate the cache for the invoices page and redirect the user.
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+    }
 }
 
 export async function voteMeetingForm(requestBody) {
@@ -157,7 +168,7 @@ export async function voteMeetingForm(requestBody) {
         // Make a POST request to your server API endpoint
         const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting/vote-form?actor_id=${actor_id}`, {
+        const response = await fetch(`http://localhost:7057/meeting-form/vote-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -203,7 +214,7 @@ export async function bookMeetingForm(requestBody) {
     try {
         // Make a POST request to your server API endpoint
         const { meetingform_id } = validatedFields.data;
-        const response = await fetch(`http://localhost:7057/meeting/book-meeting?actor_id=${actor_id}`, {
+        const response = await fetch(`http://localhost:7057/meeting-form/book-meeting?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -259,7 +270,7 @@ export async function updateMeetingForm(
         // Make a PUT request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting/update-form?actor_id=${actor_id}`, {
+        const response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -286,7 +297,7 @@ export async function updateMeetingForm(
 }
 
 export async function deleteMeetingForm(id: string) {
-    const apiUrl = `http://localhost:7057/meeting/delete-form/${id}?actor_id=${actor_id}`; 
+    const apiUrl = `http://localhost:7057/meeting-form/delete-form/${id}?actor_id=${actor_id}`; 
 
     try {
         // Make an HTTP DELETE request to your delete API endpoint
@@ -327,9 +338,9 @@ export async function authenticate(
         if (error instanceof AuthError) {
             switch (error.type) {
                 case 'CredentialsSignin':
-                    return 'Invalid credentials.';
+                    return 'Tài khoản không hợp lệ.';
                 default:
-                    return 'Something went wrong.';
+                    return 'Lỗi đăng nhập.';
             }
         }
         throw error;
@@ -338,18 +349,14 @@ export async function authenticate(
 
 export async function register(
     prevState: AccountState,
-    formData: FormData,
+    formData: FormData
 ) {
     let response;
-    // Insert data into the database
     try {
-        // Make a POST request to your server API endpoint
-
         response = await fetch(`http://localhost:7057/user/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Add any additional headers if needed
             },
             body: JSON.stringify({
                 name: formData.get('name'),
@@ -360,25 +367,28 @@ export async function register(
             }),
         });
 
-        // Check the response status code
         if (!response.ok) {
-            // Handle the error response
             const errorData = await response.json();
-            console.error('Error registering:', errorData);
-            throw new Error(`Failed to register: ${errorData.message || response.statusText}`);
+            console.error('Lỗi đăng ký:', errorData);
+            return {
+                ...prevState,
+                message: `Lỗi đăng ký: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
         }
-
     } catch (error) {
-        // Handle any errors that occur during the request
-        console.error('Error registering:', error);
+        console.error('Lỗi đăng ký:', error);
         return {
-            message: 'Failed to register.',
+            ...prevState,
+            message: 'Lỗi đăng ký tài khoản.',
+            errors: {},
         };
     }
 
     if (response.ok) {
-        // Revalidate the cache for the invoices page and redirect the user.
         revalidatePath('/login');
         redirect('/login');
     }
+
+    return prevState;
 }

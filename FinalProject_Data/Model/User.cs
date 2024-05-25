@@ -31,6 +31,8 @@ namespace FinalProject_Data.Model
         {
             builder.Property(o => o.username).HasMaxLength(200);
             builder.HasIndex(o => o.email).IsUnique();
+            builder.HasIndex(o => o.username).IsUnique();
+            builder.HasIndex(o => o.name).IsUnique();
         }
     }
 }

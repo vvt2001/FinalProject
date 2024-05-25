@@ -18,6 +18,7 @@ using eArchive.Service.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 namespace FinalProject_API
 {
@@ -35,8 +36,10 @@ namespace FinalProject_API
         {
             services.AddControllers();
 
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1"}));
+
             /* services */
-            services.AddTransient<IMeetingServices, MeetingServices>();
+            services.AddTransient<IMeetingFormServices, MeetingFormServices>();
             services.AddTransient<IAccountServices, AccountServices>();
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<IOnlineMeetingServices, OnlineMeetingServices>();
@@ -76,6 +79,8 @@ namespace FinalProject_API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("http://localhost:7057/swagger/v1/swagger.json", "My API V1"));
             }
 
             app.UseHttpsRedirection();
@@ -89,6 +94,7 @@ namespace FinalProject_API
             {
                 endpoints.MapControllers();
             });
+
         }
 
         
