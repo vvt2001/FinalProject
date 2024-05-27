@@ -20,7 +20,6 @@ async function seedUsers(client) {
       );
     `;
 
-    console.log(`Created "users" table`);
 
     // Insert data into the "users" table
     const insertedUsers = await Promise.all(
@@ -34,7 +33,6 @@ async function seedUsers(client) {
       }),
     );
 
-    console.log(`Seeded ${insertedUsers.length} users`);
 
     return {
       createTable,

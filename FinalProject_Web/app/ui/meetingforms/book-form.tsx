@@ -12,7 +12,6 @@ export default function BookMeetingForm({
     meetingform: MeetingForm;
 }) {
 
-    console.log(meetingform);
     const [selectedTimes, setSelectedTimes] = useState([]);
     const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 

@@ -23,6 +23,7 @@ namespace FinalProject_API.Services
         Task<PagedResponse<List<Meeting>>> SearchMeeting(MeetingSearching searching, string actor_id);
         Task<bool> DeleteMeeting(string id, string actor_id);
         Task<bool> UpdateMeeting(MeetingUpdating updating, string actor_id);
+        Task<bool> CancelMeeting(string id, string actor_id);
     }
     public class MeetingServices : IMeetingServices
     {
@@ -103,5 +104,18 @@ namespace FinalProject_API.Services
             await _context.meetings.Where(o => o.ID == id).ExecuteDeleteAsync();
             return true;
         }
+
+        public async Task<bool> CancelMeeting(string id, string actor_id)
+        {
+            var meeting = await GetMeeting(id, actor_id);
+            if (string.IsNullOrWhiteSpace(meeting.event_id))
+            {
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+            }
+            await _onlineMeetingServices.CancelGoogleMeetMeeting(meeting.event_id, actor_id);
+            meeting.trangthai = (int)trangthai_Meeting.Canceled;
+            return true;
+        }
+
     }
 }

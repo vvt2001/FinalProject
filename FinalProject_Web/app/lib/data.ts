@@ -8,6 +8,7 @@ import {
   User,
   Revenue,
   MeetingForm,
+  Meeting,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -22,7 +23,6 @@ export async function fetchFilteredMeetingForms(
     noStore();
 
     try {
-        console.log(query)
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
 
@@ -44,10 +44,8 @@ export async function fetchMeetingFormPages() {
     noStore();
 
     try {
-        console.log("checkpoint1");
         // Make a request to your server API to fetch the total count of meeting forms
         const response = await fetch(`http://localhost:7057/meeting-form/get-all-form?actor_id=4efyqow4ywdutzb52oymalf5d`);
-        console.log("checkpoint2");
 
         const responseData = await response.json();
 
@@ -87,7 +85,6 @@ export async function fetchMeetingFormById(id: string) {
             platform: meetingFormData.platform,
             duration: meetingFormData.duration,
             times: timesData,
-            attendee: meetingFormData.attendee,
         };
 
         return meetingForm;
@@ -105,7 +102,6 @@ export async function fetchFilteredMeeting(
     noStore();
 
     try {
-        console.log(query)
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
 
@@ -127,10 +123,8 @@ export async function fetchMeetingPages() {
     noStore();
 
     try {
-        console.log("checkpoint1");
         // Make a request to your server API to fetch the total count of meeting forms
         const response = await fetch(`http://localhost:7057/meeting/get-all-meeting?actor_id=4efyqow4ywdutzb52oymalf5d`);
-        console.log("checkpoint2");
 
         const responseData = await response.json();
 
@@ -153,24 +147,17 @@ export async function fetchMeetingById(id: string) {
         const responseData = await response.json();
 
         // Extract the array of invoices from the response data
-        const meetingFormData = responseData.data;
-
-        // Transforming the times array
-        const timesData = meetingFormData.times.map(time => ({
-            id: time.id,
-            time: new Date(time.time),
-        }));
+        const meetingData = responseData.data;
 
         // Map the fetched data to the MeetingForm type definition
-        const meetingForm: MeetingForm = {
-            id: meetingFormData.id,
-            meeting_title: meetingFormData.meeting_title,
-            meeting_description: meetingFormData.meeting_description,
-            location: meetingFormData.location,
-            platform: meetingFormData.platform,
-            duration: meetingFormData.duration,
-            times: timesData,
-            attendee: meetingFormData.attendee,
+        const meetingForm: Meeting = {
+            id: meetingData.id,
+            meeting_title: meetingData.meeting_title,
+            meeting_description: meetingData.meeting_description,
+            location: meetingData.location,
+            platform: meetingData.platform,
+            duration: meetingData.duration,
+            starttime: meetingData.starttime,
         };
 
         return meetingForm;

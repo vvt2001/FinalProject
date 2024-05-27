@@ -106,3 +106,13 @@ export type MeetingForm = {
     duration: number;
     times: Date[];
 };
+
+export type Meeting = {
+    id: string;
+    meeting_title: string;
+    meeting_description: string;
+    location: string;
+    platform: number;
+    duration: number;
+    starttime: Date;
+};

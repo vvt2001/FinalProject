@@ -29,6 +29,25 @@ const MeetingFormSchema = z.object({
     ),
 });
 
+const MeetingSchema = z.object({
+    id: z.string(),
+    meeting_title: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meeting_description: z.string(),
+    location: z.string(),
+    duration: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+    platform: z.coerce.number({
+        invalid_type_error: 'Please select a meeting platform.',
+    }),
+    starttime: z.coerce.date({
+        message: 'Please select a date and time for the meeting.',
+    }),
+});
+
+
 const VotingFormSchema = z.object({
     meetingform_id: z.string({
         invalid_type_error: 'Please select a title.',
@@ -52,11 +71,24 @@ const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
+const UpdateMeeting = MeetingSchema.omit({ id: true });
 
 const cookieStore = cookies();
 
 const actor_id = cookieStore.get("actor_id")?.value;
 const access_token = cookieStore.get("access_token")?.value;
+
+export type MeetingFormState = {
+    errors?: {
+        meeting_title?: string[];
+        meeting_description?: string[];
+        location?: string[];
+        duration?: string[];
+        platform?: string[];
+        times?: string[];
+    };
+    message?: string | null;
+};
 
 export type MeetingState = {
     errors?: {
@@ -65,7 +97,6 @@ export type MeetingState = {
         location?: string[];
         duration?: string[];
         platform?: string[];
-        times?: string[];
     };
     message?: string | null;
 };
@@ -80,7 +111,7 @@ export type AccountState = {
     };
     message?: string | null;
 };
-export async function createMeetingForm(prevState: MeetingState, formData: FormData) {
+export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
     // Validate form using Zod
     const validatedFields = CreateMeetingForm.safeParse({
         meeting_title: formData.get('meeting_title'),
@@ -120,7 +151,6 @@ export async function createMeetingForm(prevState: MeetingState, formData: FormD
                 platform: parseInt(platform || '0', 10),
             }),
         });
-        console.log(response);
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Lỗi tạo lịch họp:', errorData);
@@ -242,7 +272,7 @@ export async function bookMeetingForm(requestBody) {
 
 export async function updateMeetingForm(
     id: string,
-    prevState: MeetingState,
+    prevState: MeetingFormState,
     formData: FormData,
 ) {
     // Validate form using Zod
@@ -262,9 +292,6 @@ export async function updateMeetingForm(
             message: 'Missing Fields. Failed to Update Meeting Form.',
         };
     }
-
-    const { customerId, amount, status } = validatedFields.data;
-    const amountInCents = amount * 100;
 
     try {
         // Make a PUT request to your server API endpoint
@@ -325,6 +352,130 @@ export async function deleteMeetingForm(id: string) {
     } catch (error) {
         console.error('API Request Error:', error);
         return { message: 'Failed to delete Meeting Form.' };
+    }
+}
+
+export async function deleteMeeting(id: string) {
+    const apiUrl = `http://localhost:7057/meeting/delete-meeting/${id}?actor_id=${actor_id}`;
+    try {
+        // Make an HTTP DELETE request to your delete API endpoint
+        const response = await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if required
+                Authorization: `Bearer ${access_token}`
+            },
+        });
+
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            revalidatePath('/dashboard/meetings');
+
+            return { message: 'Deleted Meeting.' };
+        } else {
+            // If response status is not successful, parse error response
+            const errorResponse = await response.json();
+            console.error('Delete API Error:', errorResponse);
+            return { message: 'Failed to delete Meeting.', error: errorResponse };
+        }
+
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return { message: 'Failed to delete Meeting.' };
+    }
+}
+
+export async function cancelMeeting(id: string) {
+    const apiUrl = `http://localhost:7057/meeting/cancel-meeting/${id}?actor_id=${actor_id}`;
+    try {
+        // Make an HTTP PUT request to your cancel API endpoint
+        const response = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if required
+                Authorization: `Bearer ${access_token}`
+            },
+        });
+
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            revalidatePath('/dashboard/meetings');
+
+            return { message: 'Canceled Meeting.' };
+        } else {
+            // If response status is not successful, parse error response
+            const errorResponse = await response.json();
+            console.error('Cancel API Error:', errorResponse);
+            return { message: 'Failed to cancel Meeting.', error: errorResponse };
+        }
+
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return { message: 'Failed to cancel Meeting.' };
+    }
+}
+
+export async function updateMeeting(
+    id: string,
+    prevState: MeetingState,
+    formData: FormData,
+) {
+    // Validate form using Zod
+    const validatedFields = UpdateMeeting.safeParse({
+        meeting_title: formData.get('meeting_title'),
+        meeting_description: formData.get('meeting_description'),
+        location: formData.get('location'),
+        duration: formData.get('duration'),
+        starttime: formData.get('starttime'),
+        platform: formData.get('platform'),
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update Meeting Form.',
+        };
+    }
+    let response;
+    try {
+        // Make a PUT request to your server API endpoint
+        const { meeting_title, meeting_description, location, duration, platform, starttime } = validatedFields.data;
+
+        response = await fetch(`http://localhost:7057/meeting/update-meeting?actor_id=${actor_id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+                Authorization: `Bearer ${access_token}`
+            },
+            body: JSON.stringify({
+                id: id,
+                meeting_title: meeting_title,
+                meeting_description: meeting_description,
+                location: location,
+                duration: parseInt(duration || '0', 10),
+                starttime: starttime,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Lỗi sửa cuộc họp:', errorData);
+            return {
+                ...prevState,
+                message: `Lỗi sửa cuộc họp: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
+        }
+    } catch (error) {
+        return { message: 'Database Error: Failed to Update Meeting Form.' };
+    }
+    if (response.ok) {
+        revalidatePath('/dashboard/meetings');
+        redirect('/dashboard/meetings');
     }
 }
 

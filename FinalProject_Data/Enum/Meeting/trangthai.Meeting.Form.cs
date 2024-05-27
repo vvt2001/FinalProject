@@ -8,8 +8,7 @@ namespace FinalProject_Data.Enum.Meeting
 {
     public enum trangthai_MeetingForm
     {
-        Moi = 1,
-        DoiPhanHoi,
-        KetThuc
+        Waiting = 1,
+        Ended
     }
 }

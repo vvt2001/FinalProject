@@ -1,9 +1,9 @@
 // @ts-ignore
 'use client';
 
-import { PencilIcon, PlusIcon, TrashIcon, LinkIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, PlusIcon, TrashIcon, LinkIcon, CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteMeetingForm } from '@/app/lib/actions';
+import { deleteMeetingForm, deleteMeeting, cancelMeeting } from '@/app/lib/actions';
 import { useState, useEffect } from 'react';
 import React from 'react';
 
@@ -97,4 +97,39 @@ export function DeleteMeetingForm({ id }: { id: string }) {
             </button>
         </form>
   );
+}
+
+export function DeleteMeeting({ id }: { id: string }) {
+    const deleteMeetingWithId = deleteMeeting.bind(null, id);
+    return (
+        <form action={deleteMeetingWithId}>
+            <button className="rounded-md border p-2 hover:bg-gray-100">
+                <span className="sr-only">Delete</span>
+                <TrashIcon className="w-4" />
+            </button>
+        </form>
+    );
+}
+
+export function CancelMeeting({ id }: { id: string }) {
+    const cancelMeetingWithId = cancelMeeting.bind(null, id);
+    return (
+        <form action={cancelMeetingWithId}>
+            <button className="rounded-md border p-2 hover:bg-gray-100">
+                <span className="sr-only">Delete</span>
+                <XMarkIcon className="w-4" />
+            </button>
+        </form>
+    );
+}
+
+export function UpdateMeeting({ id }: { id: string }) {
+    return (
+        <Link
+            href={`/dashboard/meetings/${id}/edit`}
+            className="rounded-md border p-2 hover:bg-gray-100"
+        >
+            <PencilIcon className="w-5" />
+        </Link>
+    );
 }

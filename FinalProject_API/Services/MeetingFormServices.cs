@@ -48,7 +48,7 @@ namespace FinalProject_API.Services
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
             new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
-            new_meeting_form.trangthai = (int)trangthai_MeetingForm.Moi;
+            new_meeting_form.trangthai = (int)trangthai_MeetingForm.Waiting;
             new_meeting_form.meeting_title = creating.meeting_title;
             new_meeting_form.meeting_description = creating.meeting_description;
             new_meeting_form.location = creating.location;
@@ -66,7 +66,7 @@ namespace FinalProject_API.Services
                 meetingtime.meetingform_id = new_meeting_form.ID;
                 meetingtime.time = time;
                 meetingtime.duration = creating.duration;
-                meetingtime.trangthai = (int)trangthai_MeetingTime.moi;
+                meetingtime.trangthai = (int)trangthai_MeetingTime.New;
 
                 meetingtimes.Add(meetingtime);
 
@@ -105,7 +105,7 @@ namespace FinalProject_API.Services
                     meetingtime.meetingform_id = meetingForm.ID;
                     meetingtime.time = time;
                     meetingtime.duration = updating.duration;
-                    meetingtime.trangthai = (int)trangthai_MeetingTime.moi;
+                    meetingtime.trangthai = (int)trangthai_MeetingTime.New;
 
                     meetingtimes.Add(meetingtime);
 
@@ -201,13 +201,13 @@ namespace FinalProject_API.Services
 
             form.starttime = prefered_time.time;
             form.duration = prefered_time.duration;
-            form.trangthai = (int)trangthai_MeetingForm.KetThuc;
+            form.trangthai = (int)trangthai_MeetingForm.Ended;
 
             var meeting = _mapper.Map<MeetingForm, Meeting>(form);
             meeting.starttime = form.starttime ?? DateTime.Now;
             meeting.duration = form.duration;
             meeting.ID = SlugID.New();
-            meeting.trangthai = (int)trangthai_Meeting.Moi;
+            meeting.trangthai = (int)trangthai_Meeting.Waiting;
 
             foreach(var attendee in form.attendee)
             {

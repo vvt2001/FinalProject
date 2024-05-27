@@ -91,5 +91,19 @@ namespace FinalProject_API.Controllers
                 return HandleException(ex);
             }
         }
+
+        [Authorize]
+        [HttpPut("cancel-meeting/{id}")]
+        public async Task<ActionResult> CancelMeeting(string id, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _meetingServices.CancelMeeting(id, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
     }
 }

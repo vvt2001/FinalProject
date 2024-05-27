@@ -32,6 +32,7 @@ namespace FinalProject_API.Services
     public interface IOnlineMeetingServices
     {
         Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id);
+        Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id);
     }
     [Obsolete]
     public class OnlineMeetingServices : IOnlineMeetingServices
@@ -161,6 +162,131 @@ namespace FinalProject_API.Services
             Console.WriteLine("Google Meet link: {0}", createdEvent.ConferenceData.EntryPoints[0].Uri);
 
             meeting.meeting_link = createdEvent.ConferenceData.EntryPoints[0].Uri;
+            meeting.event_id = createdEvent.Id;
+            _context.meetings.Update(meeting);
+            
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id)
+        {
+            UserCredential credential;
+
+            // Retrieve tokens from the database
+            var storedToken = await GetTokensFromDatabase(actor_id);
+            if (storedToken == null)
+            {
+                throw new InvalidOperationException("No credentials available.");
+            }
+
+            // Create a TokenResponse using the stored token
+            var tokenResponse = new TokenResponse
+            {
+                AccessToken = storedToken.AccessToken,
+                RefreshToken = storedToken.RefreshToken,
+                Scope = storedToken.Scope,
+                TokenType = storedToken.TokenType,
+                ExpiresInSeconds = (long)storedToken.ExpiresIn,
+                Issued = storedToken.Issued,
+                IssuedUtc = storedToken.IssuedUtc
+            };
+
+            // Create a GoogleAuthorizationCodeFlow instance
+            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = GetClientSecrets(),
+                Scopes = Scopes
+            });
+
+            // Create UserCredential
+            credential = new UserCredential(flow, "user", tokenResponse);
+
+            // Refresh the token if it has expired
+            if (credential.Token.IsExpired(flow.Clock))
+            {
+                if (!await credential.RefreshTokenAsync(CancellationToken.None))
+                {
+                    throw new InvalidOperationException("Failed to refresh access token.");
+                }
+                await SaveTokensToDatabase(credential, actor_id);
+            }
+
+            // Create Google Calendar API service
+            var service = new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            // Delete the event
+            var deleteRequest = service.Events.Delete("primary", eventId);
+            var deleteResponse = await deleteRequest.ExecuteAsync();
+
+            Console.WriteLine("Event deleted: {0}", eventId);
+
+            return true;
+        }
+
+        public async Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id)
+        {
+            UserCredential credential;
+
+            // Retrieve tokens from the database
+            var storedToken = await GetTokensFromDatabase(actor_id);
+            if (storedToken == null)
+            {
+                throw new InvalidOperationException("No credentials available.");
+            }
+
+            // Create a TokenResponse using the stored token
+            var tokenResponse = new TokenResponse
+            {
+                AccessToken = storedToken.AccessToken,
+                RefreshToken = storedToken.RefreshToken,
+                Scope = storedToken.Scope,
+                TokenType = storedToken.TokenType,
+                ExpiresInSeconds = (long)storedToken.ExpiresIn,
+                Issued = storedToken.Issued,
+                IssuedUtc = storedToken.IssuedUtc
+            };
+
+            // Create a GoogleAuthorizationCodeFlow instance
+            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = GetClientSecrets(),
+                Scopes = Scopes
+            });
+
+            // Create UserCredential
+            credential = new UserCredential(flow, "user", tokenResponse);
+
+            // Refresh the token if it has expired
+            if (credential.Token.IsExpired(flow.Clock))
+            {
+                if (!await credential.RefreshTokenAsync(CancellationToken.None))
+                {
+                    throw new InvalidOperationException("Failed to refresh access token.");
+                }
+                await SaveTokensToDatabase(credential, actor_id);
+            }
+
+            // Create Google Calendar API service
+            var service = new CalendarService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            // Retrieve the event
+            var eventToUpdate = service.Events.Get("primary", eventId).Execute();
+            eventToUpdate.Status = "cancelled";  // Mark the event as cancelled
+            eventToUpdate.Summary = "[Cancelled] " + eventToUpdate.Summary; // Optional: Update summary to indicate cancellation
+
+            // Update the event
+            var updateRequest = service.Events.Update(eventToUpdate, "primary", eventId);
+            var updatedEvent = updateRequest.Execute();
+
+            Console.WriteLine("Event cancelled: {0}", updatedEvent.HtmlLink);
 
             return true;
         }

@@ -9,8 +9,6 @@ import { cookies } from "next/headers";
 async function getUser(username: string, password: string): Promise<User | undefined> {
     const apiUrl = 'http://localhost:7057/user/authenticate'; // Replace with your actual API URL
     try {
-        console.log(username);
-        console.log(password);
 
         const response = await fetch('http://localhost:7057/user/authenticate', {
             method: 'POST',
@@ -29,11 +27,9 @@ async function getUser(username: string, password: string): Promise<User | undef
         const userData = responseData.data;
 
         if (!response.ok) {
-            console.log("checkpoint 3");
 
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        console.log("checkpoint 2");
 
 
         // Map the fetched data to the MeetingForm type definition
@@ -66,7 +62,6 @@ async function getUser(username: string, password: string): Promise<User | undef
         cookies().set('actor_id', user.id);
         cookies().set('access_token', user.access_token);
 
-        console.log(cookies().get("actor_id").value);
 
         return user;
 
@@ -92,7 +87,6 @@ export const { auth, signIn, signOut } = NextAuth({
                     if (user) return user;
                 }
 
-                console.log('Invalid credentials');
                 return null;
             },
         }),

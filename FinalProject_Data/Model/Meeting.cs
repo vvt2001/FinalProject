@@ -22,6 +22,7 @@ namespace FinalProject_Data.Model
         public int trangthai { get; set; }
         public string owner_id { get; set; }
         public string? meeting_link { get;set; }
+        public string? event_id { get;set; }
     }
     public class Meeting_configuration : IEntityTypeConfiguration<Meeting>
     {

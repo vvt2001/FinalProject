@@ -97,6 +97,9 @@ namespace FinalProject_Data.Migrations
                     b.Property<int>("duration")
                         .HasColumnType("int");
 
+                    b.Property<string>("event_id")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("location")
                         .HasColumnType("nvarchar(max)");
 
@@ -215,7 +218,7 @@ namespace FinalProject_Data.Migrations
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("salt")
                         .IsRequired()
@@ -232,6 +235,12 @@ namespace FinalProject_Data.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("email")
+                        .IsUnique();
+
+                    b.HasIndex("name")
+                        .IsUnique();
+
+                    b.HasIndex("username")
                         .IsUnique();
 
                     b.ToTable("users");
