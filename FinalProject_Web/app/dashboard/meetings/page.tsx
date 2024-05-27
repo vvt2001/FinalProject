@@ -26,7 +26,6 @@ export default async function Page({
             </div>
             <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
                 <Search placeholder="Search meetings ..." />
-                <CreateMeetingForm />
             </div>
               <Suspense key={currentPage} fallback={<MeetingFormTableSkeleton />}>
                 <Table query={query} currentPage={currentPage} />

@@ -226,6 +226,9 @@ namespace FinalProject_API.Services
             var form = await _context.meetingforms.FirstOrDefaultAsync(o => o.ID == id);
             if (form != null)
             {
+                var attendees = await _context.attendees.Where(a => a.meetingform_id == id).ToListAsync();
+                attendees.ForEach(a => a.meetingform_id = null);
+                await _context.SaveChangesAsync();
                 await _context.meetingtimes.Where(o => o.meetingform_id == id).ExecuteDeleteAsync();
                 await _context.meetingforms.Where(o => o.ID == id).ExecuteDeleteAsync();
                 return true;

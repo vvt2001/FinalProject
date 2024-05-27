@@ -100,7 +100,9 @@ namespace FinalProject_API.Services
         public async Task<bool> DeleteMeeting(string id, string actor_id)
         {
             var meeting = await GetMeeting(id, actor_id);
-
+            var attendees = await _context.attendees.Where(a => a.meeting_id == id).ToListAsync();
+            attendees.ForEach(a => a.meeting_id = null);
+            await _context.SaveChangesAsync();
             await _context.meetings.Where(o => o.ID == id).ExecuteDeleteAsync();
             return true;
         }
