@@ -4,6 +4,8 @@ import {
   UserGroupIcon,
   HomeIcon,
   DocumentDuplicateIcon,
+  CalendarDaysIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -12,8 +14,8 @@ import clsx from 'clsx';
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
-    { name: 'My Schedules', href: '/dashboard', icon: HomeIcon },
-    { name: 'My Meetings', href: '/dashboard/meetings', icon: HomeIcon },
+    { name: 'My Schedules', href: '/dashboard', icon: CalendarDaysIcon },
+    { name: 'My Meetings', href: '/dashboard/meetings', icon: UsersIcon },
     //{
     //    name: 'Invoices',
     //    href: '/dashboard/invoices',

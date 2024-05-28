@@ -13,8 +13,6 @@ export default async function MeetingFormsTable({
 }) {
     const meetingforms = await fetchFilteredMeetingForms(query, currentPage);
 
-    console.log(meetingforms);
-
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">

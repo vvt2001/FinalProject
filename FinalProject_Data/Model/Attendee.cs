@@ -27,7 +27,7 @@ namespace FinalProject_Data.Model
         public void Configure(EntityTypeBuilder<Attendee> builder)
         {
             builder.HasOne(a => a.meetingform).WithMany(mf => mf.attendee).HasForeignKey(mt => mt.meetingform_id);
-            builder.HasOne(a => a.meeting).WithMany(m => m.attendee).HasForeignKey(mt => mt.meeting_id);
+            builder.HasOne(a => a.meeting).WithMany(m => m.attendees).HasForeignKey(mt => mt.meeting_id);
         }
     }
 }

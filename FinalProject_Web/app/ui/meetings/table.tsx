@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { UpdateMeeting, DeleteMeeting, CancelMeeting } from '@/app/ui/meetingforms/buttons';
-import MeetingFormStatus from '@/app/ui/meetingforms/status';
+import MeetingStatus from '@/app/ui/meetings/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeeting } from '@/app/lib/data';
 
@@ -30,7 +30,7 @@ export default async function MeetingTable({
                     </div>
                     <p className="text-sm text-gray-500">{meeting.meeting_description}</p>
                   </div>
-                  <MeetingFormStatus status={meeting.trangthai} />
+                  <MeetingStatus status={meeting.trangthai} />
                 </div>
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
@@ -89,7 +89,7 @@ export default async function MeetingTable({
                     {meeting.duration}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-center">
-                    <MeetingFormStatus status={meeting.trangthai} />
+                    <MeetingStatus status={meeting.trangthai} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-center">
                     {meeting.attendee.length}

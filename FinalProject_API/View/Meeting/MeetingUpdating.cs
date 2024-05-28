@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FinalProject_Data.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace FinalProject_API.View.Meeting
 {
@@ -11,5 +12,6 @@ namespace FinalProject_API.View.Meeting
         public string? location { get; set; }
         public DateTime starttime { get; set; }
         public int duration { get; set; }
+        public List<Attendee> attendees { get; set; }
     }
 }

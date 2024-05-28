@@ -8,8 +8,7 @@ export default function MeetingFormStatus({ status }: { status: number }) {
         'inline-flex items-center rounded-full px-2 py-1 text-xs',
         {
             'bg-gray-100 text-gray-500': status === 1,
-            'bg-yellow-500 text-white': status === 2,
-            'bg-green-500 text-white': status === 3,
+            'bg-green-500 text-white': status === 2,
         },
       )}
     >
@@ -21,13 +20,7 @@ export default function MeetingFormStatus({ status }: { status: number }) {
       ) : null}
       {status === 2 ? (
         <>
-          Ongoing
-          <MicrophoneIcon className="ml-1 w-4 text-white" />
-        </>
-      ) : null}
-      {status === 3 ? (
-        <>
-          Done
+          Booked
           <CheckIcon className="ml-1 w-4 text-white" />
         </>
       ) : null}

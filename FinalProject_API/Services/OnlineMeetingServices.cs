@@ -33,6 +33,8 @@ namespace FinalProject_API.Services
     {
         Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id);
         Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id);
+        Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id);
+        Task<bool> UpdateGoogleMeetMeeting(string eventId, string actor_id, Meeting new_meeting);
     }
     [Obsolete]
     public class OnlineMeetingServices : IOnlineMeetingServices
@@ -57,56 +59,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id)
         {
-            UserCredential credential;
-
-            // Check if tokens are already stored in the database
-            var storedToken = await GetTokensFromDatabase(actor_id);
-
-            if (storedToken != null)
-            {
-                // Create a TokenResponse using the stored token
-                var tokenResponse = new TokenResponse
-                {
-                    AccessToken = storedToken.AccessToken,
-                    RefreshToken = storedToken.RefreshToken,
-                    Scope = storedToken.Scope,
-                    TokenType = storedToken.TokenType,
-                    ExpiresInSeconds = (long)storedToken.ExpiresIn,
-                    Issued = storedToken.Issued,
-                    IssuedUtc = storedToken.IssuedUtc
-                };
-
-                // Create a Flow instance using client secrets
-                var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
-                {
-                    ClientSecrets = GetClientSecrets(),
-                    Scopes = Scopes
-                });
-
-                // Create UserCredential
-                credential = new UserCredential(flow, "user", tokenResponse);
-
-                // Refresh the token if it has expired
-                if (credential.Token.IsExpired(flow.Clock))
-                {
-                    if (await credential.RefreshTokenAsync(CancellationToken.None))
-                    {
-                        await SaveTokensToDatabase(credential, actor_id);
-                    }
-                    else
-                    {
-                        credential = await AuthenticateUserAsync();
-                        await SaveTokensToDatabase(credential, actor_id);
-                    }
-                }
-            }
-            else
-            {
-                // Authenticate the user and save the token to the database
-                credential = await AuthenticateUserAsync();
-                await SaveTokensToDatabase(credential, actor_id);
-            }
-
+            UserCredential credential = await GetCredential(actor_id);
 
             // Create Google Calendar API service.
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -114,6 +67,16 @@ namespace FinalProject_API.Services
                 HttpClientInitializer = credential,
                 ApplicationName = ApplicationName,
             });
+
+            if (meeting.attendees != null)
+            {
+                var listEventAttendee = new List<EventAttendee>();
+                foreach (var email in meeting.attendees.Select(o => o.email).ToList())
+                {
+                    var attendee = new EventAttendee() { Email = email };
+                    listEventAttendee.Add(attendee);
+                }
+            }
 
             // Example: Create an event with a Google Meet link
             var newEvent = new Event
@@ -137,11 +100,7 @@ namespace FinalProject_API.Services
                         RequestId = Guid.NewGuid().ToString()
                     }
                 },
-                Attendees = new List<EventAttendee>
-                {
-                    new EventAttendee { Email = "vvt69420@gmail.com" },
-                    new EventAttendee { Email = "thang.vv194374@sis.hust.edu.vn" }
-                },
+                Attendees = listEventAttendee,
                 Reminders = new Event.RemindersData
                 {
                     UseDefault = false,
@@ -170,46 +129,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id)
         {
-            UserCredential credential;
-
-            // Retrieve tokens from the database
-            var storedToken = await GetTokensFromDatabase(actor_id);
-            if (storedToken == null)
-            {
-                throw new InvalidOperationException("No credentials available.");
-            }
-
-            // Create a TokenResponse using the stored token
-            var tokenResponse = new TokenResponse
-            {
-                AccessToken = storedToken.AccessToken,
-                RefreshToken = storedToken.RefreshToken,
-                Scope = storedToken.Scope,
-                TokenType = storedToken.TokenType,
-                ExpiresInSeconds = (long)storedToken.ExpiresIn,
-                Issued = storedToken.Issued,
-                IssuedUtc = storedToken.IssuedUtc
-            };
-
-            // Create a GoogleAuthorizationCodeFlow instance
-            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
-            {
-                ClientSecrets = GetClientSecrets(),
-                Scopes = Scopes
-            });
-
-            // Create UserCredential
-            credential = new UserCredential(flow, "user", tokenResponse);
-
-            // Refresh the token if it has expired
-            if (credential.Token.IsExpired(flow.Clock))
-            {
-                if (!await credential.RefreshTokenAsync(CancellationToken.None))
-                {
-                    throw new InvalidOperationException("Failed to refresh access token.");
-                }
-                await SaveTokensToDatabase(credential, actor_id);
-            }
+            UserCredential credential = await GetCredential(actor_id);
 
             // Create Google Calendar API service
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -218,57 +138,20 @@ namespace FinalProject_API.Services
                 ApplicationName = ApplicationName,
             });
 
-            // Delete the event
+            // Delete the event with notifications
             var deleteRequest = service.Events.Delete("primary", eventId);
+            deleteRequest.SendUpdates = EventsResource.DeleteRequest.SendUpdatesEnum.All;  // Notify all attendees using enum
             var deleteResponse = await deleteRequest.ExecuteAsync();
 
-            Console.WriteLine("Event deleted: {0}", eventId);
+            Console.WriteLine("Event deleted with notifications: {0}", eventId);
 
             return true;
         }
 
+
         public async Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id)
         {
-            UserCredential credential;
-
-            // Retrieve tokens from the database
-            var storedToken = await GetTokensFromDatabase(actor_id);
-            if (storedToken == null)
-            {
-                throw new InvalidOperationException("No credentials available.");
-            }
-
-            // Create a TokenResponse using the stored token
-            var tokenResponse = new TokenResponse
-            {
-                AccessToken = storedToken.AccessToken,
-                RefreshToken = storedToken.RefreshToken,
-                Scope = storedToken.Scope,
-                TokenType = storedToken.TokenType,
-                ExpiresInSeconds = (long)storedToken.ExpiresIn,
-                Issued = storedToken.Issued,
-                IssuedUtc = storedToken.IssuedUtc
-            };
-
-            // Create a GoogleAuthorizationCodeFlow instance
-            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
-            {
-                ClientSecrets = GetClientSecrets(),
-                Scopes = Scopes
-            });
-
-            // Create UserCredential
-            credential = new UserCredential(flow, "user", tokenResponse);
-
-            // Refresh the token if it has expired
-            if (credential.Token.IsExpired(flow.Clock))
-            {
-                if (!await credential.RefreshTokenAsync(CancellationToken.None))
-                {
-                    throw new InvalidOperationException("Failed to refresh access token.");
-                }
-                await SaveTokensToDatabase(credential, actor_id);
-            }
+            UserCredential credential = await GetCredential(actor_id);
 
             // Create Google Calendar API service
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -284,11 +167,55 @@ namespace FinalProject_API.Services
 
             // Update the event
             var updateRequest = service.Events.Update(eventToUpdate, "primary", eventId);
+            updateRequest.SendUpdates = EventsResource.UpdateRequest.SendUpdatesEnum.All; // Notify all attendees
             var updatedEvent = updateRequest.Execute();
 
             Console.WriteLine("Event cancelled: {0}", updatedEvent.HtmlLink);
 
             return true;
+        }
+
+        public async Task<bool> UpdateGoogleMeetMeeting(string eventId, string actor_id, Meeting new_meeting)
+        {
+            UserCredential credential = await GetCredential(actor_id);
+
+            var service = new CalendarService(new BaseClientService.Initializer
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            // Retrieve the existing event
+            var eventToUpdate = await service.Events.Get("primary", eventId).ExecuteAsync();
+
+            bool changesMade = false;
+
+            if (eventToUpdate.Summary != new_meeting.meeting_title) { eventToUpdate.Summary = new_meeting.meeting_title; changesMade = true; }
+            if (eventToUpdate.Description != new_meeting.meeting_description) { eventToUpdate.Description = new_meeting.meeting_description; changesMade = true; }
+            if (eventToUpdate.Start.DateTime != new_meeting.starttime) { eventToUpdate.Start = new EventDateTime() { DateTime = new_meeting.starttime, TimeZone = "Asia/Ho_Chi_Minh" }; changesMade = true; }
+            if (eventToUpdate.End.DateTime != new_meeting.starttime.AddMinutes(new_meeting.duration)) { eventToUpdate.End = new EventDateTime() { DateTime = new_meeting.starttime.AddMinutes(new_meeting.duration), TimeZone = "Asia/Ho_Chi_Minh" }; changesMade = true; }
+
+            if (new_meeting.attendees != null)
+            {
+                if (eventToUpdate.Attendees == null)
+                    eventToUpdate.Attendees = new List<EventAttendee>();
+
+                foreach (var email in new_meeting.attendees.Select(o => o.email).ToList())
+                {
+                    eventToUpdate.Attendees.Add(new EventAttendee { Email = email });
+                }
+            }
+
+            if (changesMade)
+            {
+                // Send the update request with notifications
+                var updateRequest = service.Events.Update(eventToUpdate, "primary", eventId);
+                updateRequest.SendUpdates = EventsResource.UpdateRequest.SendUpdatesEnum.All;
+                var updatedEvent = await updateRequest.ExecuteAsync();
+                Console.WriteLine("Event updated with notifications: {0}", updatedEvent.HtmlLink);
+            }
+
+            return changesMade;
         }
 
         private async Task<UserCredential> AuthenticateUserAsync()
@@ -341,6 +268,61 @@ namespace FinalProject_API.Services
             };
 
             return clientSecrets;
+        }
+
+        private async Task<UserCredential> GetCredential(string actor_id)
+        {
+            UserCredential credential;
+
+            // Check if tokens are already stored in the database
+            var storedToken = await GetTokensFromDatabase(actor_id);
+
+            if (storedToken != null)
+            {
+                // Create a TokenResponse using the stored token
+                var tokenResponse = new TokenResponse
+                {
+                    AccessToken = storedToken.AccessToken,
+                    RefreshToken = storedToken.RefreshToken,
+                    Scope = storedToken.Scope,
+                    TokenType = storedToken.TokenType,
+                    ExpiresInSeconds = (long)storedToken.ExpiresIn,
+                    Issued = storedToken.Issued,
+                    IssuedUtc = storedToken.IssuedUtc
+                };
+
+                // Create a Flow instance using client secrets
+                var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+                {
+                    ClientSecrets = GetClientSecrets(),
+                    Scopes = Scopes
+                });
+
+                // Create UserCredential
+                credential = new UserCredential(flow, "user", tokenResponse);
+
+                // Refresh the token if it has expired
+                if (credential.Token.IsExpired(flow.Clock))
+                {
+                    if (await credential.RefreshTokenAsync(CancellationToken.None))
+                    {
+                        await SaveTokensToDatabase(credential, actor_id);
+                    }
+                    else
+                    {
+                        credential = await AuthenticateUserAsync();
+                        await SaveTokensToDatabase(credential, actor_id);
+                    }
+                }
+            }
+            else
+            {
+                // Authenticate the user and save the token to the database
+                credential = await AuthenticateUserAsync();
+                await SaveTokensToDatabase(credential, actor_id);
+            }
+
+            return credential;
         }
     }
 }

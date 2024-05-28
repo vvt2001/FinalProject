@@ -8,7 +8,7 @@ namespace FinalProject_Data.Model
 {
     public class Meeting : Meeting_properties
     {
-        public ICollection<Attendee>? attendee { get; set; }
+        public ICollection<Attendee>? attendees { get; set; }
         public User owner { get; set; }
     }
     public class Meeting_properties : Entity

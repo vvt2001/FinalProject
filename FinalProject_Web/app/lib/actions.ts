@@ -77,6 +77,8 @@ const cookieStore = cookies();
 
 const actor_id = cookieStore.get("actor_id")?.value;
 const access_token = cookieStore.get("access_token")?.value;
+console.log(actor_id);
+console.log(access_token);
 
 export type MeetingFormState = {
     errors?: {
@@ -242,6 +244,7 @@ export async function bookMeetingForm(requestBody) {
 
     // Insert data into the database
     try {
+
         // Make a POST request to your server API endpoint
         const { meetingform_id } = validatedFields.data;
         const response = await fetch(`http://localhost:7057/meeting-form/book-meeting?actor_id=${actor_id}`, {

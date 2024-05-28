@@ -51,13 +51,36 @@ namespace FinalProject_API.Services
             meeting.duration = updating.duration;
             meeting.starttime = updating.starttime;
 
+            var deletedAttendee = await _context.attendees.Where(o => o.meeting_id == updating.id && !updating.attendees.Select(o => o.ID).ToList().Contains(o.ID)).ToListAsync();
+            _context.attendees.RemoveRange(deletedAttendee);
+
+            foreach (var attendee in updating.attendees)
+            {
+                var new_attendee = new Attendee();
+
+                new_attendee.ID = SlugID.New();
+                new_attendee.email = attendee.email;
+                new_attendee.name = attendee.name;
+                new_attendee.meeting_id = updating.id;
+
+                _context.attendees.Add(attendee);
+            }
+
             _context.meetings.Update(meeting);
-            return await _context.SaveChangesAsync() > 0;
+            await _context.SaveChangesAsync();
+
+            if (string.IsNullOrWhiteSpace(meeting.event_id))
+            {
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+            }
+            await _onlineMeetingServices.UpdateGoogleMeetMeeting(meeting.event_id, actor_id, meeting);
+
+            return true;
         }
 
         public async Task<Meeting> GetMeeting(string form_id, string actor_id)
         {
-            var meeting = await _context.meetings.Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == form_id);
+            var meeting = await _context.meetings.Include(o => o.attendees).FirstOrDefaultAsync(o => o.ID == form_id);
             if(meeting != null)
             {
                 return meeting;
@@ -70,7 +93,7 @@ namespace FinalProject_API.Services
 
         public async Task<List<Meeting>> GetAllMeeting(string actor_id)
         {
-            var meetings = await _context.meetings.Include(o => o.attendee).Where(o => o.owner_id == actor_id).ToListAsync();
+            var meetings = await _context.meetings.Include(o => o.attendees).Where(o => o.owner_id == actor_id).ToListAsync();
             return meetings;
         }
 
@@ -83,7 +106,7 @@ namespace FinalProject_API.Services
             };
 
             var query = _context.meetings
-                        .Include(o => o.attendee)
+                        .Include(o => o.attendees)
                         .Where(o => o.owner_id == actor_id)
                         .AsQueryable();
 
@@ -100,10 +123,16 @@ namespace FinalProject_API.Services
         public async Task<bool> DeleteMeeting(string id, string actor_id)
         {
             var meeting = await GetMeeting(id, actor_id);
+            var meetingEventID = meeting.event_id;
             var attendees = await _context.attendees.Where(a => a.meeting_id == id).ToListAsync();
             attendees.ForEach(a => a.meeting_id = null);
             await _context.SaveChangesAsync();
             await _context.meetings.Where(o => o.ID == id).ExecuteDeleteAsync();
+            if (string.IsNullOrWhiteSpace(meetingEventID))
+            {
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+            }
+            await _onlineMeetingServices.DeleteGoogleMeetMeeting(meetingEventID, actor_id);
             return true;
         }
 
@@ -116,8 +145,8 @@ namespace FinalProject_API.Services
             }
             await _onlineMeetingServices.CancelGoogleMeetMeeting(meeting.event_id, actor_id);
             meeting.trangthai = (int)trangthai_Meeting.Canceled;
-            return true;
+            _context.meetings.Update(meeting);
+            return await _context.SaveChangesAsync() > 0;
         }
-
     }
 }
