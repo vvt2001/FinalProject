@@ -35,7 +35,7 @@ export default async function MeetingFormsTable({
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {meetingform.attendee.length}
+                      {meetingform.attendees.length}
                     </p>
                     <p>{meetingform.duration}</p>
                   </div>
@@ -93,7 +93,7 @@ export default async function MeetingFormsTable({
                     <MeetingFormStatus status={meetingform.trangthai} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-center">
-                    {meetingform.attendee.length}
+                    {meetingform.attendees.length}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3 text-center">
                     <div className="flex justify-end gap-3">

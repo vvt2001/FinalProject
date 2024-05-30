@@ -68,16 +68,6 @@ namespace FinalProject_API.Services
                 ApplicationName = ApplicationName,
             });
 
-            if (meeting.attendees != null)
-            {
-                var listEventAttendee = new List<EventAttendee>();
-                foreach (var email in meeting.attendees.Select(o => o.email).ToList())
-                {
-                    var attendee = new EventAttendee() { Email = email };
-                    listEventAttendee.Add(attendee);
-                }
-            }
-
             // Example: Create an event with a Google Meet link
             var newEvent = new Event
             {
@@ -100,7 +90,6 @@ namespace FinalProject_API.Services
                         RequestId = Guid.NewGuid().ToString()
                     }
                 },
-                Attendees = listEventAttendee,
                 Reminders = new Event.RemindersData
                 {
                     UseDefault = false,
@@ -110,6 +99,17 @@ namespace FinalProject_API.Services
                     }
                 },
             };
+
+            if (meeting.attendees != null)
+            {
+                var listEventAttendee = new List<EventAttendee>();
+                foreach (var email in meeting.attendees.Select(o => o.email).ToList())
+                {
+                    var attendee = new EventAttendee() { Email = email };
+                    listEventAttendee.Add(attendee);
+                }
+                newEvent.Attendees = listEventAttendee;
+            }
 
             // Insert the event into the primary calendar
             var request = service.Events.Insert(newEvent, "primary");

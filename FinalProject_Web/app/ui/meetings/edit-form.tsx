@@ -1,26 +1,17 @@
 'use client';
 
-import { Meeting } from '@/app/lib/definitions';
-import {
-  CheckIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline';
+import { Meeting, Attendee } from '@/app/lib/definitions';
+import { CheckIcon, ClockIcon, CurrencyDollarIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateMeeting } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function EditMeeting({
-  meeting
-}: {
-  meeting: Meeting;
-    }) {
+export default function EditMeeting({ meeting }: { meeting: Meeting }) {
     const initialState = { message: null, errors: {} };
-    const updateInvoiceWithId = updateMeeting.bind(null, meeting.id);
-    const [state, dispatch] = useFormState(updateInvoiceWithId, initialState);
+    const updateMeetingWithId = updateMeeting.bind(null, meeting.id);
+    const [state, dispatch] = useFormState(updateMeetingWithId, initialState);
     const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 
     const formatDateTimeLocal = (date) => {
@@ -38,142 +29,189 @@ export default function EditMeeting({
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-  return (
-      <form action={dispatch}>
-      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+    const [attendees, setAttendees] = useState(meeting.attendees || []);
+    const [starttime, setStarttime] = useState(formatDateTimeLocal(meeting.starttime));
 
-        {/* Meeting Title */}
-        <div className="mb-4">
-            <label htmlFor="meeting_title" className="mb-2 block text-sm font-medium">
-                Choose a title
-            </label>
-            <div className="relative mt-2 rounded-md">
-            <div className="relative">
-                <input
-                id="meeting_title"
-                name="meeting_title"
-                type="string"
-                step="0.01"
-                placeholder="Enter meeting title"
-                defaultValue={meeting.meeting_title}
-                className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                required
-                />
-            </div>
-            </div>
-        </div>
+    const handleAddAttendee = () => {
+        setAttendees([...attendees, { name: '', email: '' }]);
+    };
 
-        {/* Meeting Descriptions (optional) */}
-        <div className="mb-4">
-            <label htmlFor="meeting_description" className="mb-2 block text-sm font-medium">
-                Write a description
-            </label>
-            <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                    <input
-                        id="meeting_description"
-                        name="meeting_description"
-                        type="string"
-                        step="0.01"
-                        placeholder="Enter meeting description"
-                        defaultValue={meeting.meeting_description}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                    />
+    const handleRemoveAttendee = (index) => {
+        const newAttendees = [...attendees];
+        newAttendees.splice(index, 1);
+        setAttendees(newAttendees);
+    };
+
+    const handleAttendeeChange = (index, field, value) => {
+        const newAttendees = [...attendees];
+        newAttendees[index][field] = value;
+        setAttendees(newAttendees);
+    };
+
+
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = {
+            id: meeting.id,
+            meeting_title: e.target.meeting_title.value,
+            meeting_description: e.target.meeting_description.value,
+            location: e.target.location.value,
+            starttime: e.target.starttime.value,
+            duration: parseInt(e.target.duration.value),
+            attendees,
+        };
+        await dispatch(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <div className="rounded-md bg-gray-50 p-4 md:p-6">
+
+                {/* Meeting Title */}
+                <div className="mb-4">
+                    <label htmlFor="meeting_title" className="mb-2 block text-sm font-medium">
+                        Choose a title
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <input
+                            id="meeting_title"
+                            name="meeting_title"
+                            type="text"
+                            placeholder="Enter meeting title"
+                            defaultValue={meeting.meeting_title}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Meeting Descriptions (optional) */}
+                <div className="mb-4">
+                    <label htmlFor="meeting_description" className="mb-2 block text-sm font-medium">
+                        Write a description
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <input
+                            id="meeting_description"
+                            name="meeting_description"
+                            type="text"
+                            placeholder="Enter meeting description"
+                            defaultValue={meeting.meeting_description}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Location (optional) */}
+                <div className="mb-4">
+                    <label htmlFor="location" className="mb-2 block text-sm font-medium">
+                        Choose a location
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <input
+                            id="location"
+                            name="location"
+                            type="text"
+                            placeholder="Enter meeting location"
+                            defaultValue={meeting.location}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Meeting platform */}
+                <div className="mb-4">
+                    <label htmlFor="platform" className="mb-2 block text-sm font-medium">
+                        Meeting Platform
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <select
+                            id="platform"
+                            name="platform"
+                            className="peer block w-full cursor-pointer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                            defaultValue={platformOptions[meeting.platform]}
+                            disabled
+                        >
+                            {platformOptions.map((option, index) => (
+                                <option key={index} value={index}>{option}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Duration (minutes) */}
+                <div className="mb-4">
+                    <label htmlFor="duration" className="mb-2 block text-sm font-medium">
+                        Enter your meeting's duration (minutes)
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <input
+                            id="duration"
+                            name="duration"
+                            type="number"
+                            placeholder="Enter meeting duration"
+                            defaultValue={meeting.duration}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Start time */}
+                <div className="mb-4">
+                    <label htmlFor="starttime" className="mb-2 block text-sm font-medium">
+                        Enter your meeting's start time
+                    </label>
+                    <div className="relative mt-2 rounded-md">
+                        <input
+                            id="starttime"
+                            name="starttime"
+                            type="datetime-local"
+                            defaultValue={formatDateTimeLocal(meeting.starttime)}
+                            onChange={(e) => setStarttime(e.target.value)}
+                            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Attendees */}
+                <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium">
+                        Attendees
+                    </label>
+                    {attendees.map((attendee, index) => (
+                        <div key={index} className="mb-2 flex flex-col md:flex-row items-start md:items-center">
+                            <input
+                                type="text"
+                                placeholder="Name"
+                                value={attendee.name}
+                                onChange={(e) => handleAttendeeChange(index, 'name', e.target.value)}
+                                className="peer block w-full md:w-1/2 rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500 mb-2 md:mb-0"
+                            />
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={attendee.email}
+                                onChange={(e) => handleAttendeeChange(index, 'email', e.target.value)}
+                                className="peer block w-full md:w-1/2 rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                            />
+                            <Button className="ml-4" type="button" onClick={() => handleRemoveAttendee(index)}>x</Button>
+                        </div>
+                    ))}
+                    <Button type="button" onClick={handleAddAttendee}>Add Attendee</Button>
                 </div>
             </div>
-        </div>
-
-        {/* Location (optional) */}
-        <div className="mb-4">
-            <label htmlFor="location" className="mb-2 block text-sm font-medium">
-                Choose a location
-            </label>
-            <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                    <input
-                        id="location"
-                        name="location"
-                        type="string"
-                        step="0.01"
-                        placeholder="Enter meeting location"
-                        defaultValue={meeting.location}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                    />
-                </div>
+            <div className="mt-6 flex justify-end gap-4">
+                <Link
+                    href="/dashboard/meetings"
+                    className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+                >
+                    Cancel
+                </Link>
+                <Button type="submit">Edit Meeting</Button>
             </div>
-        </div>
-
-        {/* Meeting platform */}
-        <div className="mb-4">
-            <label htmlFor="platform" className="mb-2 block text-sm font-medium">
-                Meeting Platform
-            </label>
-            <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                    <input
-                        id="platform"
-                        name="platform"
-                        type="string"
-                        step="0.01"
-                        defaultValue={platformOptions[meeting.platform]}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        disabled
-                    />
-                </div>
-            </div>
-        </div>
-
-        {/* Duration (minutes) */}
-        <div className="mb-4">
-            <label htmlFor="duration" className="mb-2 block text-sm font-medium">
-                Enter your meeting's duration
-            </label>
-            <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                    <input
-                        id="duration"
-                        name="duration"
-                        type="text"
-                        step="0.01"
-                        placeholder="Enter meeting duration"
-                        defaultValue={meeting.duration}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        required
-                    />
-                </div>
-            </div>
-        </div>
-
-        {/* Start time */}
-        <div className="mb-4">
-            <label htmlFor="starttime" className="mb-2 block text-sm font-medium">
-                Enter your meeting's start time
-            </label>
-            <div className="relative mt-2 rounded-md">
-                <div className="relative">
-                    <input
-                        id="starttime"
-                        name="starttime"
-                        type="datetime-local"
-                        step="0.01"
-                        placeholder="Enter meeting start time"
-                        defaultValue={formatDateTimeLocal(meeting.starttime)}
-                        className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-                        required
-                    />
-                </div>
-            </div>
-        </div>
-      </div>
-      <div className="mt-6 flex justify-end gap-4">
-        <Link
-          href="/dashboard/meetingforms"
-          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-        >
-          Cancel
-        </Link>
-        <Button type="submit">Edit Meeting</Button>
-      </div>
-    </form>
-  );
+        </form>
+    );
 }

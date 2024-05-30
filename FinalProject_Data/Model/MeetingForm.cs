@@ -11,7 +11,7 @@ namespace FinalProject_Data.Model
     public class MeetingForm : MeetingForm_properties
     {
         public ICollection<MeetingTime> times { get; set; }
-        public ICollection<Attendee>? attendee { get; set; }
+        public ICollection<Attendee>? attendees { get; set; }
         public User owner { get; set; }
     }
     public class MeetingForm_properties : Entity

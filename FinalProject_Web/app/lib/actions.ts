@@ -39,12 +39,14 @@ const MeetingSchema = z.object({
     duration: z.coerce
         .number()
         .gt(0, { message: 'Please enter an amount greater than 0.' }),
-    platform: z.coerce.number({
-        invalid_type_error: 'Please select a meeting platform.',
-    }),
     starttime: z.coerce.date({
         message: 'Please select a date and time for the meeting.',
     }),
+    attendees: z.array(
+        z.coerce.date({
+            message: 'Please select a date and time for the meeting.',
+        })
+    ),
 });
 
 
@@ -99,6 +101,8 @@ export type MeetingState = {
         location?: string[];
         duration?: string[];
         platform?: string[];
+        starttime?: string[];
+        attendees?: string[];
     };
     message?: string | null;
 };
@@ -425,27 +429,30 @@ export async function updateMeeting(
     prevState: MeetingState,
     formData: FormData,
 ) {
-    // Validate form using Zod
-    const validatedFields = UpdateMeeting.safeParse({
-        meeting_title: formData.get('meeting_title'),
-        meeting_description: formData.get('meeting_description'),
-        location: formData.get('location'),
-        duration: formData.get('duration'),
-        starttime: formData.get('starttime'),
-        platform: formData.get('platform'),
-    });
+    //// Validate form using Zod
+    //const validatedFields = UpdateMeeting.safeParse({
+    //    meeting_title: formData.get('meeting_title'),
+    //    meeting_description: formData.get('meeting_description'),
+    //    location: formData.get('location'),
+    //    duration: formData.get('duration'),
+    //    starttime: formData.get('starttime'),
+    //    platform: formData.get('platform'),
+    //    attendees: formData.getAll('attendees'),
+    //});
 
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Update Meeting Form.',
-        };
-    }
+    //// If form validation fails, return errors early. Otherwise, continue.
+    //if (!validatedFields.success) {
+    //    return {
+    //        errors: validatedFields.error.flatten().fieldErrors,
+    //        message: 'Missing Fields. Failed to Update Meeting Form.',
+    //    };
+    //}
     let response;
     try {
         // Make a PUT request to your server API endpoint
-        const { meeting_title, meeting_description, location, duration, platform, starttime } = validatedFields.data;
+        //const { meeting_title, meeting_description, location, duration, platform, starttime, attendees } = validatedFields.data;
+
+        console.log(formData);
 
         response = await fetch(`http://localhost:7057/meeting/update-meeting?actor_id=${actor_id}`, {
             method: 'PUT',
@@ -456,11 +463,13 @@ export async function updateMeeting(
             },
             body: JSON.stringify({
                 id: id,
-                meeting_title: meeting_title,
-                meeting_description: meeting_description,
-                location: location,
-                duration: parseInt(duration || '0', 10),
-                starttime: starttime,
+                meeting_title: formData.meeting_title,
+                meeting_description: formData.meeting_description,
+                location: formData.location,
+                duration: formData.duration,
+                starttime: formData.starttime,
+                platform: formData.platform,
+                attendees: formData.attendees,
             }),
         });
 

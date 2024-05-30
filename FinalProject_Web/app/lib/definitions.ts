@@ -115,4 +115,10 @@ export type Meeting = {
     platform: number;
     duration: number;
     starttime: Date;
+    attendees: Attendee[]
+};
+
+export type Attendee = {
+    name: string;
+    email: string;
 };

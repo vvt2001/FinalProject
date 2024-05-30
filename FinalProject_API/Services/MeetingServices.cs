@@ -43,6 +43,11 @@ namespace FinalProject_API.Services
 
         public async Task<bool> UpdateMeeting(MeetingUpdating updating, string actor_id)
         {
+            if (updating.attendees != null && updating.attendees.GroupBy(a => a.email).Any(g => g.Count() > 1))
+            {
+                throw new InvalidProgramException("Không được phép trùng email");
+            }
+
             var meeting = await GetMeeting(updating.id, actor_id);
 
             meeting.meeting_title = updating.meeting_title;
@@ -51,19 +56,40 @@ namespace FinalProject_API.Services
             meeting.duration = updating.duration;
             meeting.starttime = updating.starttime;
 
-            var deletedAttendee = await _context.attendees.Where(o => o.meeting_id == updating.id && !updating.attendees.Select(o => o.ID).ToList().Contains(o.ID)).ToListAsync();
-            _context.attendees.RemoveRange(deletedAttendee);
+            var oldAttendees = await _context.attendees.Where(o => o.meeting_id == updating.id).ToListAsync();
+            var oldAttendees_emails = oldAttendees.Select(o => o.email).ToList();
 
-            foreach (var attendee in updating.attendees)
+            var deletedAttendees =  oldAttendees.Where(o => !updating.attendees.Select(t => t.email).ToList().Contains(o.email)).ToList();
+            _context.attendees.RemoveRange(deletedAttendees);
+
+            if (updating.attendees != null)
             {
-                var new_attendee = new Attendee();
+                var newAttendees = updating.attendees.Where(o => !oldAttendees_emails.Contains(o.email)).ToList();
+                foreach (var attendee in newAttendees)
+                {
+                    var new_attendee = new Attendee();
 
-                new_attendee.ID = SlugID.New();
-                new_attendee.email = attendee.email;
-                new_attendee.name = attendee.name;
-                new_attendee.meeting_id = updating.id;
+                    new_attendee.ID = SlugID.New();
+                    new_attendee.email = attendee.email;
+                    new_attendee.name = attendee.name;
+                    new_attendee.meeting_id = meeting.ID;
+                    new_attendee.meetingform_id = meeting.meetingform_id;
 
-                _context.attendees.Add(attendee);
+                    _context.attendees.Add(new_attendee);
+                }
+
+                var nameChangedAttendee = updating.attendees.Where(o => oldAttendees_emails.Contains(o.email)).ToList();
+                foreach (var attendee in nameChangedAttendee)
+                {
+                    var updateAttendee = await _context.attendees.FirstOrDefaultAsync(o => o.email == attendee.email);
+                    if (updateAttendee != null)
+                    {
+                        updateAttendee.email = attendee.email;
+                        updateAttendee.name = attendee.name;
+
+                        _context.attendees.Update(updateAttendee);
+                    }
+                }
             }
 
             _context.meetings.Update(meeting);

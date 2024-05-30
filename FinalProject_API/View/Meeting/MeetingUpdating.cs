@@ -12,6 +12,12 @@ namespace FinalProject_API.View.Meeting
         public string? location { get; set; }
         public DateTime starttime { get; set; }
         public int duration { get; set; }
-        public List<Attendee> attendees { get; set; }
+        public List<AttendeeUpdating>? attendees { get; set; }
+    }
+
+    public class AttendeeUpdating
+    {
+        public string name { get; set; }
+        public string email { get; set; }
     }
 }

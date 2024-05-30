@@ -122,7 +122,7 @@ namespace FinalProject_API.Services
 
         public async Task<MeetingForm> GetForm(string form_id, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == form_id);
+            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendees).FirstOrDefaultAsync(o => o.ID == form_id);
             if(form != null)
             {
                 return form;
@@ -135,7 +135,7 @@ namespace FinalProject_API.Services
 
         public async Task<List<MeetingForm>> GetAllForm(string actor_id)
         {
-            var forms = await _context.meetingforms.Include(o => o.attendee).Where(o => o.owner_id == actor_id).ToListAsync();
+            var forms = await _context.meetingforms.Include(o => o.attendees).Where(o => o.owner_id == actor_id).ToListAsync();
             return forms;
         }
 
@@ -148,7 +148,7 @@ namespace FinalProject_API.Services
             };
 
             var query = _context.meetingforms
-                        .Include(o => o.attendee)
+                        .Include(o => o.attendees)
                         .Include(o => o.times)
                         .Where(o => o.owner_id == actor_id)
                         .AsQueryable();
@@ -196,7 +196,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == booking.meetingform_id);
+            var form = await _context.meetingforms.Include(o => o.attendees).FirstOrDefaultAsync(o => o.ID == booking.meetingform_id);
             var prefered_time = await _context.meetingtimes.Where(o => o.meetingform_id == booking.meetingform_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
 
             form.starttime = prefered_time.time;
@@ -208,8 +208,9 @@ namespace FinalProject_API.Services
             meeting.duration = form.duration;
             meeting.ID = SlugID.New();
             meeting.trangthai = (int)trangthai_Meeting.Waiting;
+            meeting.meetingform_id = booking.meetingform_id;
 
-            foreach(var attendee in form.attendee)
+            foreach (var attendee in form.attendees)
             {
                 attendee.meeting_id = meeting.ID;
                 _context.attendees.Update(attendee);

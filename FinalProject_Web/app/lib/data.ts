@@ -158,6 +158,7 @@ export async function fetchMeetingById(id: string) {
             platform: meetingData.platform,
             duration: meetingData.duration,
             starttime: meetingData.starttime,
+            attendees: meetingData.attendees,
         };
 
         return meetingForm;

@@ -113,6 +113,9 @@ namespace FinalProject_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("meetingform_id")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("owner_id")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -249,11 +252,11 @@ namespace FinalProject_Data.Migrations
             modelBuilder.Entity("FinalProject_Data.Model.Attendee", b =>
                 {
                     b.HasOne("FinalProject_Data.Model.Meeting", "meeting")
-                        .WithMany("attendee")
+                        .WithMany("attendees")
                         .HasForeignKey("meeting_id");
 
                     b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
-                        .WithMany("attendee")
+                        .WithMany("attendees")
                         .HasForeignKey("meetingform_id");
 
                     b.Navigation("meeting");
@@ -296,12 +299,12 @@ namespace FinalProject_Data.Migrations
 
             modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
                 {
-                    b.Navigation("attendee");
+                    b.Navigation("attendees");
                 });
 
             modelBuilder.Entity("FinalProject_Data.Model.MeetingForm", b =>
                 {
-                    b.Navigation("attendee");
+                    b.Navigation("attendees");
 
                     b.Navigation("times");
                 });
