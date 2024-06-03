@@ -100,6 +100,9 @@ namespace FinalProject_Data.Migrations
                     b.Property<string>("event_id")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool?>("is_active")
+                        .HasColumnType("bit");
+
                     b.Property<string>("location")
                         .HasColumnType("nvarchar(max)");
 
@@ -147,6 +150,9 @@ namespace FinalProject_Data.Migrations
 
                     b.Property<int>("duration")
                         .HasColumnType("int");
+
+                    b.Property<bool?>("is_active")
+                        .HasColumnType("bit");
 
                     b.Property<string>("location")
                         .HasColumnType("nvarchar(max)");

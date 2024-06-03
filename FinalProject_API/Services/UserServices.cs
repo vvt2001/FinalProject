@@ -31,12 +31,16 @@ namespace FinalProject_API.Services
         private readonly DatabaseContext _context;
         private readonly IAccountServices _accountService;
         private readonly IConfiguration _configuration;
+        private readonly IMeetingFormServices _meetingFormServices;
+        private readonly IMeetingServices _meetingServices;
 
-        public UserServices(DatabaseContext context, IAccountServices accountService, IConfiguration configuration)
+        public UserServices(DatabaseContext context, IAccountServices accountService, IConfiguration configuration, IMeetingFormServices meetingFormServices, IMeetingServices meetingServices)
         {
             _context = context;
             _accountService = accountService;
             _configuration = configuration;
+            _meetingFormServices = meetingFormServices;
+            _meetingServices = meetingServices;
         }
 
         public async Task<LoginResponse> Authenticate(LoginRequest request)
@@ -45,7 +49,7 @@ namespace FinalProject_API.Services
 
             if (!Crypto.Verify(request.Password, user.salt, user.hash))
             {
-                throw new InvalidProgramException($"Mật khẩu không chính xác.");                
+                throw new InvalidProgramException("Wrong password");                
             }
 
             var access_token = RenderAccessToken(user);
@@ -59,7 +63,7 @@ namespace FinalProject_API.Services
                     access_token = access_token
                 };
             }
-            throw new Exception("Đăng nhập không thành công");
+            throw new Exception("Login failed");
         }
 
         public async Task<User> Get(string id, string actor_id)
@@ -71,7 +75,7 @@ namespace FinalProject_API.Services
             {
                 return user;
             }
-            throw new InvalidProgramException($"Không tìm thấy Người dùng với id '{id}'");
+            throw new InvalidProgramException($"Can't find user with id: '{id}'");
         }
 
         public async Task<List<User>> GetAll()
@@ -87,7 +91,7 @@ namespace FinalProject_API.Services
             {
                 if (creating.password != creating.confirm_password)
                 {
-                    throw new InvalidProgramException("Xác nhận mật khẩu không chính xác");
+                    throw new InvalidProgramException("Incorrect confirm password");
                 }
                 var user = new User
                 {
@@ -106,7 +110,7 @@ namespace FinalProject_API.Services
                 {
                     return user.ID;
                 }
-                throw new Exception("Xảy ra lỗi trong quá trình lưu thông tin");
+                throw new Exception("Error saving informations");
             }
             catch (Exception ex)
             {
@@ -130,22 +134,22 @@ namespace FinalProject_API.Services
                 _context.users.Update(user);
                 return await _context.SaveChangesAsync() > 0;
             }
-            throw new InvalidProgramException("Người dùng không tồn tại");
+            throw new InvalidProgramException("Can't find user");
         }
 
         private string? GetFieldDuplicate(string exceptMessage, UserCreating creating)
         {
-            if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.username)}"))
+            if (exceptMessage.Contains($"users_{nameof(User.username)}"))
             {
-                return $"Tên đăng nhập '{creating.username}'";
+                return $"Username '{creating.username}'";
             }
-            if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.email)}"))
+            if (exceptMessage.Contains($"users_{nameof(User.email)}"))
             {
                 return $"Email '{creating.email}'";
             }
-            if (exceptMessage.Contains($"{nameof(User)}_{nameof(User.name)}"))
+            if (exceptMessage.Contains($"users_{nameof(User.name)}"))
             {
-                return $"Tên người dùng '{creating.name}'";
+                return $"Account name '{creating.name}'";
             }
             return null;
         }
@@ -183,7 +187,61 @@ namespace FinalProject_API.Services
             {
                 return user;
             }
-            throw new InvalidProgramException("Người dùng không tồn tại");
+            throw new InvalidProgramException("Can't find user");
+        }
+
+        public async Task<bool> RemoveCredentials(string user_id)
+        {
+            var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
+            if (credentials != null)
+            {
+                _context.googlemeetcredentials.Remove(credentials);
+
+                var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
+                var meetings = await _meetingServices.GetAllMeeting(user_id);
+
+                foreach( var meeting_form in meeting_forms)
+                {
+                    meeting_form.is_active = false;
+                    _context.meetingforms.Update(meeting_form);
+                }
+
+                foreach (var meeting in meetings)
+                {
+                    meeting.is_active = false;
+                    _context.meetings.Update(meeting);
+                }
+
+                return await _context.SaveChangesAsync() > 0;
+            }
+            throw new InvalidProgramException("Can't find user's credentials");
+        }
+
+        public async Task<bool> AddCredentials(string user_id)
+        {
+            var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
+            if (credentials != null)
+            {
+                _context.googlemeetcredentials.Remove(credentials);
+
+                var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
+                var meetings = await _meetingServices.GetAllMeeting(user_id);
+
+                foreach (var meeting_form in meeting_forms)
+                {
+                    meeting_form.is_active = false;
+                    _context.meetingforms.Update(meeting_form);
+                }
+
+                foreach (var meeting in meetings)
+                {
+                    meeting.is_active = false;
+                    _context.meetings.Update(meeting);
+                }
+
+                return await _context.SaveChangesAsync() > 0;
+            }
+            throw new InvalidProgramException("Can't find user's credentials");
         }
     }
 }

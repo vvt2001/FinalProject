@@ -3,6 +3,7 @@ import { UpdateMeeting, DeleteMeeting, CancelMeeting } from '@/app/ui/meetingfor
 import MeetingStatus from '@/app/ui/meetings/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeeting } from '@/app/lib/data';
+import { cookies } from "next/headers";
 
 export default async function MeetingTable({
     query,
@@ -11,7 +12,10 @@ export default async function MeetingTable({
     query: string;
     currentPage: number;
 }) {
-    const meetings = await fetchFilteredMeeting(query, currentPage);
+    const cookieStore = cookies();
+    const actor_id = cookieStore.get("actor_id")?.value;
+    console.log(actor_id);
+    const meetings = await fetchFilteredMeeting(query, currentPage, actor_id);
 
   return (
     <div className="mt-6 flow-root">

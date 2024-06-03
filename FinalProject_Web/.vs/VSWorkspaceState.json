@@ -4,13 +4,13 @@
     "\\app",
     "\\app\\dashboard",
     "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\create",
     "\\app\\dashboard\\meetingforms\\[id]",
     "\\app\\dashboard\\meetingforms\\[id]\\edit",
-    "\\app\\dashboard\\meetings",
-    "\\app\\dashboard\\meetings\\[id]",
-    "\\app\\dashboard\\meetings\\[id]\\edit"
+    "\\app\\lib",
+    "\\app\\login",
+    "\\app\\ui",
+    "\\app\\ui\\dashboard"
   ],
-  "SelectedNode": "\\app\\dashboard\\(overview)\\page.tsx",
+  "SelectedNode": "\\app\\lib\\actions.ts",
   "PreviewInSolutionExplorer": false
 }

@@ -6,6 +6,7 @@ import { lusitana } from '@/app/ui/fonts';
 import { MeetingFormTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchMeetingPages } from '@/app/lib/data';
+import { cookies } from "next/headers";
 
 export default async function Page({
     searchParams,
@@ -15,9 +16,12 @@ export default async function Page({
         page?: string;
     };
 }) {
+    const cookieStore = cookies();
+    const actor_id = cookieStore.get("actor_id")?.value;
+    console.log(actor_id);
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
-    const totalPages = await fetchMeetingPages();
+    const totalPages = await fetchMeetingPages(actor_id);
 
     return (
         <div className="w-full">

@@ -26,6 +26,9 @@ using Google.Apis.Auth.OAuth2.Flows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using FinalProject_API.View.GoogleCredentials;
+using Google.Apis.Gmail.v1.Data;
+using Google.Apis.Gmail.v1;
+using MimeKit;
 
 namespace FinalProject_API.Services
 {
@@ -35,6 +38,8 @@ namespace FinalProject_API.Services
         Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id);
         Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id);
         Task<bool> UpdateGoogleMeetMeeting(string eventId, string actor_id, Meeting new_meeting);
+        Task<bool> SendEmail(MeetingForm meeting_form, string subject, string content);
+        Task<UserCredential> GetCredential(string actor_id);
     }
     [Obsolete]
     public class OnlineMeetingServices : IOnlineMeetingServices
@@ -54,7 +59,7 @@ namespace FinalProject_API.Services
             _configuration = configuration;
         }
 
-        static string[] Scopes = { CalendarService.Scope.Calendar };
+        static string[] Scopes = { CalendarService.Scope.Calendar, GmailService.Scope.GmailModify, GmailService.Scope.GmailSend, GmailService.Scope.GmailReadonly };
         static string ApplicationName = "Scheduler";
 
         public async Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id)
@@ -114,6 +119,7 @@ namespace FinalProject_API.Services
             // Insert the event into the primary calendar
             var request = service.Events.Insert(newEvent, "primary");
             request.ConferenceDataVersion = 1;
+            request.SendNotifications = true;
             var createdEvent = request.Execute();
 
             // Output the Google Meet link and the event HTML link
@@ -218,14 +224,70 @@ namespace FinalProject_API.Services
             return changesMade;
         }
 
+        public async Task<bool> SendEmail(MeetingForm meeting_form, string subject, string content)
+        {
+            UserCredential credential = await GetCredential(meeting_form.owner_id);
+
+            // Create Gmail API service.
+            var service = new GmailService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            if (meeting_form.attendees != null)
+            {
+                var message = CreateEmail(meeting_form.attendees.ToList(), subject, content, meeting_form);
+                var request = service.Users.Messages.Send(message, "me");
+                var response = await request.ExecuteAsync();
+                Console.WriteLine("Email sent: {0}", response.Id);
+                return response != null;
+            }
+            return false;
+        }
+
+        private static Message CreateEmail(List<Attendee> to, string subject, string content, MeetingForm meeting_form)
+        {
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress(meeting_form.owner.name, meeting_form.owner.email));
+
+            foreach (var attendee in to)
+            {
+                emailMessage.To.Add(new MailboxAddress(attendee.name, attendee.email));
+            }
+
+            emailMessage.Subject = subject;
+            var bodyBuilder = new BodyBuilder { TextBody = content };
+            emailMessage.Body = bodyBuilder.ToMessageBody();
+
+            using (var stream = new MemoryStream())
+            {
+                emailMessage.WriteTo(stream);
+                return new Message
+                {
+                    Raw = Convert.ToBase64String(stream.ToArray())
+                        .Replace('+', '-')
+                        .Replace('/', '_')
+                        .Replace("=", "")
+                };
+            }
+        }
+
         private async Task<UserCredential> AuthenticateUserAsync()
         {
+            var dataStore = new FileDataStore(ApplicationName);
+
+            // Clear existing credentials
+            await dataStore.ClearAsync();
+
             return await GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GetClientSecrets(),
                 Scopes,
                 "user",
-                CancellationToken.None);
+                CancellationToken.None,
+                dataStore);
         }
+
 
         private async Task<bool> SaveTokensToDatabase(UserCredential credential, string actor_id)
         {
@@ -270,7 +332,7 @@ namespace FinalProject_API.Services
             return clientSecrets;
         }
 
-        private async Task<UserCredential> GetCredential(string actor_id)
+        public async Task<UserCredential> GetCredential(string actor_id)
         {
             UserCredential credential;
 

@@ -106,7 +106,7 @@ namespace FinalProject_API.Services
 
         public async Task<Meeting> GetMeeting(string form_id, string actor_id)
         {
-            var meeting = await _context.meetings.Include(o => o.attendees).FirstOrDefaultAsync(o => o.ID == form_id);
+            var meeting = await _context.meetings.Include(o => o.attendees).Include(o => o.owner).FirstOrDefaultAsync(o => o.ID == form_id);
             if(meeting != null)
             {
                 return meeting;
@@ -119,7 +119,7 @@ namespace FinalProject_API.Services
 
         public async Task<List<Meeting>> GetAllMeeting(string actor_id)
         {
-            var meetings = await _context.meetings.Include(o => o.attendees).Where(o => o.owner_id == actor_id).ToListAsync();
+            var meetings = await _context.meetings.Include(o => o.attendees).Include(o => o.owner).Where(o => o.owner_id == actor_id).ToListAsync();
             return meetings;
         }
 

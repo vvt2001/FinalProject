@@ -7,8 +7,8 @@ namespace FinalProject_Data.Enum.Meeting
     public enum trangthai_Meeting
     {
         Waiting = 1,
-        Ongoing,
-        Ended,
-        Canceled,
+        Ongoing = 2,
+        Ended = 3,
+        Canceled = 4,
     }
 }

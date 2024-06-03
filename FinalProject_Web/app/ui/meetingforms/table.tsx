@@ -3,6 +3,7 @@ import { UpdateMeetingForm, DeleteMeetingForm, CopyVoteUrl, BookMeeting } from '
 import MeetingFormStatus from '@/app/ui/meetingforms/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeetingForms } from '@/app/lib/data';
+import { cookies } from "next/headers";
 
 export default async function MeetingFormsTable({
     query,
@@ -11,7 +12,11 @@ export default async function MeetingFormsTable({
     query: string;
     currentPage: number;
 }) {
-    const meetingforms = await fetchFilteredMeetingForms(query, currentPage);
+    const cookieStore = cookies();
+    const actor_id = cookieStore.get("actor_id")?.value;
+    console.log(actor_id);
+
+    const meetingforms = await fetchFilteredMeetingForms(query, currentPage, actor_id);
 
   return (
     <div className="mt-6 flow-root">

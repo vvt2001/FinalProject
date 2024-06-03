@@ -25,6 +25,7 @@ namespace FinalProject_Data.Model
         public int platform { get; set; }
         public int trangthai { get; set; }
         public string owner_id { get; set; }
+        public bool? is_active { get; set; } = true;
     }
     public class MeetingForm_configuration : IEntityTypeConfiguration<MeetingForm>
     {

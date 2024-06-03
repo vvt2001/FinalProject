@@ -18,7 +18,8 @@ const ITEMS_PER_PAGE = 5;
 
 export async function fetchFilteredMeetingForms(
     query: string,
-    currentPage: number
+    currentPage: number,
+    actor_id: string
 ) {
     noStore();
 
@@ -26,7 +27,7 @@ export async function fetchFilteredMeetingForms(
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
 
-        const response = await fetch(`http://localhost:7057/meeting-form/search-form?actor_id=4efyqow4ywdutzb52oymalf5d&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
+        const response = await fetch(`http://localhost:7057/meeting-form/search-form?actor_id=${actor_id}&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
         const responseData = await response.json();
 
         // Extract the array of meetings from the response data
@@ -40,12 +41,12 @@ export async function fetchFilteredMeetingForms(
     }
 }
 
-export async function fetchMeetingFormPages() {
+export async function fetchMeetingFormPages(actor_id: string) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the total count of meeting forms
-        const response = await fetch(`http://localhost:7057/meeting-form/get-all-form?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting-form/get-all-form?actor_id=${actor_id}`);
 
         const responseData = await response.json();
 
@@ -59,12 +60,12 @@ export async function fetchMeetingFormPages() {
     }
 }
 
-export async function fetchMeetingFormById(id: string) {
+export async function fetchMeetingFormById(id: string, actor_id: string) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the meeting form by ID
-        const response = await fetch(`http://localhost:7057/meeting-form/get-form/${id}?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting-form/get-form/${id}?actor_id=${actor_id}`);
         const responseData = await response.json();
 
         // Extract the array of invoices from the response data
@@ -97,7 +98,8 @@ export async function fetchMeetingFormById(id: string) {
 
 export async function fetchFilteredMeeting(
     query: string,
-    currentPage: number
+    currentPage: number,
+    actor_id: string
 ) {
     noStore();
 
@@ -105,7 +107,7 @@ export async function fetchFilteredMeeting(
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
 
-        const response = await fetch(`http://localhost:7057/meeting/search-meeting?actor_id=4efyqow4ywdutzb52oymalf5d&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
+        const response = await fetch(`http://localhost:7057/meeting/search-meeting?actor_id=${actor_id}&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
         const responseData = await response.json();
 
         // Extract the array of meetings from the response data
@@ -119,12 +121,12 @@ export async function fetchFilteredMeeting(
     }
 }
 
-export async function fetchMeetingPages() {
+export async function fetchMeetingPages(actor_id: string) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the total count of meeting forms
-        const response = await fetch(`http://localhost:7057/meeting/get-all-meeting?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting/get-all-meeting?actor_id=${actor_id}`);
 
         const responseData = await response.json();
 
@@ -138,12 +140,12 @@ export async function fetchMeetingPages() {
     }
 }
 
-export async function fetchMeetingById(id: string) {
+export async function fetchMeetingById(id: string, actor_id: string) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the meeting form by ID
-        const response = await fetch(`http://localhost:7057/meeting/get-meeting/${id}?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting/get-meeting/${id}?actor_id=${actor_id}`);
         const responseData = await response.json();
 
         // Extract the array of invoices from the response data

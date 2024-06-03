@@ -13,6 +13,7 @@ using FinalProject_Data.Enum.Meeting;
 using FinalProject_API.Common;
 using FinalProject_API.Wrappers;
 using FinalProject_API.Helpers;
+using Google.Apis.Calendar.v3.Data;
 
 namespace FinalProject_API.Services
 {
@@ -32,19 +33,28 @@ namespace FinalProject_API.Services
         private readonly DatabaseContext _context;
         private readonly IMapper _mapper;
         private readonly IOnlineMeetingServices _onlineMeetingServices;
+        private readonly IMeetingServices _meetingServices;
+
         public MeetingFormServices(
             DatabaseContext context,
             IMapper mapper,
-            IOnlineMeetingServices onlineMeetingServices
+            IOnlineMeetingServices onlineMeetingServices,
+            IMeetingServices meetingServices
         )
         {
             _context = context;
             _mapper = mapper;
             _onlineMeetingServices = onlineMeetingServices;
+            _meetingServices = meetingServices;
         }
 
         public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
         {
+            var credentials = await _onlineMeetingServices.GetCredential(actor_id);
+            if (credentials == null)
+            {
+                throw new InvalidProgramException("Google credentials invalid");
+            }
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
             new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
@@ -117,19 +127,19 @@ namespace FinalProject_API.Services
                 _context.meetingforms.Update(meetingForm);
                 return await _context.SaveChangesAsync() > 0;
             }
-            throw new InvalidProgramException("Cuộc họp không tồn tại");
+            throw new InvalidProgramException("Can't find meeting schedule");
         }
 
         public async Task<MeetingForm> GetForm(string form_id, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendees).FirstOrDefaultAsync(o => o.ID == form_id);
+            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendees).Include(o => o.owner).FirstOrDefaultAsync(o => o.ID == form_id);
             if(form != null)
             {
                 return form;
             }
             else
             {
-                throw new InvalidProgramException("Không tìm thấy lịch họp");
+                throw new InvalidProgramException("Can't find meeting schedule");
             }
         }
 
@@ -168,7 +178,16 @@ namespace FinalProject_API.Services
             var attendee = _context.attendees.Where(o => o.meetingform_id == voting.meetingform_id && o.email == voting.email);
             if(attendee.Count() > 0)
             {
-                throw new InvalidProgramException("Email đã được sử dụng cho cuộc họp này");
+                throw new InvalidProgramException("Email already used for this meeting");
+            }
+            var meeting_form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendees).Include(o => o.owner).FirstOrDefaultAsync(o => o.ID == voting.meetingform_id);
+            if (meeting_form == null)
+            {
+                throw new InvalidProgramException("Meeting schedule not found");
+            }
+            if (voting.meetingtime_ids == null || voting.meetingtime_ids.Count < 1)
+            {
+                throw new InvalidProgramException("Must vote for atleast 1 meeting time(s)");
             }
             var new_attendee = new Attendee();
             new_attendee.ID = SlugID.New();
@@ -176,21 +195,30 @@ namespace FinalProject_API.Services
             new_attendee.name = voting.name;
             new_attendee.meetingform_id = voting.meetingform_id;
 
-            var times = await _context.meetingtimes.Where(o => voting.meetingtime_ids.Contains(o.ID)).ToListAsync();
-            foreach (var time in times)
+            var voted_times = await _context.meetingtimes.Where(o => voting.meetingtime_ids.Contains(o.ID)).ToListAsync();
+            foreach (var time in voted_times)
             {
                 time.vote_count += 1;
             }
             try
             {
                 _context.attendees.Add(new_attendee);
-                _context.meetingtimes.UpdateRange(times);
+                _context.meetingtimes.UpdateRange(voted_times);
 
-                return await _context.SaveChangesAsync() > 0;
+                await _context.SaveChangesAsync();
+                var voted_times_string = voted_times.Select(o => o.time.ToString("dd/MM/yyyy HH:mm")).ToList();
+
+                var most_voted_time = meeting_form.times.OrderByDescending(o => o.vote_count).FirstOrDefault();
+                if (most_voted_time != null && voted_times_string.Count > 0)
+                {
+                    await _onlineMeetingServices.SendEmail(meeting_form, "New attendee has voted", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\n Currently, the meeting will be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} as it has the most votes");
+                }
+
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                throw new InvalidProgramException("Gặp lỗi trong quá trình xử lý");
+                throw ex;
             }
         }
 
@@ -219,7 +247,10 @@ namespace FinalProject_API.Services
 
             await _context.SaveChangesAsync();
 
-            return await _onlineMeetingServices.CreateGoogleMeetMeeting(meeting, actor_id);
+            var createdMeeting = await _meetingServices.GetMeeting(meeting.ID, actor_id);
+            await _onlineMeetingServices.CreateGoogleMeetMeeting(createdMeeting, actor_id);
+
+            return true;
         }
 
         public async Task<bool> DeleteForm(string id, string actor_id)

@@ -9,6 +9,6 @@ namespace FinalProject_Data.Enum.Meeting
     public enum trangthai_MeetingForm
     {
         Waiting = 1,
-        Ended
+        Ended = 2,
     }
 }
