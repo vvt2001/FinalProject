@@ -10,8 +10,8 @@ import { useState, useEffect } from 'react';
 
 export default function EditMeeting({ meeting }: { meeting: Meeting }) {
     const initialState = { message: null, errors: {} };
-    const updateMeetingWithId = updateMeeting.bind(null, meeting.id);
-    const [state, dispatch] = useFormState(updateMeetingWithId, initialState);
+    //const updateMeetingWithId = updateMeeting.bind(null, meeting.id);
+    const [state, dispatch] = useFormState(updateMeeting, initialState);
     const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 
     const formatDateTimeLocal = (date) => {
@@ -48,20 +48,58 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
         setAttendees(newAttendees);
     };
 
+    //const handleSubmit = async (e) => {
+    //    e.preventDefault();
+    //    const formData = {
+    //        id: meeting.id,
+    //        meeting_title: e.target.meeting_title.value,
+    //        meeting_description: e.target.meeting_description.value,
+    //        location: e.target.location.value,
+    //        starttime: e.target.starttime.value,
+    //        duration: parseInt(e.target.duration.value),
+    //        attendees,
+    //    };
+    //    await dispatch(formData);
+    //};
 
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        };
+
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
+
+    // Function to handle form submission
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        // Create FormData object
         const formData = {
             id: meeting.id,
-            meeting_title: e.target.meeting_title.value,
-            meeting_description: e.target.meeting_description.value,
-            location: e.target.location.value,
-            starttime: e.target.starttime.value,
-            duration: parseInt(e.target.duration.value),
+            meeting_title: event.target.meeting_title.value,
+            meeting_description: event.target.meeting_description.value,
+            location: event.target.location.value,
+            starttime: event.target.starttime.value,
+            duration: parseInt(event.target.duration.value),
             attendees,
         };
-        await dispatch(formData);
+
+        // Call createMeetingForm function with form data and actor_id
+        const result = await updateMeeting(meeting.id, state, formData, actor_id, access_token);
+
+        // Update state with result
+        dispatch(result);
     };
 
     return (

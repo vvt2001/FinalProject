@@ -10,7 +10,7 @@ import {
 import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Form() {
     const initialState = { message: null, errors: {} };
@@ -39,27 +39,40 @@ export default function Form() {
         setSelectedDateTimes(newDateTimes);
     };
 
-    //// Function to handle form submission
-    //const handleSubmit = async (event) => {
-    //    event.preventDefault(); // Prevent default form submission
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
 
-    //    // Create FormData object
-    //    const formData = new FormData(event.target);
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        };
 
-    //    // Append selectedDateTimes to formData
-    //    selectedDateTimes.forEach((times, index) => {
-    //        formData.append(`times`, times);
-    //    });
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
 
-    //    // Call createMeetingForm function with form data
-    //    const result = await createMeetingForm(state, formData);
+    // Function to handle form submission
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent default form submission
 
-    //    // Update state with result
-    //    dispatch(result);
-    //};
+        // Create FormData object
+        const formData = new FormData(event.target);
+
+        // Call createMeetingForm function with form data and actor_id
+        const result = await createMeetingForm(state, formData, actor_id, access_token);
+
+        // Update state with result
+        dispatch(result);
+    };
 
     return (
-    <form action={dispatch}>
+    <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Meeting Title */}

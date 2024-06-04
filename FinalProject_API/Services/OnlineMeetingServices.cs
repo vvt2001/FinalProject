@@ -59,7 +59,9 @@ namespace FinalProject_API.Services
             _configuration = configuration;
         }
 
-        static string[] Scopes = { CalendarService.Scope.Calendar, GmailService.Scope.GmailModify, GmailService.Scope.GmailSend, GmailService.Scope.GmailReadonly };
+        static string[] Scopes = { CalendarService.Scope.Calendar };
+        static string[] EmailScopes = { GmailService.Scope.GmailModify, GmailService.Scope.GmailSend, GmailService.Scope.GmailReadonly };
+
         static string ApplicationName = "Scheduler";
 
         public async Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id)

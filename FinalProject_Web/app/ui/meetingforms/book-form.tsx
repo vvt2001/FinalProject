@@ -1,7 +1,7 @@
 'use client';
 
 import { MeetingForm } from '@/app/lib/definitions';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { bookMeetingForm } from '@/app/lib/actions';
@@ -15,6 +15,24 @@ export default function BookMeetingForm({
     const [selectedTimes, setSelectedTimes] = useState([]);
     const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
 
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
+
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        };
+
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
+
     const handleSubmit = (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
@@ -24,7 +42,7 @@ export default function BookMeetingForm({
         };
 
         // Send request to book meeting
-        bookMeetingForm(requestBody);
+        bookMeetingForm(requestBody, actor_id, access_token);
     };
 
     return (

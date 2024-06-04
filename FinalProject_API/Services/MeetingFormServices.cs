@@ -211,7 +211,7 @@ namespace FinalProject_API.Services
                 var most_voted_time = meeting_form.times.OrderByDescending(o => o.vote_count).FirstOrDefault();
                 if (most_voted_time != null && voted_times_string.Count > 0)
                 {
-                    await _onlineMeetingServices.SendEmail(meeting_form, "New attendee has voted", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\n Currently, the meeting will be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} as it has the most votes");
+                    await _onlineMeetingServices.SendEmail(meeting_form, $"Meeting '{meeting_form.meeting_title}': New attendee has voted for a meeting time", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\nCurrently, the meeting are scheduled to be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} with {most_voted_time.vote_count} votes.");
                 }
 
                 return true;

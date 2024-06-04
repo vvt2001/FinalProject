@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 import { axios } from 'axios';
-import { cookies } from "next/headers";
+//import { cookies } from "next/headers";
 
 const MeetingFormSchema = z.object({
     id: z.string(),
@@ -75,12 +75,12 @@ const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
 const UpdateMeeting = MeetingSchema.omit({ id: true });
 
-const cookieStore = cookies();
+//const cookieStore = cookies();
 
-const actor_id = cookieStore.get("actor_id")?.value;
-const access_token = cookieStore.get("access_token")?.value;
-console.log(actor_id);
-console.log(access_token);
+//const actor_id = cookieStore.get("actor_id")?.value;
+//const access_token = cookieStore.get("access_token")?.value;
+//console.log(actor_id);
+//console.log(access_token);
 
 export type MeetingFormState = {
     errors?: {
@@ -117,7 +117,7 @@ export type AccountState = {
     };
     message?: string | null;
 };
-export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
+export async function createMeetingForm(prevState: MeetingFormState, formData: FormData, actor_id: string, access_token: string) {
     // Validate form using Zod
     const validatedFields = CreateMeetingForm.safeParse({
         meeting_title: formData.get('meeting_title'),
@@ -198,13 +198,14 @@ export async function voteMeetingForm(requestBody) {
             message: 'Missing Fields. Failed to Create Meeting Form.',
         };
     }
+    let response;
 
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
         const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting-form/vote-form?actor_id=${actor_id}`, {
+        response = await fetch(`http://localhost:7057/meeting-form/vote-form`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -226,13 +227,14 @@ export async function voteMeetingForm(requestBody) {
             message: 'Failed to create meeting form.',
         };
     }
-
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard');
-    redirect('/dashboard');
+    if (response.ok) {
+        // Revalidate the cache for the invoices page and redirect the user.
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+    }
 }
 
-export async function bookMeetingForm(requestBody) {
+export async function bookMeetingForm(requestBody, actor_id: string, access_token: string) {
     // Validate form using Zod
     const validatedFields = BookMeetingForm.safeParse({
         meetingform_id: requestBody.meetingform_id,
@@ -245,13 +247,13 @@ export async function bookMeetingForm(requestBody) {
             message: 'Missing Fields. Failed to Create Meeting Form.',
         };
     }
-
+    let response;
     // Insert data into the database
     try {
 
         // Make a POST request to your server API endpoint
         const { meetingform_id } = validatedFields.data;
-        const response = await fetch(`http://localhost:7057/meeting-form/book-meeting?actor_id=${actor_id}`, {
+        response = await fetch(`http://localhost:7057/meeting-form/book-meeting?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -263,6 +265,15 @@ export async function bookMeetingForm(requestBody) {
             }),
         });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Lỗi đặt cuộc họp:', errorData);
+            return {
+                message: `Lỗi đặt cuộc họp: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
+        }
+
     } catch (error) {
 
         // Handle any errors that occur during the request
@@ -271,16 +282,19 @@ export async function bookMeetingForm(requestBody) {
             message: 'Failed to create meeting form.',
         };
     }
-
-    // Revalidate the cache for the invoices page and redirect the user.
-    revalidatePath('/dashboard');
-    redirect('/dashboard');
+    if (response.ok) {
+        // Revalidate the cache for the invoices page and redirect the user.
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+    }
 }
 
 export async function updateMeetingForm(
     id: string,
     prevState: MeetingFormState,
     formData: FormData,
+    actor_id: string,
+    access_token: string
 ) {
     // Validate form using Zod
     const validatedFields = UpdateMeetingForm.safeParse({
@@ -299,12 +313,12 @@ export async function updateMeetingForm(
             message: 'Missing Fields. Failed to Update Meeting Form.',
         };
     }
-
+    let response;
     try {
         // Make a PUT request to your server API endpoint
         const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
-        const response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
+        response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -322,15 +336,25 @@ export async function updateMeetingForm(
             }),
         });
 
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Lỗi sửa lịch họp:', errorData);
+            return {
+                message: `Lỗi sửa lịch họp: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
+        }
+
     } catch (error) {
         return { message: 'Database Error: Failed to Update Meeting Form.' };
     }
-
-    revalidatePath('/dashboard');
-    redirect('/dashboard');
+    if (response.ok) {
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+    }
 }
 
-export async function deleteMeetingForm(id: string) {
+export async function deleteMeetingForm(id: string, actor_id: string, access_token: string) {
     const apiUrl = `http://localhost:7057/meeting-form/delete-form/${id}?actor_id=${actor_id}`; 
 
     try {
@@ -362,7 +386,7 @@ export async function deleteMeetingForm(id: string) {
     }
 }
 
-export async function deleteMeeting(id: string) {
+export async function deleteMeeting(id: string, actor_id: string, access_token: string) {
     const apiUrl = `http://localhost:7057/meeting/delete-meeting/${id}?actor_id=${actor_id}`;
     try {
         // Make an HTTP DELETE request to your delete API endpoint
@@ -393,7 +417,7 @@ export async function deleteMeeting(id: string) {
     }
 }
 
-export async function cancelMeeting(id: string) {
+export async function cancelMeeting(id: string, actor_id: string, access_token: string) {
     const apiUrl = `http://localhost:7057/meeting/cancel-meeting/${id}?actor_id=${actor_id}`;
     try {
         // Make an HTTP PUT request to your cancel API endpoint
@@ -428,25 +452,10 @@ export async function updateMeeting(
     id: string,
     prevState: MeetingState,
     formData: FormData,
+    actor_id: string,
+    access_token: string
 ) {
-    //// Validate form using Zod
-    //const validatedFields = UpdateMeeting.safeParse({
-    //    meeting_title: formData.get('meeting_title'),
-    //    meeting_description: formData.get('meeting_description'),
-    //    location: formData.get('location'),
-    //    duration: formData.get('duration'),
-    //    starttime: formData.get('starttime'),
-    //    platform: formData.get('platform'),
-    //    attendees: formData.getAll('attendees'),
-    //});
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Update Meeting Form.',
-    //    };
-    //}
     let response;
     try {
         // Make a PUT request to your server API endpoint
