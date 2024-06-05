@@ -38,8 +38,8 @@ namespace FinalProject_API.Services
         Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id);
         Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id);
         Task<bool> UpdateGoogleMeetMeeting(string eventId, string actor_id, Meeting new_meeting);
-        Task<bool> SendEmail(MeetingForm meeting_form, string subject, string content);
-        Task<UserCredential> GetCredential(string actor_id);
+        Task<bool> SendSystemEmail(MeetingForm meeting_form, string subject, string content);
+        Task<UserCredential> GetCredentialCalendar(string actor_id);
     }
     [Obsolete]
     public class OnlineMeetingServices : IOnlineMeetingServices
@@ -59,14 +59,14 @@ namespace FinalProject_API.Services
             _configuration = configuration;
         }
 
-        static string[] Scopes = { CalendarService.Scope.Calendar };
+        static string[] CalendarScopes = { CalendarService.Scope.Calendar };
         static string[] EmailScopes = { GmailService.Scope.GmailModify, GmailService.Scope.GmailSend, GmailService.Scope.GmailReadonly };
 
         static string ApplicationName = "Scheduler";
 
         public async Task<bool> CreateGoogleMeetMeeting(Meeting meeting, string actor_id)
         {
-            UserCredential credential = await GetCredential(actor_id);
+            UserCredential credential = await GetCredentialCalendar(actor_id);
 
             // Create Google Calendar API service.
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -137,7 +137,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> DeleteGoogleMeetMeeting(string eventId, string actor_id)
         {
-            UserCredential credential = await GetCredential(actor_id);
+            UserCredential credential = await GetCredentialCalendar(actor_id);
 
             // Create Google Calendar API service
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -159,7 +159,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> CancelGoogleMeetMeeting(string eventId, string actor_id)
         {
-            UserCredential credential = await GetCredential(actor_id);
+            UserCredential credential = await GetCredentialCalendar(actor_id);
 
             // Create Google Calendar API service
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -185,7 +185,7 @@ namespace FinalProject_API.Services
 
         public async Task<bool> UpdateGoogleMeetMeeting(string eventId, string actor_id, Meeting new_meeting)
         {
-            UserCredential credential = await GetCredential(actor_id);
+            UserCredential credential = await GetCredentialCalendar(actor_id);
 
             var service = new CalendarService(new BaseClientService.Initializer
             {
@@ -226,9 +226,9 @@ namespace FinalProject_API.Services
             return changesMade;
         }
 
-        public async Task<bool> SendEmail(MeetingForm meeting_form, string subject, string content)
+        public async Task<bool> SendSystemEmail(MeetingForm meeting_form, string subject, string content)
         {
-            UserCredential credential = await GetCredential(meeting_form.owner_id);
+            UserCredential credential = await GetCredentialEmail(_configuration.GetValue<string>("AdminID"));
 
             // Create Gmail API service.
             var service = new GmailService(new BaseClientService.Initializer()
@@ -239,7 +239,7 @@ namespace FinalProject_API.Services
 
             if (meeting_form.attendees != null)
             {
-                var message = CreateEmail(meeting_form.attendees.ToList(), subject, content, meeting_form);
+                var message = await CreateSystemEmail(meeting_form.attendees.ToList(), subject, content);
                 var request = service.Users.Messages.Send(message, "me");
                 var response = await request.ExecuteAsync();
                 Console.WriteLine("Email sent: {0}", response.Id);
@@ -248,10 +248,11 @@ namespace FinalProject_API.Services
             return false;
         }
 
-        private static Message CreateEmail(List<Attendee> to, string subject, string content, MeetingForm meeting_form)
+        private async Task<Message> CreateSystemEmail(List<Attendee> to, string subject, string content)
         {
+            var admin = await _context.users.FirstOrDefaultAsync(o => o.ID == "y8kfrgk5ysd9h741x65bwxf5");
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress(meeting_form.owner.name, meeting_form.owner.email));
+            emailMessage.From.Add(new MailboxAddress("Scheduler", admin.email));
 
             foreach (var attendee in to)
             {
@@ -275,7 +276,7 @@ namespace FinalProject_API.Services
             }
         }
 
-        private async Task<UserCredential> AuthenticateUserAsync()
+        private async Task<UserCredential> AuthenticateUserCalendarAsync()
         {
             var dataStore = new FileDataStore(ApplicationName);
 
@@ -284,12 +285,26 @@ namespace FinalProject_API.Services
 
             return await GoogleWebAuthorizationBroker.AuthorizeAsync(
                 GetClientSecrets(),
-                Scopes,
+                CalendarScopes,
                 "user",
                 CancellationToken.None,
                 dataStore);
         }
 
+        private async Task<UserCredential> AuthenticateUserEmailAsync()
+        {
+            var dataStore = new FileDataStore(ApplicationName);
+
+            // Clear existing credentials
+            await dataStore.ClearAsync();
+
+            return await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                GetClientSecrets(),
+                EmailScopes,
+                "user",
+                CancellationToken.None,
+                dataStore);
+        }
 
         private async Task<bool> SaveTokensToDatabase(UserCredential credential, string actor_id)
         {
@@ -334,7 +349,7 @@ namespace FinalProject_API.Services
             return clientSecrets;
         }
 
-        public async Task<UserCredential> GetCredential(string actor_id)
+        public async Task<UserCredential> GetCredentialCalendar(string actor_id)
         {
             UserCredential credential;
 
@@ -359,7 +374,7 @@ namespace FinalProject_API.Services
                 var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
                 {
                     ClientSecrets = GetClientSecrets(),
-                    Scopes = Scopes
+                    Scopes = CalendarScopes
                 });
 
                 // Create UserCredential
@@ -374,7 +389,7 @@ namespace FinalProject_API.Services
                     }
                     else
                     {
-                        credential = await AuthenticateUserAsync();
+                        credential = await AuthenticateUserCalendarAsync();
                         await SaveTokensToDatabase(credential, actor_id);
                     }
                 }
@@ -382,7 +397,62 @@ namespace FinalProject_API.Services
             else
             {
                 // Authenticate the user and save the token to the database
-                credential = await AuthenticateUserAsync();
+                credential = await AuthenticateUserCalendarAsync();
+                await SaveTokensToDatabase(credential, actor_id);
+            }
+
+            return credential;
+        }
+
+        public async Task<UserCredential> GetCredentialEmail(string actor_id)
+        {
+            UserCredential credential;
+
+            // Check if tokens are already stored in the database
+            var storedToken = await GetTokensFromDatabase(actor_id);
+
+            if (storedToken != null)
+            {
+                // Create a TokenResponse using the stored token
+                var tokenResponse = new TokenResponse
+                {
+                    AccessToken = storedToken.AccessToken,
+                    RefreshToken = storedToken.RefreshToken,
+                    Scope = storedToken.Scope,
+                    TokenType = storedToken.TokenType,
+                    ExpiresInSeconds = (long)storedToken.ExpiresIn,
+                    Issued = storedToken.Issued,
+                    IssuedUtc = storedToken.IssuedUtc
+                };
+
+                // Create a Flow instance using client secrets
+                var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+                {
+                    ClientSecrets = GetClientSecrets(),
+                    Scopes = CalendarScopes
+                });
+
+                // Create UserCredential
+                credential = new UserCredential(flow, "user", tokenResponse);
+
+                // Refresh the token if it has expired
+                if (credential.Token.IsExpired(flow.Clock))
+                {
+                    if (await credential.RefreshTokenAsync(CancellationToken.None))
+                    {
+                        await SaveTokensToDatabase(credential, actor_id);
+                    }
+                    else
+                    {
+                        credential = await AuthenticateUserCalendarAsync();
+                        await SaveTokensToDatabase(credential, actor_id);
+                    }
+                }
+            }
+            else
+            {
+                // Authenticate the user and save the token to the database
+                credential = await AuthenticateUserEmailAsync();
                 await SaveTokensToDatabase(credential, actor_id);
             }
 

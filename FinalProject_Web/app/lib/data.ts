@@ -37,7 +37,7 @@ export async function fetchFilteredMeetingForms(
     }
     catch (error) {
         console.error('Database Error:', error);
-        throw new Error('Failed to fetch meetings.');
+        throw new Error('Failed to fetch meeting schedules.');
     }
 }
 
@@ -56,7 +56,7 @@ export async function fetchMeetingFormPages(actor_id: string) {
         return totalPages;
     } catch (error) {
         console.error('Database Error:', error);
-        throw new Error('Failed to fetch total number of invoices.');
+        throw new Error('Failed to fetch total number of meeting schedules.');
     }
 }
 
@@ -75,6 +75,7 @@ export async function fetchMeetingFormById(id: string, actor_id: string) {
         const timesData = meetingFormData.times.map(time => ({
             id: time.id,
             time: new Date(time.time),
+            vote_count: time.vote_count
         }));
 
         // Map the fetched data to the MeetingForm type definition
@@ -136,7 +137,7 @@ export async function fetchMeetingPages(actor_id: string) {
         return totalPages;
     } catch (error) {
         console.error('Database Error:', error);
-        throw new Error('Failed to fetch total number of invoices.');
+        throw new Error('Failed to fetch total number of meetings.');
     }
 }
 

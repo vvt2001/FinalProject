@@ -132,7 +132,7 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Meeting Form.',
+            message: 'Missing Fields. Failed to Creat meeting schedule.',
         };
     }
     let response;
@@ -159,10 +159,10 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
         });
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Lỗi tạo lịch họp:', errorData);
+            console.error('Creat meeting schedule error:', errorData);
             return {
                 ...prevState,
-                message: `Lỗi tạo lịch họp: ${errorData.detail || response.statusText}`,
+                message: `Creat meeting schedule error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
@@ -170,9 +170,9 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Lỗi tạo lịch họp:', error);
+        console.error('Creat meeting schedule error:', error);
         return {
-            message: 'Lỗi tạo lịch họp.',
+            message: 'Creat meeting schedule error.',
         };
     }
     if (response.ok) {
@@ -195,7 +195,7 @@ export async function voteMeetingForm(requestBody) {
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Meeting Form.',
+            message: 'Missing Fields. Failed to Create Meeting Schedule.',
         };
     }
     let response;
@@ -222,9 +222,9 @@ export async function voteMeetingForm(requestBody) {
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Error creating meeting form:', error);
+        console.error('Creat meeting schedule error:', error);
         return {
-            message: 'Failed to create meeting form.',
+            message: 'Failed to Creat meeting schedule.',
         };
     }
     if (response.ok) {
@@ -244,7 +244,7 @@ export async function bookMeetingForm(requestBody, actor_id: string, access_toke
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Meeting Form.',
+            message: 'Missing Fields. Failed to Book Meeting.',
         };
     }
     let response;
@@ -267,9 +267,9 @@ export async function bookMeetingForm(requestBody, actor_id: string, access_toke
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Lỗi đặt cuộc họp:', errorData);
+            console.error('Book Meeting error:', errorData);
             return {
-                message: `Lỗi đặt cuộc họp: ${errorData.detail || response.statusText}`,
+                message: `Book Meeting error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
@@ -277,9 +277,9 @@ export async function bookMeetingForm(requestBody, actor_id: string, access_toke
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Error creating meeting form:', error);
+        console.error('Book Meeting error:', error);
         return {
-            message: 'Failed to create meeting form.',
+            message: 'Failed to Book Meeting.',
         };
     }
     if (response.ok) {
@@ -338,15 +338,15 @@ export async function updateMeetingForm(
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Lỗi sửa lịch họp:', errorData);
+            console.error('Update Meeting Schedule error:', errorData);
             return {
-                message: `Lỗi sửa lịch họp: ${errorData.detail || response.statusText}`,
+                message: `Update Meeting Schedule error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
 
     } catch (error) {
-        return { message: 'Database Error: Failed to Update Meeting Form.' };
+        return { message: 'Database Error: Failed to Update Meeting Schedule.' };
     }
     if (response.ok) {
         revalidatePath('/dashboard');
@@ -484,15 +484,15 @@ export async function updateMeeting(
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Lỗi sửa cuộc họp:', errorData);
+            console.error('Update Meeting error:', errorData);
             return {
                 ...prevState,
-                message: `Lỗi sửa cuộc họp: ${errorData.detail || response.statusText}`,
+                message: `Update Meeting error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
     } catch (error) {
-        return { message: 'Database Error: Failed to Update Meeting Form.' };
+        return { message: 'Database Error: Failed to Update Meeting.' };
     }
     if (response.ok) {
         revalidatePath('/dashboard/meetings');
@@ -510,9 +510,9 @@ export async function authenticate(
         if (error instanceof AuthError) {
             switch (error.type) {
                 case 'CredentialsSignin':
-                    return 'Tài khoản không hợp lệ.';
+                    return 'Invalid credentials.';
                 default:
-                    return 'Lỗi đăng nhập.';
+                    return 'Login error.';
             }
         }
         throw error;
@@ -541,18 +541,18 @@ export async function register(
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Lỗi đăng ký:', errorData);
+            console.error('Register eror:', errorData);
             return {
                 ...prevState,
-                message: `Lỗi đăng ký: ${errorData.detail || response.statusText}`,
+                message: `Register eror: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
     } catch (error) {
-        console.error('Lỗi đăng ký:', error);
+        console.error('Register eror:', error);
         return {
             ...prevState,
-            message: 'Lỗi đăng ký tài khoản.',
+            message: 'Register eror.',
             errors: {},
         };
     }

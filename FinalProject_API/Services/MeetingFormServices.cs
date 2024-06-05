@@ -50,7 +50,7 @@ namespace FinalProject_API.Services
 
         public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
         {
-            var credentials = await _onlineMeetingServices.GetCredential(actor_id);
+            var credentials = await _onlineMeetingServices.GetCredentialCalendar(actor_id);
             if (credentials == null)
             {
                 throw new InvalidProgramException("Google credentials invalid");
@@ -58,7 +58,7 @@ namespace FinalProject_API.Services
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
             new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
-            new_meeting_form.trangthai = (int)trangthai_MeetingForm.Waiting;
+            new_meeting_form.trangthai = (int)trangthai_MeetingForm.New;
             new_meeting_form.meeting_title = creating.meeting_title;
             new_meeting_form.meeting_description = creating.meeting_description;
             new_meeting_form.location = creating.location;
@@ -185,6 +185,9 @@ namespace FinalProject_API.Services
             {
                 throw new InvalidProgramException("Meeting schedule not found");
             }
+
+            meeting_form.trangthai = (int)trangthai_MeetingForm.Voting;
+
             if (voting.meetingtime_ids == null || voting.meetingtime_ids.Count < 1)
             {
                 throw new InvalidProgramException("Must vote for atleast 1 meeting time(s)");
@@ -204,6 +207,7 @@ namespace FinalProject_API.Services
             {
                 _context.attendees.Add(new_attendee);
                 _context.meetingtimes.UpdateRange(voted_times);
+                _context.meetingforms.Update(meeting_form);
 
                 await _context.SaveChangesAsync();
                 var voted_times_string = voted_times.Select(o => o.time.ToString("dd/MM/yyyy HH:mm")).ToList();
@@ -211,7 +215,7 @@ namespace FinalProject_API.Services
                 var most_voted_time = meeting_form.times.OrderByDescending(o => o.vote_count).FirstOrDefault();
                 if (most_voted_time != null && voted_times_string.Count > 0)
                 {
-                    await _onlineMeetingServices.SendEmail(meeting_form, $"Meeting '{meeting_form.meeting_title}': New attendee has voted for a meeting time", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\nCurrently, the meeting are scheduled to be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} with {most_voted_time.vote_count} votes.");
+                    await _onlineMeetingServices.SendSystemEmail(meeting_form, $"Meeting '{meeting_form.meeting_title}': New attendee has voted for a meeting time", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\nCurrently, the meeting are scheduled to be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} with {most_voted_time.vote_count} votes.");
                 }
 
                 return true;

@@ -147,15 +147,18 @@ export default function VoteMeetingForm({
                         </div>
                     </div>
                 </div>
+
                 {/* Render select list with checkboxes for meeting times */}
                 <div className="mb-4">
                     <label className="mb-2 block text-sm font-medium">
                         Vote for a meeting time
                     </label>
                     {meetingform.times.map((time, index) => (
-                        <div key={index} className="mb-4 ">
-                            <div className="flex flex-col md:flex-row items-start md:items-center">
-
+                        <div key={index} className="mb-4">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-200 mr-4">
+                                    <span className="text-sm font-medium">{time.vote_count}</span>
+                                </div>
                                 <div className="relative mt-2 rounded-md">
                                     <div className="relative">
                                         <label htmlFor={`time-${index}`} className="peer inline-block w-80 rounded-md border border-gray-200 py-2 pl-10 pr-2 text-sm outline-2 placeholder:text-gray-500 overflow-hidden">
