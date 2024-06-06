@@ -68,10 +68,16 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            // Check if parts array is defined and has a length of 2
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
         };
 
         const actorIdFromCookie = getCookie("actor_id");
@@ -181,7 +187,7 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
                 {/* Duration (minutes) */}
                 <div className="mb-4">
                     <label htmlFor="duration" className="mb-2 block text-sm font-medium">
-                        Enter your meeting's duration (minutes)
+                        Enter your meeting duration (minutes)
                     </label>
                     <div className="relative mt-2 rounded-md">
                         <input
@@ -199,7 +205,7 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
                 {/* Start time */}
                 <div className="mb-4">
                     <label htmlFor="starttime" className="mb-2 block text-sm font-medium">
-                        Enter your meeting's start time
+                        Enter your meeting start time
                     </label>
                     <div className="relative mt-2 rounded-md">
                         <input

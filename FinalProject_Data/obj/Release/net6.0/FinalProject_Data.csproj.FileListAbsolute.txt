@@ -1,0 +1,14 @@
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\bin\Release\net6.0\FinalProject_Data.deps.json
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\bin\Release\net6.0\FinalProject_Data.runtimeconfig.json
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\bin\Release\net6.0\FinalProject_Data.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\bin\Release\net6.0\FinalProject_Data.pdb
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.csproj.AssemblyReference.cache
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.AssemblyInfoInputs.cache
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.AssemblyInfo.cs
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.csproj.CoreCompileInputs.cache
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\refint\FinalProject_Data.dll
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.pdb
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\FinalProject_Data.genruntimeconfig.cache
+C:\Users\AD\source\repos\FinalProject\FinalProject_Data\obj\Release\net6.0\ref\FinalProject_Data.dll

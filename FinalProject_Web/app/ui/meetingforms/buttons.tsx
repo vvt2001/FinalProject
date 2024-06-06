@@ -90,8 +90,8 @@ export function CopyVoteUrl({ url }: { url: string }) {
 
 export function DeleteMeetingForm({ id }: { id: string }) {
     //const deleteMeetingFormWithId = deleteMeetingForm.bind(null, id);
-    const initialState = { message: null, errors: {} };
-    const [state, dispatch] = useFormState(deleteMeetingForm, initialState);
+    //const initialState = { message: null, errors: {} };
+    //const [state, dispatch] = useFormState(deleteMeetingForm, initialState);
 
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');
@@ -99,10 +99,15 @@ export function DeleteMeetingForm({ id }: { id: string }) {
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
         };
 
         const actorIdFromCookie = getCookie("actor_id");
@@ -122,7 +127,7 @@ export function DeleteMeetingForm({ id }: { id: string }) {
         const result = await deleteMeetingForm(id, actor_id, access_token);
 
         // Update state with result
-        dispatch(result);
+/*        dispatch(result);*/
     };
     return (
         <form onSubmit={handleSubmit}>
@@ -136,8 +141,8 @@ export function DeleteMeetingForm({ id }: { id: string }) {
 
 export function DeleteMeeting({ id }: { id: string }) {
     //const deleteMeetingWithId = deleteMeeting.bind(null, id);
-    const initialState = { message: null, errors: {} };
-    const [state, dispatch] = useFormState(deleteMeeting, initialState);
+    //const initialState = { message: null, errors: {} };
+    //const [state, dispatch] = useFormState(deleteMeeting, initialState);
 
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');
@@ -145,10 +150,15 @@ export function DeleteMeeting({ id }: { id: string }) {
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
         };
 
         const actorIdFromCookie = getCookie("actor_id");
@@ -168,7 +178,7 @@ export function DeleteMeeting({ id }: { id: string }) {
         const result = await deleteMeeting(id, actor_id, access_token);
 
         // Update state with result
-        dispatch(result);
+    //    dispatch(result);
     };
     return (
         <form onSubmit={handleSubmit}>
@@ -182,8 +192,8 @@ export function DeleteMeeting({ id }: { id: string }) {
 
 export function CancelMeeting({ id }: { id: string }) {
     //const cancelMeetingWithId = cancelMeeting.bind(null, id);
-    const initialState = { message: null, errors: {} };
-    const [state, dispatch] = useFormState(cancelMeeting, initialState);
+    //const initialState = { message: null, errors: {} };
+    //const [state, dispatch] = useFormState(cancelMeeting, initialState);
 
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');
@@ -191,11 +201,15 @@ export function CancelMeeting({ id }: { id: string }) {
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        };
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;        };
 
         const actorIdFromCookie = getCookie("actor_id");
         const accessTokenFromCookie = getCookie("access_token");
@@ -214,7 +228,7 @@ export function CancelMeeting({ id }: { id: string }) {
         const result = await cancelMeeting(id, actor_id, access_token);
 
         // Update state with result
-        dispatch(result);
+    //    dispatch(result);
     };
     return (
         <form onSubmit={handleSubmit}>

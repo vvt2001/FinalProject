@@ -1,79 +1,78 @@
 ﻿'use server';
 
-import { z } from 'zod';
+//import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { axios } from 'axios';
 //import { cookies } from "next/headers";
 
-const MeetingFormSchema = z.object({
-    id: z.string(),
-    meeting_title: z.string({
-        invalid_type_error: 'Please select a title.',
-    }),
-    meeting_description: z.string(),
-    location: z.string(),
-    duration: z.coerce
-        .number()
-        .gt(0, { message: 'Please enter an amount greater than 0.' }),
-    platform: z.coerce.number({
-        invalid_type_error: 'Please select a meeting platform.',
-    }),
-    times: z.array(
-        z.coerce.date({
-            message: 'Please select a date and time for the meeting.',
-        })
-    ),
-});
+//const MeetingFormSchema = z.object({
+//    id: z.string(),
+//    meeting_title: z.string({
+//        invalid_type_error: 'Please select a title.',
+//    }),
+//    meeting_description: z.string(),
+//    location: z.string(),
+//    duration: z.coerce
+//        .number()
+//        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+//    platform: z.coerce.number({
+//        invalid_type_error: 'Please select a meeting platform.',
+//    }),
+//    times: z.array(
+//        z.coerce.date({
+//            message: 'Please select a date and time for the meeting.',
+//        })
+//    ),
+//});
 
-const MeetingSchema = z.object({
-    id: z.string(),
-    meeting_title: z.string({
-        invalid_type_error: 'Please select a title.',
-    }),
-    meeting_description: z.string(),
-    location: z.string(),
-    duration: z.coerce
-        .number()
-        .gt(0, { message: 'Please enter an amount greater than 0.' }),
-    starttime: z.coerce.date({
-        message: 'Please select a date and time for the meeting.',
-    }),
-    attendees: z.array(
-        z.coerce.date({
-            message: 'Please select a date and time for the meeting.',
-        })
-    ),
-});
+//const MeetingSchema = z.object({
+//    id: z.string(),
+//    meeting_title: z.string({
+//        invalid_type_error: 'Please select a title.',
+//    }),
+//    meeting_description: z.string(),
+//    location: z.string(),
+//    duration: z.coerce
+//        .number()
+//        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+//    starttime: z.coerce.date({
+//        message: 'Please select a date and time for the meeting.',
+//    }),
+//    attendees: z.array(
+//        z.coerce.date({
+//            message: 'Please select a date and time for the meeting.',
+//        })
+//    ),
+//});
 
 
-const VotingFormSchema = z.object({
-    meetingform_id: z.string({
-        invalid_type_error: 'Please select a title.',
-    }),
-    meetingtime_ids: z.array(
-        z.string({
-            message: 'Please vote atleast one date and time for the meeting.',
-        })
-    ),
-    name: z.string(),
-    email: z.string(),
-});
+//const VotingFormSchema = z.object({
+//    meetingform_id: z.string({
+//        invalid_type_error: 'Please select a title.',
+//    }),
+//    meetingtime_ids: z.array(
+//        z.string({
+//            message: 'Please vote atleast one date and time for the meeting.',
+//        })
+//    ),
+//    name: z.string(),
+//    email: z.string(),
+//});
 
-const BookingFormSchema = z.object({
-    meetingform_id: z.string({
-        invalid_type_error: 'Please select a title.',
-    }),
-});
+//const BookingFormSchema = z.object({
+//    meetingform_id: z.string({
+//        invalid_type_error: 'Please select a title.',
+//    }),
+//});
 
-const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
-const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
-const VoteMeetingForm = VotingFormSchema;
-const BookMeetingForm = BookingFormSchema;
-const UpdateMeeting = MeetingSchema.omit({ id: true });
+//const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
+//const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
+//const VoteMeetingForm = VotingFormSchema;
+//const BookMeetingForm = BookingFormSchema;
+//const UpdateMeeting = MeetingSchema.omit({ id: true });
 
 //const cookieStore = cookies();
 
@@ -117,29 +116,30 @@ export type AccountState = {
     };
     message?: string | null;
 };
-export async function createMeetingForm(prevState: MeetingFormState, formData: FormData, actor_id: string, access_token: string) {
-    // Validate form using Zod
-    const validatedFields = CreateMeetingForm.safeParse({
-        meeting_title: formData.get('meeting_title'),
-        meeting_description: formData.get('meeting_description'),
-        location: formData.get('location'),
-        times: formData.getAll('times'),
-        duration: formData.get('duration'),
-        platform: formData.get('platform'),
-    });
 
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Creat meeting schedule.',
-        };
-    }
+export async function createMeetingForm(prevState: MeetingFormState, formData: FormData, actor_id: any, access_token: any) {
+    // Validate form using Zod
+    //const validatedFields = CreateMeetingForm.safeParse({
+    //    meeting_title: formData.get('meeting_title'),
+    //    meeting_description: formData.get('meeting_description'),
+    //    location: formData.get('location'),
+    //    times: formData.getAll('times'),
+    //    duration: formData.get('duration'),
+    //    platform: formData.get('platform'),
+    //});
+
+    //// If form validation fails, return errors early. Otherwise, continue.
+    //if (!validatedFields.success) {
+    //    return {
+    //        errors: validatedFields.error.flatten().fieldErrors,
+    //        message: 'Missing Fields. Failed to Creat meeting schedule.',
+    //    };
+    //}
     let response;
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
-        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        //const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
         response = await fetch(`http://localhost:7057/meeting-form/create-form?actor_id=${actor_id}`, {
             method: 'POST',
@@ -149,12 +149,18 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
                 Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
-                meeting_title: meeting_title,
-                meeting_description: meeting_description,
-                location: location,
-                times: times,
-                duration: parseInt(duration || '0', 10),
-                platform: parseInt(platform || '0', 10),
+                meeting_title: formData.get('meeting_title'),
+                meeting_description: formData.get('meeting_description'),
+                location: formData.get('location'),
+                times: formData.getAll('times'),
+                duration: parseInt(formData.get('duration')?.toString() || '0', 10),
+                platform: parseInt(formData.get('platform')?.toString() || '0', 10),
+                //meeting_title: meeting_title,
+                //meeting_description: meeting_description,
+                //location: location,
+                //times: times,
+                //duration: parseInt(duration || '0', 10),
+                //platform: parseInt(platform || '0', 10),
             }),
         });
         if (!response.ok) {
@@ -182,28 +188,28 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
     }
 }
 
-export async function voteMeetingForm(requestBody) {
+export async function voteMeetingForm(requestBody: { meetingform_id: any; meetingtime_ids: any; name: any; email: any; }) {
     // Validate form using Zod
-    const validatedFields = VoteMeetingForm.safeParse({
-        meetingform_id: requestBody.meetingform_id,
-        meetingtime_ids: requestBody.meetingtime_ids,
-        name: requestBody.name,
-        email: requestBody.email,
-    });
+    //const validatedFields = VoteMeetingForm.safeParse({
+    //    meetingform_id: requestBody.meetingform_id,
+    //    meetingtime_ids: requestBody.meetingtime_ids,
+    //    name: requestBody.name,
+    //    email: requestBody.email,
+    //});
 
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Meeting Schedule.',
-        };
-    }
+    //// If form validation fails, return errors early. Otherwise, continue.
+    //if (!validatedFields.success) {
+    //    return {
+    //        errors: validatedFields.error.flatten().fieldErrors,
+    //        message: 'Missing Fields. Failed to Create Meeting Schedule.',
+    //    };
+    //}
     let response;
 
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
-        const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
+        //const { meetingform_id, meetingtime_ids, name, email } = validatedFields.data;
 
         response = await fetch(`http://localhost:7057/meeting-form/vote-form`, {
             method: 'PUT',
@@ -212,10 +218,10 @@ export async function voteMeetingForm(requestBody) {
                 // Add any additional headers if needed
             },
             body: JSON.stringify({
-                meetingform_id: meetingform_id,
-                meetingtime_ids: meetingtime_ids,
-                name: name,
-                email: email,
+                meetingform_id: requestBody.meetingform_id,
+                meetingtime_ids: requestBody.meetingtime_ids,
+                name: requestBody.name,
+                email: requestBody.email,
             }),
         });
 
@@ -234,25 +240,25 @@ export async function voteMeetingForm(requestBody) {
     }
 }
 
-export async function bookMeetingForm(requestBody, actor_id: string, access_token: string) {
+export async function bookMeetingForm(requestBody: { meetingform_id: any; }, actor_id: any, access_token: any) {
     // Validate form using Zod
-    const validatedFields = BookMeetingForm.safeParse({
-        meetingform_id: requestBody.meetingform_id,
-    });
+    //const validatedFields = BookMeetingForm.safeParse({
+    //    meetingform_id: requestBody.meetingform_id,
+    //});
 
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Book Meeting.',
-        };
-    }
+    //// If form validation fails, return errors early. Otherwise, continue.
+    //if (!validatedFields.success) {
+    //    return {
+    //        errors: validatedFields.error.flatten().fieldErrors,
+    //        message: 'Missing Fields. Failed to Book Meeting.',
+    //    };
+    //}
     let response;
     // Insert data into the database
     try {
 
         // Make a POST request to your server API endpoint
-        const { meetingform_id } = validatedFields.data;
+        //const { meetingform_id } = validatedFields.data;
         response = await fetch(`http://localhost:7057/meeting-form/book-meeting?actor_id=${actor_id}`, {
             method: 'POST',
             headers: {
@@ -261,7 +267,7 @@ export async function bookMeetingForm(requestBody, actor_id: string, access_toke
                 Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
-                meetingform_id: meetingform_id,
+                meetingform_id: requestBody.meetingform_id,
             }),
         });
 
@@ -293,30 +299,30 @@ export async function updateMeetingForm(
     id: string,
     prevState: MeetingFormState,
     formData: FormData,
-    actor_id: string,
-    access_token: string
+    actor_id: any,
+    access_token: any
 ) {
     // Validate form using Zod
-    const validatedFields = UpdateMeetingForm.safeParse({
-        meeting_title: formData.get('meeting_title'),
-        meeting_description: formData.get('meeting_description'),
-        location: formData.get('location'),
-        times: formData.getAll('times'),
-        duration: formData.get('duration'),
-        platform: formData.get('platform'),
-    });
+    //const validatedFields = UpdateMeetingForm.safeParse({
+    //    meeting_title: formData.get('meeting_title'),
+    //    meeting_description: formData.get('meeting_description'),
+    //    location: formData.get('location'),
+    //    times: formData.getAll('times'),
+    //    duration: formData.get('duration'),
+    //    platform: formData.get('platform'),
+    //});
 
-    // If form validation fails, return errors early. Otherwise, continue.
-    if (!validatedFields.success) {
-        return {
-            errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Update Meeting Form.',
-        };
-    }
+    //// If form validation fails, return errors early. Otherwise, continue.
+    //if (!validatedFields.success) {
+    //    return {
+    //        errors: validatedFields.error.flatten().fieldErrors,
+    //        message: 'Missing Fields. Failed to Update Meeting Form.',
+    //    };
+    //}
     let response;
     try {
         // Make a PUT request to your server API endpoint
-        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        //const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
 
         response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
@@ -327,12 +333,19 @@ export async function updateMeetingForm(
             },
             body: JSON.stringify({
                 id: id,
-                meeting_title: meeting_title,
-                meeting_description: meeting_description,
-                location: location,
-                times: times,
-                duration: parseInt(duration || '0', 10),
-                platform: parseInt(platform || '0', 10),
+                meeting_title: formData.get('meeting_title'),
+                meeting_description: formData.get('meeting_description'),
+                location: formData.get('location'),
+                times: formData.getAll('times'),
+                duration: parseInt(formData.get('duration')?.toString() || '0', 10),
+                platform: parseInt(formData.get('platform')?.toString() || '0', 10),
+                //id: id,
+                //meeting_title: meeting_title,
+                //meeting_description: meeting_description,
+                //location: location,
+                //times: times,
+                //duration: parseInt(duration || '0', 10),
+                //platform: parseInt(platform || '0', 10),
             }),
         });
 
@@ -354,7 +367,7 @@ export async function updateMeetingForm(
     }
 }
 
-export async function deleteMeetingForm(id: string, actor_id: string, access_token: string) {
+export async function deleteMeetingForm(id: string, actor_id: any, access_token: any) {
     const apiUrl = `http://localhost:7057/meeting-form/delete-form/${id}?actor_id=${actor_id}`; 
 
     try {
@@ -386,7 +399,7 @@ export async function deleteMeetingForm(id: string, actor_id: string, access_tok
     }
 }
 
-export async function deleteMeeting(id: string, actor_id: string, access_token: string) {
+export async function deleteMeeting(id: string, actor_id: any, access_token: any) {
     const apiUrl = `http://localhost:7057/meeting/delete-meeting/${id}?actor_id=${actor_id}`;
     try {
         // Make an HTTP DELETE request to your delete API endpoint
@@ -417,7 +430,7 @@ export async function deleteMeeting(id: string, actor_id: string, access_token: 
     }
 }
 
-export async function cancelMeeting(id: string, actor_id: string, access_token: string) {
+export async function cancelMeeting(id: string, actor_id: any, access_token: any) {
     const apiUrl = `http://localhost:7057/meeting/cancel-meeting/${id}?actor_id=${actor_id}`;
     try {
         // Make an HTTP PUT request to your cancel API endpoint
@@ -451,9 +464,17 @@ export async function cancelMeeting(id: string, actor_id: string, access_token: 
 export async function updateMeeting(
     id: string,
     prevState: MeetingState,
-    formData: FormData,
-    actor_id: string,
-    access_token: string
+    formData: {
+        id: any,
+        meeting_title: any,
+        meeting_description: any,
+        location: any,
+        starttime: any,
+        duration: any,
+        attendees: any,
+    },
+    actor_id: any,
+    access_token: any
 ) {
 
     let response;
@@ -477,7 +498,6 @@ export async function updateMeeting(
                 location: formData.location,
                 duration: formData.duration,
                 starttime: formData.starttime,
-                platform: formData.platform,
                 attendees: formData.attendees,
             }),
         });
@@ -506,7 +526,7 @@ export async function authenticate(
 ) {
     try {
         await signIn('credentials', formData);
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof AuthError) {
             switch (error.type) {
                 case 'CredentialsSignin':

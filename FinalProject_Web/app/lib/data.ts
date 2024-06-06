@@ -41,7 +41,7 @@ export async function fetchFilteredMeetingForms(
     }
 }
 
-export async function fetchMeetingFormPages(actor_id: string) {
+export async function fetchMeetingFormPages(actor_id: any) {
     noStore();
 
     try {
@@ -60,7 +60,7 @@ export async function fetchMeetingFormPages(actor_id: string) {
     }
 }
 
-export async function fetchMeetingFormById(id: string, actor_id: string) {
+export async function fetchMeetingFormById(id: string, actor_id: any) {
     noStore();
 
     try {
@@ -72,7 +72,7 @@ export async function fetchMeetingFormById(id: string, actor_id: string) {
         const meetingFormData = responseData.data;
 
         // Transforming the times array
-        const timesData = meetingFormData.times.map(time => ({
+        const timesData = meetingFormData.times.map((time: { id: any; time: string | number | Date; vote_count: any; }) => ({
             id: time.id,
             time: new Date(time.time),
             vote_count: time.vote_count
@@ -100,7 +100,7 @@ export async function fetchMeetingFormById(id: string, actor_id: string) {
 export async function fetchFilteredMeeting(
     query: string,
     currentPage: number,
-    actor_id: string
+    actor_id: any
 ) {
     noStore();
 
@@ -122,7 +122,7 @@ export async function fetchFilteredMeeting(
     }
 }
 
-export async function fetchMeetingPages(actor_id: string) {
+export async function fetchMeetingPages(actor_id: any) {
     noStore();
 
     try {
@@ -141,7 +141,7 @@ export async function fetchMeetingPages(actor_id: string) {
     }
 }
 
-export async function fetchMeetingById(id: string, actor_id: string) {
+export async function fetchMeetingById(id: string, actor_id: any) {
     noStore();
 
     try {

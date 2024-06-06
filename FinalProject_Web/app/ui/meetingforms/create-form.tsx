@@ -10,7 +10,7 @@ import {
 import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 
 export default function Form() {
     const initialState = { message: null, errors: {} };
@@ -21,7 +21,7 @@ export default function Form() {
     const [selectedDateTimes, setSelectedDateTimes] = useState([]);
 
     // Function to handle changes in the datetime input
-    const handleDateTimeChange = (index, event) => {
+    const handleDateTimeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes[index] = event.target.value;
         setSelectedDateTimes(newDateTimes);
@@ -45,10 +45,15 @@ export default function Form() {
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
         };
 
         const actorIdFromCookie = getCookie("actor_id");

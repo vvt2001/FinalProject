@@ -6,6 +6,8 @@ import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { bookMeetingForm } from '@/app/lib/actions';
 
+interface Time { id: any; time: string | number | Date; vote_count: any; }
+
 export default function BookMeetingForm({
     meetingform
 }: {
@@ -21,10 +23,15 @@ export default function BookMeetingForm({
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
-        const getCookie = (name) => {
+        const getCookie = (name: string) => {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
         };
 
         const actorIdFromCookie = getCookie("actor_id");
@@ -33,7 +40,7 @@ export default function BookMeetingForm({
         setAccessToken(accessTokenFromCookie || '');
     }, []);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = (event: { preventDefault: () => void; }) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body
@@ -156,7 +163,7 @@ export default function BookMeetingForm({
                     <label className="mb-2 block text-sm font-medium">
                         Vote for a meeting time
                     </label>
-                    {meetingform.times.map((time, index) => (
+                    {meetingform.times.map((time: Time, index) => (
                         <div key={index} className="mb-4">
                             <div className="flex items-center">
                                 <div className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-200 mr-4">

@@ -4,7 +4,6 @@
     "\\app",
     "\\app\\dashboard",
     "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\create",
     "\\app\\dashboard\\meetingforms\\[id]",
     "\\app\\dashboard\\meetings",
     "\\app\\dashboard\\meetings\\[id]",
@@ -13,6 +12,5 @@
     "\\app\\guest\\[id]",
     "\\app\\guest\\[id]\\vote"
   ],
-  "SelectedNode": "\\app\\guest\\[id]\\vote\\page.tsx",
   "PreviewInSolutionExplorer": false
 }

@@ -104,7 +104,7 @@ export type MeetingForm = {
     location: string;
     platform: number;
     duration: number;
-    times: Date[];
+    times: any[];
 };
 
 export type Meeting = {
