@@ -14,7 +14,6 @@ export default async function MeetingFormsTable({
 }) {
     const cookieStore = cookies();
     const actor_id = cookieStore.get("actor_id")?.value;
-    console.log(actor_id);
 
     const meetingforms = await fetchFilteredMeetingForms(query, currentPage, actor_id);
 

@@ -18,7 +18,6 @@ export default async function Page({
 }) {
     const cookieStore = cookies();
     const actor_id = cookieStore.get("actor_id")?.value;
-    console.log(actor_id);
     const query = searchParams?.query || '';
     const currentPage = Number(searchParams?.page) || 1;
     const totalPages = await fetchMeetingFormPages(actor_id);
@@ -32,11 +31,11 @@ export default async function Page({
                 <Search placeholder="Search schedules ..." />
                 <CreateMeetingForm />
             </div>
-              <Suspense key={currentPage} fallback={<MeetingFormTableSkeleton />}>
+            <Suspense key={currentPage} fallback={<MeetingFormTableSkeleton />}>
                 <Table query={query} currentPage={currentPage} />
-              </Suspense> 
+            </Suspense>
             <div className="mt-5 flex w-full justify-center">
-                 <Pagination totalPages={totalPages} /> 
+                <Pagination totalPages={totalPages} />
             </div>
         </div>
     );

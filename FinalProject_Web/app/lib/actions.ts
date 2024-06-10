@@ -1,78 +1,79 @@
 ﻿'use server';
 
-//import { z } from 'zod';
+import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { AccountState, MeetingFormState, MeetingState } from './definitions';
 //import { cookies } from "next/headers";
 
-//const MeetingFormSchema = z.object({
-//    id: z.string(),
-//    meeting_title: z.string({
-//        invalid_type_error: 'Please select a title.',
-//    }),
-//    meeting_description: z.string(),
-//    location: z.string(),
-//    duration: z.coerce
-//        .number()
-//        .gt(0, { message: 'Please enter an amount greater than 0.' }),
-//    platform: z.coerce.number({
-//        invalid_type_error: 'Please select a meeting platform.',
-//    }),
-//    times: z.array(
-//        z.coerce.date({
-//            message: 'Please select a date and time for the meeting.',
-//        })
-//    ),
-//});
+const MeetingFormSchema = z.object({
+    id: z.string(),
+    meeting_title: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meeting_description: z.string(),
+    location: z.string(),
+    duration: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+    platform: z.coerce.number({
+        invalid_type_error: 'Please select a meeting platform.',
+    }),
+    times: z.array(
+        z.coerce.date({
+            invalid_type_error: 'Please select a date and time for the meeting.',
+        })
+    ),
+});
 
-//const MeetingSchema = z.object({
-//    id: z.string(),
-//    meeting_title: z.string({
-//        invalid_type_error: 'Please select a title.',
-//    }),
-//    meeting_description: z.string(),
-//    location: z.string(),
-//    duration: z.coerce
-//        .number()
-//        .gt(0, { message: 'Please enter an amount greater than 0.' }),
-//    starttime: z.coerce.date({
-//        message: 'Please select a date and time for the meeting.',
-//    }),
-//    attendees: z.array(
-//        z.coerce.date({
-//            message: 'Please select a date and time for the meeting.',
-//        })
-//    ),
-//});
+const MeetingSchema = z.object({
+    id: z.string(),
+    meeting_title: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meeting_description: z.string(),
+    location: z.string(),
+    duration: z.coerce
+        .number()
+        .gt(0, { message: 'Please enter an amount greater than 0.' }),
+    starttime: z.coerce.date({
+        invalid_type_error: 'Please select a date and time for the meeting.',
+    }),
+    attendees: z.array(
+        z.coerce.date({
+            invalid_type_error: 'Please select a date and time for the meeting.',
+        })
+    ),
+});
 
 
-//const VotingFormSchema = z.object({
-//    meetingform_id: z.string({
-//        invalid_type_error: 'Please select a title.',
-//    }),
-//    meetingtime_ids: z.array(
-//        z.string({
-//            message: 'Please vote atleast one date and time for the meeting.',
-//        })
-//    ),
-//    name: z.string(),
-//    email: z.string(),
-//});
+const VotingFormSchema = z.object({
+    meetingform_id: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+    meetingtime_ids: z.array(
+        z.string({
+            invalid_type_error: 'Please vote atleast one date and time for the meeting.',
+        })
+    ),
+    name: z.string(),
+    email: z.string(),
+});
 
-//const BookingFormSchema = z.object({
-//    meetingform_id: z.string({
-//        invalid_type_error: 'Please select a title.',
-//    }),
-//});
+const BookingFormSchema = z.object({
+    meetingform_id: z.string({
+        invalid_type_error: 'Please select a title.',
+    }),
+});
 
-//const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
-//const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
-//const VoteMeetingForm = VotingFormSchema;
-//const BookMeetingForm = BookingFormSchema;
-//const UpdateMeeting = MeetingSchema.omit({ id: true });
+const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
+const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
+const VoteMeetingForm = VotingFormSchema;
+const BookMeetingForm = BookingFormSchema;
+const UpdateMeeting = MeetingSchema.omit({ id: true });
 
 //const cookieStore = cookies();
 
@@ -81,44 +82,46 @@ import { AuthError } from 'next-auth';
 //console.log(actor_id);
 //console.log(access_token);
 
-export type MeetingFormState = {
-    errors?: {
-        meeting_title?: string[];
-        meeting_description?: string[];
-        location?: string[];
-        duration?: string[];
-        platform?: string[];
-        times?: string[];
-    };
-    message?: string | null;
-};
+//export type MeetingFormState = {
+//    errors?: {
+//        meeting_title?: string[];
+//        meeting_description?: string[];
+//        location?: string[];
+//        duration?: string[];
+//        platform?: string[];
+//        times?: string[];
+//    };
+//    message?: string | null;
+//};
 
-export type MeetingState = {
-    errors?: {
-        meeting_title?: string[];
-        meeting_description?: string[];
-        location?: string[];
-        duration?: string[];
-        platform?: string[];
-        starttime?: string[];
-        attendees?: string[];
-    };
-    message?: string | null;
-};
+//export type MeetingState = {
+//    errors?: {
+//        meeting_title?: string[];
+//        meeting_description?: string[];
+//        location?: string[];
+//        duration?: string[];
+//        platform?: string[];
+//        starttime?: string[];
+//        attendees?: string[];
+//    };
+//    message?: string | null;
+//};
 
-export type AccountState = {
-    errors?: {
-        name?: string[];
-        email?: string[];
-        username?: string[];
-        password?: string[];
-        confirm_password?: string[];
-    };
-    message?: string | null;
-};
+//export type AccountState = {
+//    errors?: {
+//        name?: string[];
+//        email?: string[];
+//        username?: string[];
+//        password?: string[];
+//        confirm_password?: string[];
+//    };
+//    message?: string | null;
+//};
 
-export async function createMeetingForm(prevState: MeetingFormState, formData: FormData, actor_id: any, access_token: any) {
-    // Validate form using Zod
+export async function createMeetingForm(prevState: MeetingFormState, formData: any) {
+    console.log("actionside");
+    console.log(formData);
+    //// Validate form using Zod
     //const validatedFields = CreateMeetingForm.safeParse({
     //    meeting_title: formData.get('meeting_title'),
     //    meeting_description: formData.get('meeting_description'),
@@ -140,6 +143,8 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
     try {
         // Make a POST request to your server API endpoint
         //const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        const actor_id = formData.actor_id;
+        const access_token = formData.access_token;
 
         response = await fetch(`http://localhost:7057/meeting-form/create-form?actor_id=${actor_id}`, {
             method: 'POST',
@@ -149,26 +154,26 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
                 Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
-                meeting_title: formData.get('meeting_title'),
-                meeting_description: formData.get('meeting_description'),
-                location: formData.get('location'),
-                times: formData.getAll('times'),
-                duration: parseInt(formData.get('duration')?.toString() || '0', 10),
-                platform: parseInt(formData.get('platform')?.toString() || '0', 10),
-                //meeting_title: meeting_title,
-                //meeting_description: meeting_description,
-                //location: location,
-                //times: times,
-                //duration: parseInt(duration || '0', 10),
-                //platform: parseInt(platform || '0', 10),
+                //meeting_title: formData.get('meeting_title'),
+                //meeting_description: formData.get('meeting_description'),
+                //location: formData.get('location'),
+                //times: formData.getAll('times'),
+                //duration: parseInt(formData.get('duration')?.toString() || '0', 10),
+                //platform: parseInt(formData.get('platform')?.toString() || '0', 10),
+                meeting_title: formData.meeting_title,
+                meeting_description: formData.meeting_description,
+                location: formData.location,
+                times: formData.times,
+                duration: formData.duration,
+                platform: formData.platform,
             }),
         });
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('Creat meeting schedule error:', errorData);
+            console.error('Create meeting schedule error:', errorData);
             return {
                 ...prevState,
-                message: `Creat meeting schedule error: ${errorData.detail || response.statusText}`,
+                message: `Create meeting schedule error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
@@ -176,34 +181,42 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: F
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Creat meeting schedule error:', error);
+        console.error('Create meeting schedule error:', error);
         return {
-            message: 'Creat meeting schedule error.',
+            ...prevState,
+            message: 'Create meeting schedule error.',
         };
     }
     if (response.ok) {
         // Revalidate the cache for the invoices page and redirect the user.
         revalidatePath('/dashboard');
         redirect('/dashboard');
+        return {
+            ...prevState,
+            message: 'Meeting schedule created successfully.',
+            errors: {},
+        };
     }
+    // Return the default state if no conditions are met
+    return prevState;
 }
 
 export async function voteMeetingForm(requestBody: { meetingform_id: any; meetingtime_ids: any; name: any; email: any; }) {
     // Validate form using Zod
-    //const validatedFields = VoteMeetingForm.safeParse({
-    //    meetingform_id: requestBody.meetingform_id,
-    //    meetingtime_ids: requestBody.meetingtime_ids,
-    //    name: requestBody.name,
-    //    email: requestBody.email,
-    //});
+    const validatedFields = VoteMeetingForm.safeParse({
+        meetingform_id: requestBody.meetingform_id,
+        meetingtime_ids: requestBody.meetingtime_ids,
+        name: requestBody.name,
+        email: requestBody.email,
+    });
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Create Meeting Schedule.',
-    //    };
-    //}
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Create Meeting Schedule.',
+        };
+    }
     let response;
 
     // Insert data into the database
@@ -242,17 +255,17 @@ export async function voteMeetingForm(requestBody: { meetingform_id: any; meetin
 
 export async function bookMeetingForm(requestBody: { meetingform_id: any; }, actor_id: any, access_token: any) {
     // Validate form using Zod
-    //const validatedFields = BookMeetingForm.safeParse({
-    //    meetingform_id: requestBody.meetingform_id,
-    //});
+    const validatedFields = BookMeetingForm.safeParse({
+        meetingform_id: requestBody.meetingform_id,
+    });
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Book Meeting.',
-    //    };
-    //}
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Book Meeting.',
+        };
+    }
     let response;
     // Insert data into the database
     try {
@@ -303,22 +316,22 @@ export async function updateMeetingForm(
     access_token: any
 ) {
     // Validate form using Zod
-    //const validatedFields = UpdateMeetingForm.safeParse({
-    //    meeting_title: formData.get('meeting_title'),
-    //    meeting_description: formData.get('meeting_description'),
-    //    location: formData.get('location'),
-    //    times: formData.getAll('times'),
-    //    duration: formData.get('duration'),
-    //    platform: formData.get('platform'),
-    //});
+    const validatedFields = UpdateMeetingForm.safeParse({
+        meeting_title: formData.get('meeting_title'),
+        meeting_description: formData.get('meeting_description'),
+        location: formData.get('location'),
+        times: formData.getAll('times'),
+        duration: formData.get('duration'),
+        platform: formData.get('platform'),
+    });
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Update Meeting Form.',
-    //    };
-    //}
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update Meeting Form.',
+        };
+    }
     let response;
     try {
         // Make a PUT request to your server API endpoint

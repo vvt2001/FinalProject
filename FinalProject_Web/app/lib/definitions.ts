@@ -122,3 +122,39 @@ export type Attendee = {
     name: string;
     email: string;
 };
+
+export type MeetingFormState = {
+    errors?: {
+        meeting_title?: string[];
+        meeting_description?: string[];
+        location?: string[];
+        duration?: string[];
+        platform?: string[];
+        times?: string[];
+    };
+    message?: string | null;
+};
+
+export type MeetingState = {
+    errors?: {
+        meeting_title?: string[];
+        meeting_description?: string[];
+        location?: string[];
+        duration?: string[];
+        platform?: string[];
+        starttime?: string[];
+        attendees?: string[];
+    };
+    message?: string | null;
+};
+
+export type AccountState = {
+    errors?: {
+        name?: string[];
+        email?: string[];
+        username?: string[];
+        password?: string[];
+        confirm_password?: string[];
+    };
+    message?: string | null;
+};

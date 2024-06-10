@@ -21,7 +21,7 @@ export default function EditMeetingForm({
     const initialState = { message: null, errors: {} };
     //const updateInvoiceWithId = updateMeetingForm.bind(null, meetingform.id);
     const [state, dispatch] = useFormState(updateMeetingForm, initialState);
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    const platformOptions = ["Zoom", "Google Meet"];
 
     const timeValues = meetingform.times.map((timeData: { time: string }) => {
         const dateTime = new Date(timeData.time);

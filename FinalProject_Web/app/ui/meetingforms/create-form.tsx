@@ -11,11 +11,12 @@ import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { useState, useEffect, ChangeEvent } from 'react';
+import { MeetingFormState } from '@/app/lib/definitions';
 
 export default function Form() {
     const initialState = { message: null, errors: {} };
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    const platformOptions = ["Zoom", "Google Meet"];
 
     // State to store the selected datetime values
     const [selectedDateTimes, setSelectedDateTimes] = useState([]);
@@ -68,9 +69,11 @@ export default function Form() {
 
         // Create FormData object
         const formData = new FormData(event.target);
+        formData.append('actor_id', actor_id);
+        formData.append('access_token', access_token);
 
         // Call createMeetingForm function with form data and actor_id
-        const result = await createMeetingForm(state, formData, actor_id, access_token);
+        const result = await createMeetingForm(state, formData);
 
         // Update state with result
         dispatch(result);

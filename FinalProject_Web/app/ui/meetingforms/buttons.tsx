@@ -117,11 +117,11 @@ export function DeleteMeetingForm({ id }: { id: string }) {
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: { preventDefault: () => void }) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
-        const formData = new FormData(event.target);
+        //const formData = new FormData(event.target);
 
         // Call createMeetingForm function with form data and actor_id
         const result = await deleteMeetingForm(id, actor_id, access_token);
@@ -168,11 +168,11 @@ export function DeleteMeeting({ id }: { id: string }) {
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
-        const formData = new FormData(event.target);
+        //const formData = new FormData(event.target);
 
         // Call createMeetingForm function with form data and actor_id
         const result = await deleteMeeting(id, actor_id, access_token);
@@ -218,11 +218,11 @@ export function CancelMeeting({ id }: { id: string }) {
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
-        const formData = new FormData(event.target);
+        //const formData = new FormData(event.target);
 
         // Call createMeetingForm function with form data and actor_id
         const result = await cancelMeeting(id, actor_id, access_token);
