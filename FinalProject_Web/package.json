@@ -44,9 +44,5 @@
   },
   "engines": {
     "node": ">=18.17.0"
-  },
-  "scripts": {
-    "build": "next build",
-    "export": "next build && next export"
   }
 }

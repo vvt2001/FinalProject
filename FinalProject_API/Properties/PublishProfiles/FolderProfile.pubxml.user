@@ -5,7 +5,13 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Release\net6.0\publish\</_PublishTargetUrl>
-    <History>True|2024-06-06T02:23:29.8603647Z;</History>
+    <History>True|2024-06-11T13:15:27.3144381Z;True|2024-06-11T17:10:40.9881837+07:00;True|2024-06-11T16:53:33.1109149+07:00;True|2024-06-11T16:35:10.7043926+07:00;True|2024-06-11T16:34:56.7686913+07:00;True|2024-06-11T16:23:49.2762369+07:00;True|2024-06-11T16:21:12.9011239+07:00;</History>
     <LastFailureDetails />
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
   </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>Server=VVT%3bDatabase=FinalProject_MeetingScheduler%3bUser Id=vvt1508%3bPassword=123456a%40%3bTrusted_Connection=False%3bEncrypt=True%3bTrustServerCertificate=True</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
 </Project>

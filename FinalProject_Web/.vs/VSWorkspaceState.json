@@ -3,9 +3,9 @@
     "",
     "\\app",
     "\\app\\dashboard",
+    "\\app\\dashboard\\(overview)",
     "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\[id]",
-    "\\app\\dashboard\\meetingforms\\[id]\\edit",
+    "\\app\\dashboard\\meetingforms\\create",
     "\\app\\dashboard\\meetings",
     "\\app\\dashboard\\meetings\\[id]",
     "\\app\\dashboard\\meetings\\[id]\\edit",
@@ -13,6 +13,5 @@
     "\\app\\guest\\[id]",
     "\\app\\guest\\[id]\\vote"
   ],
-  "SelectedNode": "\\next.config.js",
   "PreviewInSolutionExplorer": false
 }
