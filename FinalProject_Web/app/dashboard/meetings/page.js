@@ -10,11 +10,6 @@ import { cookies } from "next/headers";
 
 export default async function Page({
     searchParams,
-}: {
-    searchParams?: {
-        query?: string;
-        page?: string;
-    };
 }) {
     const cookieStore = cookies();
     const actor_id = cookieStore.get("actor_id")?.value;

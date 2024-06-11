@@ -5,10 +5,10 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { cookies } from "next/headers";
 
-export const metadata: Metadata = {
+export const metadata = {
     title: 'Book Meeting | Scheduler',
 };
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }) {
     const cookieStore = cookies();
     const actor_id = cookieStore.get("actor_id")?.value;
     console.log(actor_id);

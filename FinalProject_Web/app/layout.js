@@ -2,7 +2,7 @@ import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
 
-export const metadata: Metadata = {
+export const metadata = {
     title: {
         template: '%s | Scheduler',
         default: 'Scheduler',
@@ -12,8 +12,6 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
