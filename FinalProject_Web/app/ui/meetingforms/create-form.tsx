@@ -19,11 +19,11 @@ export default function Form() {
     const platformOptions = ["Zoom", "Google Meet"];
 
     // State to store the selected datetime values
-    const [selectedDateTimes, setSelectedDateTimes] = useState([]);
+    const [selectedDateTimes, setSelectedDateTimes] = useState<string[]>([]);
 
     // Function to handle changes in the datetime input
     const handleDateTimeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
-        const newDateTimes = [...selectedDateTimes];
+        const newDateTimes: string[] = [...selectedDateTimes];
         newDateTimes[index] = event.target.value;
         setSelectedDateTimes(newDateTimes);
     };
@@ -34,7 +34,7 @@ export default function Form() {
     };
 
     // Function to remove a datetime input
-    const removeDateTimeInput = (index) => {
+    const removeDateTimeInput = (index: number) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes.splice(index, 1);
         setSelectedDateTimes(newDateTimes);
@@ -64,7 +64,7 @@ export default function Form() {
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
@@ -72,11 +72,11 @@ export default function Form() {
         formData.append('actor_id', actor_id);
         formData.append('access_token', access_token);
 
-        // Call createMeetingForm function with form data and actor_id
-        const result = await createMeetingForm(state, formData);
+        //// Call createMeetingForm function with form data and actor_id
+        //const result = await createMeetingForm(state, formData);
 
         // Update state with result
-        dispatch(result);
+        dispatch(formData);
     };
 
     return (

@@ -121,6 +121,7 @@ export type Meeting = {
 export type Attendee = {
     name: string;
     email: string;
+    [key: string]: string;
 };
 
 export type MeetingFormState = {

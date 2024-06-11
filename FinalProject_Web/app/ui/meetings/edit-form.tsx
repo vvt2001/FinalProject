@@ -14,7 +14,7 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
     const [state, dispatch] = useFormState(updateMeeting, initialState);
     const platformOptions = ["Zoom", "Google Meet"];
 
-    const formatDateTimeLocal = (date) => {
+    const formatDateTimeLocal = (date: string | number | Date) => {
         if (!date) return ''; // early exit for undefined/null dates
 
         let d = new Date(date);
@@ -36,31 +36,17 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
         setAttendees([...attendees, { name: '', email: '' }]);
     };
 
-    const handleRemoveAttendee = (index) => {
+    const handleRemoveAttendee = (index: number) => {
         const newAttendees = [...attendees];
         newAttendees.splice(index, 1);
         setAttendees(newAttendees);
     };
 
-    const handleAttendeeChange = (index, field, value) => {
+    const handleAttendeeChange = (index: number, field: keyof Attendee, value: string) => {
         const newAttendees = [...attendees];
         newAttendees[index][field] = value;
         setAttendees(newAttendees);
     };
-
-    //const handleSubmit = async (e) => {
-    //    e.preventDefault();
-    //    const formData = {
-    //        id: meeting.id,
-    //        meeting_title: e.target.meeting_title.value,
-    //        meeting_description: e.target.meeting_description.value,
-    //        location: e.target.location.value,
-    //        starttime: e.target.starttime.value,
-    //        duration: parseInt(e.target.duration.value),
-    //        attendees,
-    //    };
-    //    await dispatch(formData);
-    //};
 
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');
@@ -87,7 +73,7 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
@@ -97,15 +83,17 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
             meeting_description: event.target.meeting_description.value,
             location: event.target.location.value,
             starttime: event.target.starttime.value,
-            duration: parseInt(event.target.duration.value),
+            duration: event.target.duration.value,
             attendees,
+            actor_id: actor_id,
+            access_token: access_token
         };
 
         // Call createMeetingForm function with form data and actor_id
-        const result = await updateMeeting(meeting.id, state, formData, actor_id, access_token);
+        //const result = await updateMeeting(state, formData);
 
         // Update state with result
-        dispatch(result);
+        dispatch(formData);
     };
 
     return (

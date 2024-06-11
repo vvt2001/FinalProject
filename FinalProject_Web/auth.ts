@@ -48,7 +48,9 @@ async function getUser(username: string, password: string): Promise<User | undef
                 path: "/",
                 maxAge: 60 * 60 * 24 * 30 * 1000,
                 expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
-            },
+            }
+        );
+        cookies().set(
             {
                 name: "access_token",
                 value: user.access_token,
@@ -58,7 +60,6 @@ async function getUser(username: string, password: string): Promise<User | undef
                 expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
             }
         );
-
         cookies().set('actor_id', user.id);
         cookies().set('access_token', user.access_token);
 

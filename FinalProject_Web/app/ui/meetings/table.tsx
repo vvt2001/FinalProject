@@ -1,9 +1,10 @@
 import Image from 'next/image';
-import { UpdateMeeting, DeleteMeeting, CancelMeeting } from '@/app/ui/meetingforms/buttons';
+import { UpdateMeeting, DeleteMeeting, CancelMeeting } from '@/app/ui/meetings/buttons';
 import MeetingStatus from '@/app/ui/meetings/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeeting } from '@/app/lib/data';
 import { cookies } from "next/headers";
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
 
 export default async function MeetingTable({
     query,
@@ -22,7 +23,7 @@ export default async function MeetingTable({
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {meetings?.map((meeting) => (
+            {meetings?.map((meeting: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => (
               <div
                 key={meeting.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -76,7 +77,7 @@ export default async function MeetingTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {meetings?.map((meeting) => (
+              {meetings?.map((meeting: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; }) => (
                 <tr
                   key={meeting.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"

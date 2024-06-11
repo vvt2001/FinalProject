@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 
 export default function EditMeetingForm({
   meetingform
@@ -36,7 +36,7 @@ export default function EditMeetingForm({
     const [selectedDateTimes, setSelectedDateTimes] = useState(timeValues);
 
     // Function to handle changes in the datetime input
-    const handleDateTimeChange = (index, event) => {
+    const handleDateTimeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes[index] = event.target.value;
         setSelectedDateTimes(newDateTimes);
@@ -48,7 +48,7 @@ export default function EditMeetingForm({
     };
 
     // Function to remove a datetime input
-    const removeDateTimeInput = (index) => {
+    const removeDateTimeInput = (index: number) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes.splice(index, 1);
         setSelectedDateTimes(newDateTimes);
@@ -78,17 +78,20 @@ export default function EditMeetingForm({
     }, []);
 
     // Function to handle form submission
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault(); // Prevent default form submission
 
         // Create FormData object
         const formData = new FormData(event.target);
+        formData.append('actor_id', actor_id);
+        formData.append('access_token', access_token);
+        formData.append('id', meetingform.id);
 
-        // Call createMeetingForm function with form data and actor_id
-        const result = await updateMeetingForm(meetingform.id, state, formData, actor_id, access_token);
+        //// Call createMeetingForm function with form data and actor_id
+        //const result = await updateMeetingForm( state, formData);
 
         // Update state with result
-        dispatch(result);
+        dispatch(formData);
     };
 
   return (

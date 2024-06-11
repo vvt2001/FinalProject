@@ -13,12 +13,12 @@ export default function VoteMeetingForm({
 }) {
 
     console.log(meetingform);
-    const [selectedTimes, setSelectedTimes] = useState([]);
+    const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const platformOptions = ["Zoom", "Google Meet"];
 
-    const handleCheckboxChange = (timeId) => {
+    const handleCheckboxChange = (timeId: any) => {
         if (selectedTimes.includes(timeId)) {
             setSelectedTimes(selectedTimes.filter((id) => id !== timeId));
         } else {
@@ -26,7 +26,7 @@ export default function VoteMeetingForm({
         }
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = (event: any) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body

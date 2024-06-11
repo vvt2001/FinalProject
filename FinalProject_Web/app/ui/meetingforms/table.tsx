@@ -4,6 +4,7 @@ import MeetingFormStatus from '@/app/ui/meetingforms/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeetingForms } from '@/app/lib/data';
 import { cookies } from "next/headers";
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
 
 export default async function MeetingFormsTable({
     query,
@@ -22,7 +23,7 @@ export default async function MeetingFormsTable({
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {meetingforms?.map((meetingform) => (
+            {meetingforms?.map((meetingform: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; url: string; }) => (
               <div
                 key={meetingform.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -77,7 +78,7 @@ export default async function MeetingFormsTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {meetingforms?.map((meetingform) => (
+              {meetingforms?.map((meetingform: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; url: string; }) => (
                 <tr
                   key={meetingform.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"

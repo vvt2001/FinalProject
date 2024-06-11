@@ -19,7 +19,7 @@ const ITEMS_PER_PAGE = 5;
 export async function fetchFilteredMeetingForms(
     query: string,
     currentPage: number,
-    actor_id: string
+    actor_id: any
 ) {
     noStore();
 

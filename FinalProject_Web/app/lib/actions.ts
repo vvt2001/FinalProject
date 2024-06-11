@@ -118,33 +118,33 @@ const UpdateMeeting = MeetingSchema.omit({ id: true });
 //    message?: string | null;
 //};
 
-export async function createMeetingForm(prevState: MeetingFormState, formData: any) {
+export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
     console.log("actionside");
     console.log(formData);
-    //// Validate form using Zod
-    //const validatedFields = CreateMeetingForm.safeParse({
-    //    meeting_title: formData.get('meeting_title'),
-    //    meeting_description: formData.get('meeting_description'),
-    //    location: formData.get('location'),
-    //    times: formData.getAll('times'),
-    //    duration: formData.get('duration'),
-    //    platform: formData.get('platform'),
-    //});
+    // Validate form using Zod
+    const validatedFields = CreateMeetingForm.safeParse({
+        meeting_title: formData.get('meeting_title'),
+        meeting_description: formData.get('meeting_description'),
+        location: formData.get('location'),
+        times: formData.getAll('times'),
+        duration: formData.get('duration'),
+        platform: formData.get('platform'),
+    });
 
-    //// If form validation fails, return errors early. Otherwise, continue.
-    //if (!validatedFields.success) {
-    //    return {
-    //        errors: validatedFields.error.flatten().fieldErrors,
-    //        message: 'Missing Fields. Failed to Creat meeting schedule.',
-    //    };
-    //}
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Creat meeting schedule.',
+        };
+    }
     let response;
     // Insert data into the database
     try {
         // Make a POST request to your server API endpoint
-        //const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
-        const actor_id = formData.actor_id;
-        const access_token = formData.access_token;
+        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        const actor_id = formData.get('actor_id');
+        const access_token = formData.get('access_token');
 
         response = await fetch(`http://localhost:7057/meeting-form/create-form?actor_id=${actor_id}`, {
             method: 'POST',
@@ -160,12 +160,12 @@ export async function createMeetingForm(prevState: MeetingFormState, formData: a
                 //times: formData.getAll('times'),
                 //duration: parseInt(formData.get('duration')?.toString() || '0', 10),
                 //platform: parseInt(formData.get('platform')?.toString() || '0', 10),
-                meeting_title: formData.meeting_title,
-                meeting_description: formData.meeting_description,
-                location: formData.location,
-                times: formData.times,
-                duration: formData.duration,
-                platform: formData.platform,
+                meeting_title: meeting_title,
+                meeting_description: meeting_description,
+                location: location,
+                times: times,
+                duration: duration,
+                platform: platform,
             }),
         });
         if (!response.ok) {
@@ -309,11 +309,8 @@ export async function bookMeetingForm(requestBody: { meetingform_id: any; }, act
 }
 
 export async function updateMeetingForm(
-    id: string,
     prevState: MeetingFormState,
     formData: FormData,
-    actor_id: any,
-    access_token: any
 ) {
     // Validate form using Zod
     const validatedFields = UpdateMeetingForm.safeParse({
@@ -335,7 +332,10 @@ export async function updateMeetingForm(
     let response;
     try {
         // Make a PUT request to your server API endpoint
-        //const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        const { meeting_title, meeting_description, location, times, duration, platform } = validatedFields.data;
+        const actor_id = formData.get('actor_id');
+        const access_token = formData.get('access_token');
+        const id = formData.get('id');
 
         response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
@@ -345,20 +345,20 @@ export async function updateMeetingForm(
                 Authorization: `Bearer ${access_token}` 
             },
             body: JSON.stringify({
-                id: id,
-                meeting_title: formData.get('meeting_title'),
-                meeting_description: formData.get('meeting_description'),
-                location: formData.get('location'),
-                times: formData.getAll('times'),
-                duration: parseInt(formData.get('duration')?.toString() || '0', 10),
-                platform: parseInt(formData.get('platform')?.toString() || '0', 10),
                 //id: id,
-                //meeting_title: meeting_title,
-                //meeting_description: meeting_description,
-                //location: location,
-                //times: times,
-                //duration: parseInt(duration || '0', 10),
-                //platform: parseInt(platform || '0', 10),
+                //meeting_title: formData.get('meeting_title'),
+                //meeting_description: formData.get('meeting_description'),
+                //location: formData.get('location'),
+                //times: formData.getAll('times'),
+                //duration: parseInt(formData.get('duration')?.toString() || '0', 10),
+                //platform: parseInt(formData.get('platform')?.toString() || '0', 10),
+                id: id,
+                meeting_title: meeting_title,
+                meeting_description: meeting_description,
+                location: location,
+                times: times,
+                duration: duration,
+                platform: platform,
             }),
         });
 
@@ -366,18 +366,31 @@ export async function updateMeetingForm(
             const errorData = await response.json();
             console.error('Update Meeting Schedule error:', errorData);
             return {
+                ...prevState,
                 message: `Update Meeting Schedule error: ${errorData.detail || response.statusText}`,
                 errors: errorData.errors || {},
             };
         }
 
     } catch (error) {
-        return { message: 'Database Error: Failed to Update Meeting Schedule.' };
+        // Handle any errors that occur during the request
+        console.error('Update meeting schedule error:', error);
+        return {
+            ...prevState,
+            message: 'Update meeting schedule error.',
+        };
     }
     if (response.ok) {
         revalidatePath('/dashboard');
         redirect('/dashboard');
+        return {
+            ...prevState,
+            message: 'Meeting schedule created successfully.',
+            errors: {},
+        };
     }
+
+    return prevState;
 }
 
 export async function deleteMeetingForm(id: string, actor_id: any, access_token: any) {
@@ -475,7 +488,6 @@ export async function cancelMeeting(id: string, actor_id: any, access_token: any
 }
 
 export async function updateMeeting(
-    id: string,
     prevState: MeetingState,
     formData: {
         id: any,
@@ -485,9 +497,9 @@ export async function updateMeeting(
         starttime: any,
         duration: any,
         attendees: any,
+        actor_id: any,
+        access_token: any
     },
-    actor_id: any,
-    access_token: any
 ) {
 
     let response;
@@ -496,6 +508,8 @@ export async function updateMeeting(
         //const { meeting_title, meeting_description, location, duration, platform, starttime, attendees } = validatedFields.data;
 
         console.log(formData);
+        const actor_id = formData.actor_id;
+        const access_token = formData.access_token;
 
         response = await fetch(`http://localhost:7057/meeting/update-meeting?actor_id=${actor_id}`, {
             method: 'PUT',
@@ -505,7 +519,7 @@ export async function updateMeeting(
                 Authorization: `Bearer ${access_token}`
             },
             body: JSON.stringify({
-                id: id,
+                id: formData.id,
                 meeting_title: formData.meeting_title,
                 meeting_description: formData.meeting_description,
                 location: formData.location,
@@ -525,12 +539,24 @@ export async function updateMeeting(
             };
         }
     } catch (error) {
-        return { message: 'Database Error: Failed to Update Meeting.' };
+        // Handle any errors that occur during the request
+        console.error('Update meeting error:', error);
+        return {
+            ...prevState,
+            message: 'Update meeting error.',
+        };
     }
     if (response.ok) {
-        revalidatePath('/dashboard/meetings');
-        redirect('/dashboard/meetings');
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+        return {
+            ...prevState,
+            message: 'Meeting created successfully.',
+            errors: {},
+        };
     }
+
+    return prevState;
 }
 
 export async function authenticate(
