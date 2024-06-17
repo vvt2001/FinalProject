@@ -3,14 +3,14 @@
     "",
     "\\app",
     "\\app\\dashboard",
-    "\\app\\dashboard\\meetings",
     "\\app\\dashboard\\user",
     "\\app\\dashboard\\user\\[id]",
     "\\app\\dashboard\\user\\[id]\\edit",
+    "\\app\\login",
     "\\app\\register",
     "\\app\\ui",
     "\\app\\ui\\dashboard"
   ],
-  "SelectedNode": "\\app\\ui\\dashboard\\nav-links.tsx",
+  "SelectedNode": "\\app\\login\\page.tsx",
   "PreviewInSolutionExplorer": false
 }

@@ -31,7 +31,6 @@ async function getUser(username: string, password: string): Promise<User | undef
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-
         // Map the fetched data to the MeetingForm type definition
         const user: User = {
             id: userData.id,
