@@ -3,6 +3,7 @@
     "",
     "\\app",
     "\\app\\dashboard",
+    "\\app\\dashboard\\(overview)",
     "\\app\\dashboard\\user",
     "\\app\\dashboard\\user\\[id]",
     "\\app\\dashboard\\user\\[id]\\edit",
@@ -11,6 +12,6 @@
     "\\app\\ui",
     "\\app\\ui\\dashboard"
   ],
-  "SelectedNode": "\\app\\login\\page.tsx",
+  "SelectedNode": "\\next.config.js",
   "PreviewInSolutionExplorer": false
 }

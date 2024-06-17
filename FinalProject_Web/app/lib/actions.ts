@@ -5,9 +5,8 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
-import { AuthError } from 'next-auth';
-import { AccountState, MeetingFormState, MeetingState, UserState } from './definitions';
-//import { cookies } from "next/headers";
+import { AccountState, MeetingFormState, MeetingState, User, UserState } from './definitions';
+import { cookies } from "next/headers";
 
 const MeetingFormSchema = z.object({
     id: z.string(),
@@ -79,12 +78,22 @@ const UserSchema = z.object({
     }),
 });
 
+const LoginSchema = z.object({
+    username: z.string({
+        invalid_type_error: 'Please enter an username.',
+    }),
+    password: z.string({
+        invalid_type_error: 'Please enter a password.',
+    }),
+});
+
 const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
 const UpdateMeeting = MeetingSchema.omit({ id: true });
 const UpdateUser = UserSchema.omit({ id: true });
+const LoginForm = LoginSchema.omit({ id: true });
 
 export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
     console.log("actionside");
@@ -662,22 +671,128 @@ export async function AddCredentials(actor_id: any, access_token: any) {
     }
 }
 
+//export async function authenticate(
+//    prevState: string | undefined,
+//    formData: FormData,
+//) {
+//    try {
+//        await signIn('credentials', formData);
+//    } catch (error: any) {
+//        if (error instanceof AuthError) {
+//            switch (error.type) {
+//                case 'CredentialsSignin':
+//                    return 'Invalid credentials.';
+//                default:
+//                    return 'Login error.';
+//            }
+//        }
+//        throw error;
+//    }
+//}
+
 export async function authenticate(
-    prevState: string | undefined,
-    formData: FormData,
+    username: string | undefined,
+    password: string | undefined,
 ) {
+    // Validate form using Zod
+    const validatedFields = LoginForm.safeParse({
+        username: username,
+        password: password,
+    });
+
+    // If form validation fails, return errors early. Otherwise, continue.
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to login.',
+        };
+    }
+
     try {
-        await signIn('credentials', formData);
-    } catch (error: any) {
-        if (error instanceof AuthError) {
-            switch (error.type) {
-                case 'CredentialsSignin':
-                    return 'Invalid credentials.';
-                default:
-                    return 'Login error.';
-            }
+
+        const response = await fetch('http://localhost:7057/user/authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+            },
+            body: JSON.stringify({
+                Username: username,
+                Password: password,
+            }),
+        });
+        const responseData = await response.json();
+
+        // Extract the array of invoices from the response data
+        const userData = responseData.data;
+
+        if (!response.ok) {
+
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        throw error;
+
+        // Map the fetched data to the MeetingForm type definition
+        const user: User = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            access_token: userData.access_token,
+            has_googlecredentials: userData.has_googlecredentials
+        };
+
+        cookies().set(
+            {
+                name: "actor_id",
+                value: user.id,
+                httpOnly: true,
+                path: "/",
+                maxAge: 60 * 60 * 24 * 30 * 1000,
+                expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+            }
+        );
+        cookies().set(
+            {
+                name: "access_token",
+                value: user.access_token,
+                httpOnly: true,
+                path: "/",
+                maxAge: 60 * 60 * 24 * 30 * 1000,
+                expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+            }
+        );
+        cookies().set('actor_id', user.id);
+        cookies().set('access_token', user.access_token);
+
+        //const cookieStore = cookies();
+        //const actor_id = cookieStore.get("actor_id")?.value;
+        //const access_token = cookieStore.get("access_token")?.value;
+        //console.log(actor_id);
+        //console.log(access_token);
+
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            return { message: 'Logged in.' };
+        } else {
+            // If response status is not successful, parse error response
+            const errorResponse = await response.json();
+            console.error('API Request Error:', errorResponse);
+            return { message: 'Failed to login.', error: errorResponse };
+        }
+    } catch (error) {
+        console.error('Failed to login:', error);
+        throw new Error('Failed to to login.');
+    }
+}
+
+export async function signOut() {
+    try {
+        // Clear cookies
+        cookies().set('actor_id', '', { httpOnly: true, path: '/', maxAge: 0 });
+        cookies().set('access_token', '', { httpOnly: true, path: '/', maxAge: 0 });
+
+    } catch (error) {
+        console.error('Failed to sign out:', error);
+        throw new Error('Failed to sign out.');
     }
 }
 
