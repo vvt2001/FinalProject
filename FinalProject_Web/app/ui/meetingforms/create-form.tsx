@@ -16,7 +16,7 @@ import { MeetingFormState } from '@/app/lib/definitions';
 export default function Form() {
     const initialState = { message: null, errors: {} };
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
-    const platformOptions = ["Zoom", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     // State to store the selected datetime values
     const [selectedDateTimes, setSelectedDateTimes] = useState<string[]>([]);

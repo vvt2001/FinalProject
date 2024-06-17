@@ -15,7 +15,7 @@ export default function BookMeetingForm({
 }) {
     console.log(meetingform.times);
     const [selectedTimes, setSelectedTimes] = useState([]);
-    const platformOptions = ["Zoom", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');

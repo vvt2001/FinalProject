@@ -321,6 +321,17 @@ namespace FinalProject_API.Services
                 user_id = actor_id,
             };
             _context.googlemeetcredentials.Add(token);
+
+            var user = await _context.users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(k => k.ID == actor_id);
+            if (user == null)
+            {
+                throw new InvalidProgramException($"Can't find user with id: '{actor_id}'"); 
+            }
+            user.has_googlecredentials = true;
+            _context.users.Update(user);
+
             return await _context.SaveChangesAsync() > 0;
         }
 

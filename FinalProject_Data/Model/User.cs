@@ -23,6 +23,7 @@ namespace FinalProject_Data.Model
         public int trangthai { get; set; }
         public string hash { get; set; }
         public string salt { get; set; }
+        public bool has_googlecredentials { get; set; }
     }
 
     public class User_configuration : IEntityTypeConfiguration<User>

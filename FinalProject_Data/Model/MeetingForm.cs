@@ -13,6 +13,7 @@ namespace FinalProject_Data.Model
         public ICollection<MeetingTime> times { get; set; }
         public ICollection<Attendee>? attendees { get; set; }
         public User owner { get; set; }
+        public ICollection<VotingHistory> voting_histories { get; set; }
     }
     public class MeetingForm_properties : Entity
     {
@@ -31,7 +32,7 @@ namespace FinalProject_Data.Model
     {
         public void Configure(EntityTypeBuilder<MeetingForm> builder)
         {
-            builder.HasOne(mf => mf.owner).WithMany().HasForeignKey(mf => mf.owner_id);
+            builder.HasOne(mf => mf.owner).WithMany().HasForeignKey(mf => mf.owner_id).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -21,7 +21,7 @@ export default function EditMeetingForm({
     const initialState = { message: null, errors: {} };
     //const updateInvoiceWithId = updateMeetingForm.bind(null, meetingform.id);
     const [state, dispatch] = useFormState(updateMeetingForm, initialState);
-    const platformOptions = ["Zoom", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     const timeValues = meetingform.times.map((timeData: { time: string }) => {
         const dateTime = new Date(timeData.time);
@@ -237,7 +237,7 @@ export default function EditMeetingForm({
         >
           Cancel
         </Link>
-        <Button type="submit">Edit Invoice</Button>
+        <Button type="submit">Edit Schedule</Button>
       </div>
     </form>
   );

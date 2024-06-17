@@ -30,7 +30,7 @@ namespace FinalProject_Data.Model
     {
         public void Configure(EntityTypeBuilder<Meeting> builder)
         {
-            builder.HasOne(m => m.owner).WithMany().HasForeignKey(m => m.owner_id).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(m => m.owner).WithMany().HasForeignKey(m => m.owner_id).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

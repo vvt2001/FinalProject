@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import { AccountState, MeetingFormState, MeetingState } from './definitions';
+import { AccountState, MeetingFormState, MeetingState, UserState } from './definitions';
 //import { cookies } from "next/headers";
 
 const MeetingFormSchema = z.object({
@@ -69,54 +69,22 @@ const BookingFormSchema = z.object({
     }),
 });
 
+const UserSchema = z.object({
+    id: z.string(),
+    name: z.string({
+        invalid_type_error: 'Please enter a name.',
+    }),
+    email: z.string({
+        invalid_type_error: 'Please enter an email.',
+    }),
+});
+
 const CreateMeetingForm = MeetingFormSchema.omit({ id: true });
 const UpdateMeetingForm = MeetingFormSchema.omit({ id: true });
 const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
 const UpdateMeeting = MeetingSchema.omit({ id: true });
-
-//const cookieStore = cookies();
-
-//const actor_id = cookieStore.get("actor_id")?.value;
-//const access_token = cookieStore.get("access_token")?.value;
-//console.log(actor_id);
-//console.log(access_token);
-
-//export type MeetingFormState = {
-//    errors?: {
-//        meeting_title?: string[];
-//        meeting_description?: string[];
-//        location?: string[];
-//        duration?: string[];
-//        platform?: string[];
-//        times?: string[];
-//    };
-//    message?: string | null;
-//};
-
-//export type MeetingState = {
-//    errors?: {
-//        meeting_title?: string[];
-//        meeting_description?: string[];
-//        location?: string[];
-//        duration?: string[];
-//        platform?: string[];
-//        starttime?: string[];
-//        attendees?: string[];
-//    };
-//    message?: string | null;
-//};
-
-//export type AccountState = {
-//    errors?: {
-//        name?: string[];
-//        email?: string[];
-//        username?: string[];
-//        password?: string[];
-//        confirm_password?: string[];
-//    };
-//    message?: string | null;
-//};
+const UpdateUser = UserSchema.omit({ id: true });
 
 export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
     console.log("actionside");
@@ -214,7 +182,7 @@ export async function voteMeetingForm(requestBody: { meetingform_id: any; meetin
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: 'Missing Fields. Failed to Create Meeting Schedule.',
+            message: 'Missing Fields. Failed to Vote Meeting Schedule.',
         };
     }
     let response;
@@ -241,9 +209,9 @@ export async function voteMeetingForm(requestBody: { meetingform_id: any; meetin
     } catch (error) {
 
         // Handle any errors that occur during the request
-        console.error('Creat meeting schedule error:', error);
+        console.error('Vote meeting schedule error:', error);
         return {
-            message: 'Failed to Creat meeting schedule.',
+            message: 'Failed to vote meeting schedule.',
         };
     }
     if (response.ok) {
@@ -312,6 +280,8 @@ export async function updateMeetingForm(
     prevState: MeetingFormState,
     formData: FormData,
 ) {
+    console.log(formData.getAll('times'));
+
     // Validate form using Zod
     const validatedFields = UpdateMeetingForm.safeParse({
         meeting_title: formData.get('meeting_title'),
@@ -337,6 +307,8 @@ export async function updateMeetingForm(
         const access_token = formData.get('access_token');
         const id = formData.get('id');
 
+        console.log(times);
+
         response = await fetch(`http://localhost:7057/meeting-form/update-form?actor_id=${actor_id}`, {
             method: 'PUT',
             headers: {
@@ -356,7 +328,7 @@ export async function updateMeetingForm(
                 meeting_title: meeting_title,
                 meeting_description: meeting_description,
                 location: location,
-                times: times,
+                times: formData.getAll('times'),
                 duration: duration,
                 platform: platform,
             }),
@@ -385,7 +357,7 @@ export async function updateMeetingForm(
         redirect('/dashboard');
         return {
             ...prevState,
-            message: 'Meeting schedule created successfully.',
+            message: 'Meeting schedule updated successfully.',
             errors: {},
         };
     }
@@ -551,12 +523,143 @@ export async function updateMeeting(
         redirect('/dashboard');
         return {
             ...prevState,
-            message: 'Meeting created successfully.',
+            message: 'Meeting updated successfully.',
             errors: {},
         };
     }
 
     return prevState;
+}
+
+export async function updateUser(
+    prevState: UserState,
+    formData: FormData,
+) {
+    const validatedFields = UpdateUser.safeParse({
+        name: formData.get('name'),
+        email: formData.get('email'),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update User.',
+        };
+    }
+
+    let response;
+    try {
+        // Make a PUT request to your server API endpoint
+        const { name, email } = validatedFields.data;
+        const actor_id = formData.get('actor_id');
+        const access_token = formData.get('access_token');
+        const id = formData.get('id');
+
+        response = await fetch(`http://localhost:7057/user/update?actor_id=${actor_id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if needed
+                Authorization: `Bearer ${access_token}`
+            },
+            body: JSON.stringify({
+                id: id,
+                name: name,
+                email: email
+            }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Update User error:', errorData);
+            return {
+                ...prevState,
+                message: `Update User error: ${errorData.detail || response.statusText}`,
+                errors: errorData.errors || {},
+            };
+        }
+
+    } catch (error) {
+        // Handle any errors that occur during the request
+        console.error('Update User error:', error);
+        return {
+            ...prevState,
+            message: 'Update User error.',
+        };
+    }
+    if (response.ok) {
+        revalidatePath('/dashboard');
+        redirect('/dashboard');
+        return {
+            ...prevState,
+            message: 'User updated successfully.',
+            errors: {},
+        };
+    }
+
+    return prevState;
+}
+
+export async function RemoveCredentials(actor_id: any, access_token: any) {
+    const apiUrl = `http://localhost:7057/user/remove-credentials?user_id=${actor_id}`;
+    try {
+        // Make an HTTP PUT request to your cancel API endpoint
+        const response = await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if required
+                Authorization: `Bearer ${access_token}`
+            },
+        });
+
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            revalidatePath(`/dashboard/user/${actor_id}/edit`);
+
+            return { message: 'Removed Credentials.' };
+        } else {
+            // If response status is not successful, parse error response
+            const errorResponse = await response.json();
+            console.error('API Request Error:', errorResponse);
+            return { message: 'Failed to Remove Credentials.', error: errorResponse };
+        }
+
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return { message: 'Failed to Remove Credentials.' };
+    }
+}
+
+export async function AddCredentials(actor_id: any, access_token: any) {
+    const apiUrl = `http://localhost:7057/user/add-credentials?user_id=${actor_id}`;
+    try {
+        // Make an HTTP PUT request to your cancel API endpoint
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any additional headers if required
+                Authorization: `Bearer ${access_token}`
+            },
+        });
+
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            revalidatePath(`/dashboard/user/${actor_id}/edit`);
+
+            return { message: 'Added Credentials.' };
+        } else {
+            // If response status is not successful, parse error response
+            const errorResponse = await response.json();
+            console.error('API Request Error:', errorResponse);
+            return { message: 'Failed to Add Credentials.', error: errorResponse };
+        }
+
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return { message: 'Failed to Add Credentials.' };
+    }
 }
 
 export async function authenticate(

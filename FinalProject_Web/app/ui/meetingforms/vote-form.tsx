@@ -16,7 +16,7 @@ export default function VoteMeetingForm({
     const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const platformOptions = ["Zoom", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     const handleCheckboxChange = (timeId: any) => {
         if (selectedTimes.includes(timeId)) {

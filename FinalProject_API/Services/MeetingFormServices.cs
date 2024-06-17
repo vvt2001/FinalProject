@@ -14,6 +14,7 @@ using FinalProject_API.Common;
 using FinalProject_API.Wrappers;
 using FinalProject_API.Helpers;
 using Google.Apis.Calendar.v3.Data;
+using System.Collections;
 
 namespace FinalProject_API.Services
 {
@@ -106,6 +107,9 @@ namespace FinalProject_API.Services
                 var oldMeetingTimes = await _context.meetingtimes.Where(o => o.meetingform_id == updating.id).ToListAsync();
                 _context.meetingtimes.RemoveRange(oldMeetingTimes);
 
+                var removed_history = await _context.votinghistories.Where(o => oldMeetingTimes.Select(o => o.ID).ToList().Contains(o.meetingtime_id)).ToListAsync();
+                _context.votinghistories.RemoveRange(removed_history);
+
                 var meetingtimes = new List<MeetingTime>();
                 foreach (var time in updating.times)
                 {
@@ -175,55 +179,104 @@ namespace FinalProject_API.Services
 
         public async Task<bool> VoteForm(MeetingFormVoting voting)
         {
-            var attendee = _context.attendees.Where(o => o.meetingform_id == voting.meetingform_id && o.email == voting.email);
-            if(attendee.Count() > 0)
-            {
-                throw new InvalidProgramException("Email already used for this meeting");
-            }
+            var attendees = await _context.attendees.Where(o => o.meetingform_id == voting.meetingform_id && o.email == voting.email).FirstOrDefaultAsync();
             var meeting_form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendees).Include(o => o.owner).FirstOrDefaultAsync(o => o.ID == voting.meetingform_id);
+            var voted_times = await _context.meetingtimes.Where(o => voting.meetingtime_ids.Contains(o.ID)).ToListAsync();
             if (meeting_form == null)
             {
                 throw new InvalidProgramException("Meeting schedule not found");
             }
-
-            meeting_form.trangthai = (int)trangthai_MeetingForm.Voting;
-
-            if (voting.meetingtime_ids == null || voting.meetingtime_ids.Count < 1)
+            if (attendees != null)
             {
-                throw new InvalidProgramException("Must vote for atleast 1 meeting time(s)");
-            }
-            var new_attendee = new Attendee();
-            new_attendee.ID = SlugID.New();
-            new_attendee.email = voting.email;
-            new_attendee.name = voting.name;
-            new_attendee.meetingform_id = voting.meetingform_id;
+                attendees.name = voting.name;
+                _context.attendees.Update(attendees);
 
-            var voted_times = await _context.meetingtimes.Where(o => voting.meetingtime_ids.Contains(o.ID)).ToListAsync();
-            foreach (var time in voted_times)
-            {
-                time.vote_count += 1;
-            }
-            try
-            {
-                _context.attendees.Add(new_attendee);
-                _context.meetingtimes.UpdateRange(voted_times);
-                _context.meetingforms.Update(meeting_form);
+                var voting_history = await _context.votinghistories.Where(o => o.attendee_id == attendees.ID && o.meetingform_id == voting.meetingform_id).ToListAsync();
+                var removed_voting_history = voting_history.Where(o => !voting.meetingtime_ids.Contains(o.meetingtime_id)).ToList();
+                _context.votinghistories.RemoveRange(removed_voting_history);
+
+                foreach (var meetingtime_id in voting.meetingtime_ids.Except(voting_history.Select(o => o.meetingtime_id).ToList()).ToList())
+                {
+                    var new_voting_history = new VotingHistory
+                    {
+                        ID = SlugID.New(),
+                        meetingtime_id = meetingtime_id,
+                        meetingform_id = voting.meetingform_id,
+                        attendee_id = attendees.ID
+                    };
+
+                    _context.votinghistories.Add(new_voting_history);
+                }
 
                 await _context.SaveChangesAsync();
-                var voted_times_string = voted_times.Select(o => o.time.ToString("dd/MM/yyyy HH:mm")).ToList();
 
+                var meeting_times = await _context.meetingtimes.Where(o => o.meetingform_id == voting.meetingform_id).ToListAsync();
+                foreach (var time in meeting_times)
+                {
+                    time.vote_count = _context.votinghistories.Where(o => o.meetingform_id == voting.meetingform_id && o.meetingtime_id == time.ID).Count();
+                    _context.meetingtimes.Update(time);
+                }
+
+                await _context.SaveChangesAsync();
+
+                //Send email
+                var voted_times_string = voted_times.Select(o => o.time.ToString("dd/MM/yyyy HH:mm")).ToList();
                 var most_voted_time = meeting_form.times.OrderByDescending(o => o.vote_count).FirstOrDefault();
                 if (most_voted_time != null && voted_times_string.Count > 0)
                 {
                     await _onlineMeetingServices.SendSystemEmail(meeting_form, $"Meeting '{meeting_form.meeting_title}': New attendee has voted for a meeting time", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\nCurrently, the meeting are scheduled to be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} with {most_voted_time.vote_count} votes.\nCheck the meeting's info here {meeting_form.URL}");
                 }
-
-                return true;
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                meeting_form.trangthai = (int)trangthai_MeetingForm.Voting;
+
+                if (voting.meetingtime_ids == null || voting.meetingtime_ids.Count < 1)
+                {
+                    throw new InvalidProgramException("Must vote for atleast 1 meeting time(s)");
+                }
+                var new_attendee = new Attendee();
+                new_attendee.ID = SlugID.New();
+                new_attendee.email = voting.email;
+                new_attendee.name = voting.name;
+                new_attendee.meetingform_id = voting.meetingform_id;
+
+                _context.attendees.Add(new_attendee);
+                _context.meetingforms.Update(meeting_form);
+
+                foreach (var meetingtime_id in voting.meetingtime_ids)
+                {
+                    var new_voting_history = new VotingHistory
+                    {
+                        ID = SlugID.New(),
+                        meetingtime_id = meetingtime_id,
+                        meetingform_id = voting.meetingform_id,
+                        attendee_id = new_attendee.ID
+                    };
+
+                    _context.votinghistories.Add(new_voting_history);
+                }
+
+                await _context.SaveChangesAsync();
+
+                var meeting_times = await _context.meetingtimes.Where(o => o.meetingform_id == voting.meetingform_id).ToListAsync();
+                foreach (var time in meeting_times)
+                {
+                    time.vote_count = _context.votinghistories.Where(o => o.meetingform_id == voting.meetingform_id && o.meetingtime_id == time.ID).Count();
+                    _context.meetingtimes.Update(time);
+                }
+
+                await _context.SaveChangesAsync();
+
+                //Send email
+                var voted_times_string = voted_times.Select(o => o.time.ToString("dd/MM/yyyy HH:mm")).ToList();
+                var most_voted_time = meeting_form.times.OrderByDescending(o => o.vote_count).FirstOrDefault();
+                if (most_voted_time != null && voted_times_string.Count > 0)
+                {
+                    await _onlineMeetingServices.SendSystemEmail(meeting_form, $"Meeting '{meeting_form.meeting_title}': New attendee has voted for a meeting time", $"A new attendee has voted for the meeting times {string.Join(", ", voted_times_string)}.\nCurrently, the meeting are scheduled to be held at {most_voted_time.time.ToString("dd/MM/yyyy HH:mm")} with {most_voted_time.vote_count} votes.\nCheck the meeting's info here {meeting_form.URL}");
+                }
             }
+            return true;
         }
 
         public async Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id)
@@ -264,9 +317,11 @@ namespace FinalProject_API.Services
             {
                 var attendees = await _context.attendees.Where(a => a.meetingform_id == id).ToListAsync();
                 attendees.ForEach(a => a.meetingform_id = null);
+
                 await _context.SaveChangesAsync();
-                await _context.meetingtimes.Where(o => o.meetingform_id == id).ExecuteDeleteAsync();
                 await _context.meetingforms.Where(o => o.ID == id).ExecuteDeleteAsync();
+                await _context.attendees.Where(o => o.meetingform_id == null && o.meeting_id == null ).ExecuteDeleteAsync();
+
                 return true;
             }
             throw new InvalidProgramException("Mẫu cuộc họp không tồn tại");

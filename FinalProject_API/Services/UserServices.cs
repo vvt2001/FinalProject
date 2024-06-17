@@ -14,6 +14,15 @@ using System.Security.Claims;
 using System.Text;
 using FinalProject_API.View.Authentication;
 using FinalProject_Data.Enum.Meeting;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Util.Store;
+using Microsoft.Identity.Client;
+using FinalProject_API.View.GoogleCredentials;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Calendar.v3.Data;
+using Google.Apis.Auth.OAuth2.Flows;
+using Azure.Core;
 
 namespace FinalProject_API.Services
 {
@@ -24,6 +33,8 @@ namespace FinalProject_API.Services
         Task<User> Get(string id, string actor_id);
         Task<List<User>> GetAll();
         Task<bool> Update(UserUpdating updating, string actor_id);
+        Task<bool> RemoveCredentials(string user_id);
+        Task<bool> AddCredentials(string user_id);
     }
 
     public class UserServices : IUserServices
@@ -42,6 +53,9 @@ namespace FinalProject_API.Services
             _meetingFormServices = meetingFormServices;
             _meetingServices = meetingServices;
         }
+
+        static string ApplicationName = "Scheduler";
+        static string[] CalendarScopes = { CalendarService.Scope.Calendar };
 
         public async Task<LoginResponse> Authenticate(LoginRequest request)
         {
@@ -128,7 +142,6 @@ namespace FinalProject_API.Services
             if (user != null)
             {
                 user.name = updating.name;
-                user.username = updating.username;
                 user.email = updating.email;
 
                 _context.users.Update(user);
@@ -192,10 +205,11 @@ namespace FinalProject_API.Services
 
         public async Task<bool> RemoveCredentials(string user_id)
         {
-            var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
+            var user = await Get(user_id, user_id);
+            var credentials = await _context.googlemeetcredentials.Where(o => o.user_id == user_id).ToListAsync();
             if (credentials != null)
             {
-                _context.googlemeetcredentials.Remove(credentials);
+                _context.googlemeetcredentials.RemoveRange(credentials);
 
                 var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
                 var meetings = await _meetingServices.GetAllMeeting(user_id);
@@ -212,6 +226,16 @@ namespace FinalProject_API.Services
                     _context.meetings.Update(meeting);
                 }
 
+                user.has_googlecredentials = false;
+                _context.users.Update(user);
+
+
+                var client = new HttpClient();
+                var revokeTokenEndpoint = $"https://oauth2.googleapis.com/revoke?token={credentials.OrderByDescending(o => o.IssuedUtc).FirstOrDefault().AccessToken}";
+
+                var response = await client.PostAsync(revokeTokenEndpoint, null);
+                response.EnsureSuccessStatusCode();
+
                 return await _context.SaveChangesAsync() > 0;
             }
             throw new InvalidProgramException("Can't find user's credentials");
@@ -219,29 +243,99 @@ namespace FinalProject_API.Services
 
         public async Task<bool> AddCredentials(string user_id)
         {
+            var user = await Get(user_id, user_id);
             var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
             if (credentials != null)
             {
-                _context.googlemeetcredentials.Remove(credentials);
-
-                var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
-                var meetings = await _meetingServices.GetAllMeeting(user_id);
-
-                foreach (var meeting_form in meeting_forms)
-                {
-                    meeting_form.is_active = false;
-                    _context.meetingforms.Update(meeting_form);
-                }
-
-                foreach (var meeting in meetings)
-                {
-                    meeting.is_active = false;
-                    _context.meetings.Update(meeting);
-                }
-
-                return await _context.SaveChangesAsync() > 0;
+                throw new InvalidProgramException("User's already authenticated");
             }
-            throw new InvalidProgramException("Can't find user's credentials");
+
+            // Authenticate the user and save the token to the database
+            UserCredential credential = await AuthenticateUserCalendarAsync();
+            await SaveTokensToDatabase(credential, user_id);
+
+            var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
+            var meetings = await _meetingServices.GetAllMeeting(user_id);
+
+            foreach (var meeting_form in meeting_forms)
+            {
+                meeting_form.is_active = true;
+                _context.meetingforms.Update(meeting_form);
+            }
+
+            foreach (var meeting in meetings)
+            {
+                meeting.is_active = true;
+                _context.meetings.Update(meeting);
+            }
+
+            return await _context.SaveChangesAsync() > 0;
         }
+
+        private async Task<UserCredential> AuthenticateUserCalendarAsync()
+        {
+            var dataStore = new FileDataStore(ApplicationName);
+
+            // Clear existing credentials
+            await dataStore.ClearAsync();
+
+            return await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                GetClientSecrets(),
+                CalendarScopes,
+                "user",
+                CancellationToken.None,
+                dataStore);
+        }
+
+        private async Task<bool> SaveTokensToDatabase(UserCredential credential, string actor_id)
+        {
+            var token = new GoogleMeetCredentials
+            {
+                ID = SlugID.New(),
+                AccessToken = credential.Token.AccessToken,
+                TokenType = credential.Token.TokenType,
+                ExpiresIn = (int)credential.Token.ExpiresInSeconds,
+                RefreshToken = credential.Token.RefreshToken,
+                Scope = credential.Token.Scope,
+                Issued = credential.Token.Issued,
+                IssuedUtc = credential.Token.IssuedUtc,
+                user_id = actor_id,
+            };
+            _context.googlemeetcredentials.Add(token);
+
+            var user = await _context.users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(k => k.ID == actor_id);
+            if (user == null)
+            {
+                throw new InvalidProgramException($"Can't find user with id: '{actor_id}'");
+            }
+            user.has_googlecredentials = true;
+            _context.users.Update(user);
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+
+        private ClientSecrets GetClientSecrets()
+        {
+            // Get the Google credentials from the configuration
+            var googleCredentials = _configuration.GetSection("GoogleCredentials").Get<GoogleCredentials>();
+
+            if (googleCredentials?.web == null)
+            {
+                throw new InvalidOperationException("Google credentials are not configured correctly in appsettings.json.");
+            }
+
+            // Create the client secrets object from the configuration
+            var clientSecrets = new ClientSecrets
+            {
+                ClientId = googleCredentials.web.client_id,
+                ClientSecret = googleCredentials.web.client_secret
+            };
+
+            return clientSecrets;
+        }
+
     }
 }

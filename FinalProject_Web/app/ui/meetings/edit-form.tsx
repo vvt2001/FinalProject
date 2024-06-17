@@ -12,7 +12,7 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
     const initialState = { message: null, errors: {} };
     //const updateMeetingWithId = updateMeeting.bind(null, meeting.id);
     const [state, dispatch] = useFormState(updateMeeting, initialState);
-    const platformOptions = ["Zoom", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     const formatDateTimeLocal = (date: string | number | Date) => {
         if (!date) return ''; // early exit for undefined/null dates

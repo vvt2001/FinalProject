@@ -154,6 +154,7 @@ namespace FinalProject_API.Services
             attendees.ForEach(a => a.meeting_id = null);
             await _context.SaveChangesAsync();
             await _context.meetings.Where(o => o.ID == id).ExecuteDeleteAsync();
+            await _context.attendees.Where(o => o.meetingform_id == null && o.meeting_id == null).ExecuteDeleteAsync();
             if (string.IsNullOrWhiteSpace(meetingEventID))
             {
                 throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");

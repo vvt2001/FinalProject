@@ -221,6 +221,9 @@ namespace FinalProject_Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("has_googlecredentials")
+                        .HasColumnType("bit");
+
                     b.Property<string>("hash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -255,6 +258,34 @@ namespace FinalProject_Data.Migrations
                     b.ToTable("users");
                 });
 
+            modelBuilder.Entity("FinalProject_Data.Model.VotingHistory", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("attendee_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingform_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("meetingtime_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("attendee_id");
+
+                    b.HasIndex("meetingform_id");
+
+                    b.HasIndex("meetingtime_id");
+
+                    b.ToTable("votinghistories");
+                });
+
             modelBuilder.Entity("FinalProject_Data.Model.Attendee", b =>
                 {
                     b.HasOne("FinalProject_Data.Model.Meeting", "meeting")
@@ -275,7 +306,7 @@ namespace FinalProject_Data.Migrations
                     b.HasOne("FinalProject_Data.Model.User", "owner")
                         .WithMany()
                         .HasForeignKey("owner_id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("owner");
@@ -303,6 +334,38 @@ namespace FinalProject_Data.Migrations
                     b.Navigation("meetingform");
                 });
 
+            modelBuilder.Entity("FinalProject_Data.Model.VotingHistory", b =>
+                {
+                    b.HasOne("FinalProject_Data.Model.Attendee", "attendee")
+                        .WithMany("voting_histories")
+                        .HasForeignKey("attendee_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinalProject_Data.Model.MeetingForm", "meetingform")
+                        .WithMany("voting_histories")
+                        .HasForeignKey("meetingform_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinalProject_Data.Model.MeetingTime", "meetingtime")
+                        .WithMany("voting_histories")
+                        .HasForeignKey("meetingtime_id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("attendee");
+
+                    b.Navigation("meetingform");
+
+                    b.Navigation("meetingtime");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.Attendee", b =>
+                {
+                    b.Navigation("voting_histories");
+                });
+
             modelBuilder.Entity("FinalProject_Data.Model.Meeting", b =>
                 {
                     b.Navigation("attendees");
@@ -313,6 +376,13 @@ namespace FinalProject_Data.Migrations
                     b.Navigation("attendees");
 
                     b.Navigation("times");
+
+                    b.Navigation("voting_histories");
+                });
+
+            modelBuilder.Entity("FinalProject_Data.Model.MeetingTime", b =>
+                {
+                    b.Navigation("voting_histories");
                 });
 #pragma warning restore 612, 618
         }

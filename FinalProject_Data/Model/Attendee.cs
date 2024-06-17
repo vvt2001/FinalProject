@@ -14,6 +14,7 @@ namespace FinalProject_Data.Model
     {
         public MeetingForm? meetingform { get; set; }
         public Meeting? meeting { get; set; }
+        public ICollection<VotingHistory> voting_histories { get; set; }
     }
     public class Attendee_properties : Entity
     {

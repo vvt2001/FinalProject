@@ -10,7 +10,6 @@ namespace FinalProject_API.View.User
         public string name { get; set; }
 
         [Required(ErrorMessage = "Tên tài khoản không được trống")]
-        public string username { get; set; }
         public string email { get; set; }
     }
 }

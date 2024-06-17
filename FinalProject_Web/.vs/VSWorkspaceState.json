@@ -3,16 +3,14 @@
     "",
     "\\app",
     "\\app\\dashboard",
-    "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\[id]",
-    "\\app\\dashboard\\meetingforms\\[id]\\edit",
     "\\app\\dashboard\\meetings",
-    "\\app\\dashboard\\meetings\\[id]",
-    "\\app\\dashboard\\meetings\\[id]\\edit",
-    "\\app\\guest",
-    "\\app\\guest\\[id]",
-    "\\app\\guest\\[id]\\vote"
+    "\\app\\dashboard\\user",
+    "\\app\\dashboard\\user\\[id]",
+    "\\app\\dashboard\\user\\[id]\\edit",
+    "\\app\\register",
+    "\\app\\ui",
+    "\\app\\ui\\dashboard"
   ],
-  "SelectedNode": "\\next.config.js",
+  "SelectedNode": "\\app\\ui\\dashboard\\nav-links.tsx",
   "PreviewInSolutionExplorer": false
 }

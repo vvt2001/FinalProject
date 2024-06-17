@@ -172,3 +172,30 @@ export async function fetchMeetingById(id: string, actor_id: any) {
     }
 }
 
+export async function fetchUserById(id: string, actor_id: any) {
+    noStore();
+
+    try {
+        // Make a request to your server API to fetch the meeting form by ID
+        const response = await fetch(`http://localhost:7057/user/get/${id}?actor_id=${actor_id}`);
+        const responseData = await response.json();
+
+        // Extract the array of invoices from the response data
+        const userData = responseData.data;
+
+        // Map the fetched data to the MeetingForm type definition
+        const user: User = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            has_googlecredentials: userData.has_googlecredentials,
+            access_token: userData.access_token,
+        };
+
+        return user;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch user.');
+    }
+}
