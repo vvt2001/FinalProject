@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Users\AD\source\repos\FinalProject\FinalProject_API\bin\Release\net6.0\publish\</_PublishTargetUrl>
-    <History>True|2024-06-06T02:23:29.8603647Z;</History>
+    <History>True|2024-06-17T03:05:51.4450311Z;True|2024-06-06T09:23:29.8603647+07:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
 </Project>

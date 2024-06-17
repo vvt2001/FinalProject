@@ -38,6 +38,7 @@ async function getUser(username: string, password: string): Promise<User | undef
             name: userData.name,
             email: userData.email,
             access_token: userData.access_token,
+            has_googlecredentials: userData.has_googlecredentials
         };
 
         cookies().set(
