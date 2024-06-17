@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { signIn } from '@/auth';
 import { AccountState, MeetingFormState, MeetingState, User, UserState } from './definitions';
 import { cookies } from "next/headers";
 
@@ -93,7 +92,7 @@ const VoteMeetingForm = VotingFormSchema;
 const BookMeetingForm = BookingFormSchema;
 const UpdateMeeting = MeetingSchema.omit({ id: true });
 const UpdateUser = UserSchema.omit({ id: true });
-const LoginForm = LoginSchema.omit({ id: true });
+const LoginForm = LoginSchema;
 
 export async function createMeetingForm(prevState: MeetingFormState, formData: FormData) {
     console.log("actionside");
@@ -787,7 +786,6 @@ export async function authenticate(
 export async function signOut() {
     try {
         // Clear cookies
-        cookies().set('actor_id', '', { httpOnly: true, path: '/', maxAge: 0 });
         cookies().set('access_token', '', { httpOnly: true, path: '/', maxAge: 0 });
 
     } catch (error) {
