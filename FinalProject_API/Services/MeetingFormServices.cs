@@ -15,6 +15,7 @@ using FinalProject_API.Wrappers;
 using FinalProject_API.Helpers;
 using Google.Apis.Calendar.v3.Data;
 using System.Collections;
+using Microsoft.Extensions.Configuration;
 
 namespace FinalProject_API.Services
 {
@@ -35,18 +36,21 @@ namespace FinalProject_API.Services
         private readonly IMapper _mapper;
         private readonly IOnlineMeetingServices _onlineMeetingServices;
         private readonly IMeetingServices _meetingServices;
+        private readonly IConfiguration _configuration;
 
         public MeetingFormServices(
             DatabaseContext context,
             IMapper mapper,
             IOnlineMeetingServices onlineMeetingServices,
-            IMeetingServices meetingServices
+            IMeetingServices meetingServices,
+            IConfiguration configuration
         )
         {
             _context = context;
             _mapper = mapper;
             _onlineMeetingServices = onlineMeetingServices;
             _meetingServices = meetingServices;
+            _configuration = configuration;
         }
 
         public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
@@ -58,7 +62,7 @@ namespace FinalProject_API.Services
             }
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
-            new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
+            new_meeting_form.URL = $"http://{_configuration["EC2_IP"]}:3000/guest/{new_meeting_form.ID}/vote";
             new_meeting_form.trangthai = (int)trangthai_MeetingForm.New;
             new_meeting_form.meeting_title = creating.meeting_title;
             new_meeting_form.meeting_description = creating.meeting_description;
