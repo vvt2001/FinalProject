@@ -57,14 +57,33 @@ export function CopyVoteUrl({ url }: { url: string }) {
     const [copySuccess, setCopySuccess] = useState(false);
 
     const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(url);
-            setCopySuccess(true);
-            setTimeout(() => {
-                setCopySuccess(false);
-            }, 1000); // Reset copy success message after 1 second
-        } catch (error) {
-            console.error('Failed to copy URL:', error);
+        if (navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(url);
+                setCopySuccess(true);
+                setTimeout(() => {
+                    setCopySuccess(false);
+                }, 1000); // Reset copy success message after 1 second
+            } catch (error) {
+                console.error('Failed to copy URL:', error);
+            }
+        } else {
+            // Fallback method for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setCopySuccess(true);
+                setTimeout(() => {
+                    setCopySuccess(false);
+                }, 1000); // Reset copy success message after 1 second
+            } catch (error) {
+                console.error('Fallback: Failed to copy URL:', error);
+            } finally {
+                document.body.removeChild(textArea);
+            }
         }
     };
 
@@ -87,6 +106,7 @@ export function CopyVoteUrl({ url }: { url: string }) {
         </div>
     );
 }
+
 
 export function DeleteMeetingForm({ id }: { id: string }) {
     //const deleteMeetingFormWithId = deleteMeetingForm.bind(null, id);

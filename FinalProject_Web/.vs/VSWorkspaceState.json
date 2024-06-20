@@ -3,7 +3,6 @@
     "",
     "\\app",
     "\\app\\dashboard",
-    "\\app\\dashboard\\(overview)",
     "\\app\\dashboard\\user",
     "\\app\\dashboard\\user\\[id]",
     "\\app\\dashboard\\user\\[id]\\edit",
