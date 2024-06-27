@@ -12,6 +12,7 @@ namespace FinalProject_Data
         {
 
             var connectionString = "Server=VVT;Database=FinalProject_MeetingScheduler;User Id=vvt1508;Password=123456a@;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True";
+            //var connectionString = "Server=104.197.148.232;Database=FinalProject_MeetingScheduler;User Id=vvt1508;Password=123456a@;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True";
 
             var optionsBuilder = new DbContextOptionsBuilder<DatabaseContext>();
             optionsBuilder.UseSqlServer(connectionString);

@@ -3,11 +3,9 @@ import {
   CustomerField,
   CustomersTableType,
   InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
   User,
-  Revenue,
   MeetingForm,
+  Meeting,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -17,16 +15,97 @@ const ITEMS_PER_PAGE = 5;
 
 export async function fetchFilteredMeetingForms(
     query: string,
-    currentPage: number
+    currentPage: number,
+    actor_id: any
 ) {
     noStore();
 
     try {
-        console.log(query)
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
 
-        const response = await fetch(`http://localhost:7057/meeting/search-form?actor_id=4efyqow4ywdutzb52oymalf5d&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
+        const response = await fetch(`http://localhost:7057/meeting-form/search-form?actor_id=${actor_id}&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
+        const responseData = await response.json();
+
+        // Extract the array of meetings from the response data
+        const meetingForms = responseData.data;
+
+        return meetingForms;
+    }
+    catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch meeting schedules.');
+    }
+}
+
+export async function fetchMeetingFormPages(actor_id: any) {
+    noStore();
+
+    try {
+        // Make a request to your server API to fetch the total count of meeting forms
+        const response = await fetch(`http://localhost:7057/meeting-form/get-all-form?actor_id=${actor_id}`);
+
+        const responseData = await response.json();
+
+        const count = responseData.data.length;
+
+        const totalPages = Math.ceil(Number(count) / ITEMS_PER_PAGE);
+        return totalPages;
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch total number of meeting schedules.');
+    }
+}
+
+export async function fetchMeetingFormById(id: string, actor_id: any) {
+    noStore();
+
+    try {
+        // Make a request to your server API to fetch the meeting form by ID
+        const response = await fetch(`http://localhost:7057/meeting-form/get-form/${id}?actor_id=${actor_id}`);
+        const responseData = await response.json();
+
+        // Extract the array of invoices from the response data
+        const meetingFormData = responseData.data;
+
+        // Transforming the times array
+        const timesData = meetingFormData.times.map((time: { id: any; time: string | number | Date; vote_count: any; }) => ({
+            id: time.id,
+            time: new Date(time.time),
+            vote_count: time.vote_count
+        }));
+
+        // Map the fetched data to the MeetingForm type definition
+        const meetingForm: MeetingForm = {
+            id: meetingFormData.id,
+            meeting_title: meetingFormData.meeting_title,
+            meeting_description: meetingFormData.meeting_description,
+            location: meetingFormData.location,
+            platform: meetingFormData.platform,
+            duration: meetingFormData.duration,
+            times: timesData,
+        };
+
+        return meetingForm;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch meeting.');
+    }
+}
+
+export async function fetchFilteredMeeting(
+    query: string,
+    currentPage: number,
+    actor_id: any
+) {
+    noStore();
+
+    try {
+
+        if (currentPage == null || currentPage < 1) currentPage = 1;
+
+        const response = await fetch(`http://localhost:7057/meeting/search-meeting?actor_id=${actor_id}&meeting_title=${query}&PageNumber=${currentPage}&PageSize=${ITEMS_PER_PAGE}`);
         const responseData = await response.json();
 
         // Extract the array of meetings from the response data
@@ -40,12 +119,13 @@ export async function fetchFilteredMeetingForms(
     }
 }
 
-export async function fetchMeetingFormPages() {
+export async function fetchMeetingPages(actor_id: any) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the total count of meeting forms
-        const response = await fetch(`http://localhost:7057/meeting/get-all-form?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting/get-all-meeting?actor_id=${actor_id}`);
+
         const responseData = await response.json();
 
         const count = responseData.data.length;
@@ -54,37 +134,31 @@ export async function fetchMeetingFormPages() {
         return totalPages;
     } catch (error) {
         console.error('Database Error:', error);
-        throw new Error('Failed to fetch total number of invoices.');
+        throw new Error('Failed to fetch total number of meetings.');
     }
 }
 
-export async function fetchMeetingFormById(id: string) {
+export async function fetchMeetingById(id: string, actor_id: any) {
     noStore();
 
     try {
         // Make a request to your server API to fetch the meeting form by ID
-        const response = await fetch(`http://localhost:7057/meeting/get-form/${id}?actor_id=4efyqow4ywdutzb52oymalf5d`);
+        const response = await fetch(`http://localhost:7057/meeting/get-meeting/${id}?actor_id=${actor_id}`);
         const responseData = await response.json();
 
         // Extract the array of invoices from the response data
-        const meetingFormData = responseData.data;
-
-        // Transforming the times array
-        const timesData = meetingFormData.times.map(time => ({
-            id: time.id,
-            time: new Date(time.time),
-        }));
+        const meetingData = responseData.data;
 
         // Map the fetched data to the MeetingForm type definition
-        const meetingForm: MeetingForm = {
-            id: meetingFormData.id,
-            meeting_title: meetingFormData.meeting_title,
-            meeting_description: meetingFormData.meeting_description,
-            location: meetingFormData.location,
-            platform: meetingFormData.platform,
-            duration: meetingFormData.duration,
-            times: timesData,
-            attendee: meetingFormData.attendee,
+        const meetingForm: Meeting = {
+            id: meetingData.id,
+            meeting_title: meetingData.meeting_title,
+            meeting_description: meetingData.meeting_description,
+            location: meetingData.location,
+            platform: meetingData.platform,
+            duration: meetingData.duration,
+            starttime: meetingData.starttime,
+            attendees: meetingData.attendees,
         };
 
         return meetingForm;
@@ -95,3 +169,30 @@ export async function fetchMeetingFormById(id: string) {
     }
 }
 
+export async function fetchUserById(id: string, actor_id: any) {
+    noStore();
+
+    try {
+        // Make a request to your server API to fetch the meeting form by ID
+        const response = await fetch(`http://localhost:7057/user/get/${id}?actor_id=${actor_id}`);
+        const responseData = await response.json();
+
+        // Extract the array of invoices from the response data
+        const userData = responseData.data;
+
+        // Map the fetched data to the MeetingForm type definition
+        const user: User = {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            has_googlecredentials: userData.has_googlecredentials,
+            access_token: userData.access_token,
+        };
+
+        return user;
+
+    } catch (error) {
+        console.error('Database Error:', error);
+        throw new Error('Failed to fetch user.');
+    }
+}

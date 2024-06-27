@@ -8,7 +8,7 @@ namespace FinalProject_Data.Enum.Meeting
 {
     public enum trangthai_MeetingTime
     {
-        moi = 1,
-        da_su_dung
+        New = 1,
+        Used
     }
 }

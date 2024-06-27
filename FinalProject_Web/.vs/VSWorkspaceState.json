@@ -3,12 +3,15 @@
     "",
     "\\app",
     "\\app\\dashboard",
-    "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\create",
+    "\\app\\dashboard\\(overview)",
+    "\\app\\dashboard\\user",
+    "\\app\\dashboard\\user\\[id]",
+    "\\app\\dashboard\\user\\[id]\\edit",
     "\\app\\login",
     "\\app\\register",
-    "\\app\\ui"
+    "\\app\\ui",
+    "\\app\\ui\\dashboard"
   ],
-  "SelectedNode": "\\app\\dashboard\\meetingforms\\create\\page.tsx",
+  "SelectedNode": "\\app\\dashboard\\user\\[id]\\edit\\page.tsx",
   "PreviewInSolutionExplorer": false
 }

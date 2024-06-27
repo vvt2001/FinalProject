@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 import { updateMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 
 export default function EditMeetingForm({
   meetingform
@@ -19,9 +19,9 @@ export default function EditMeetingForm({
   meetingform: MeetingForm;
     }) {
     const initialState = { message: null, errors: {} };
-    const updateInvoiceWithId = updateMeetingForm.bind(null, meetingform.id);
-    const [state, dispatch] = useFormState(updateInvoiceWithId, initialState);
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    //const updateInvoiceWithId = updateMeetingForm.bind(null, meetingform.id);
+    const [state, dispatch] = useFormState(updateMeetingForm, initialState);
+    const platformOptions = ["Google Meet"];
 
     const timeValues = meetingform.times.map((timeData: { time: string }) => {
         const dateTime = new Date(timeData.time);
@@ -36,7 +36,7 @@ export default function EditMeetingForm({
     const [selectedDateTimes, setSelectedDateTimes] = useState(timeValues);
 
     // Function to handle changes in the datetime input
-    const handleDateTimeChange = (index, event) => {
+    const handleDateTimeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes[index] = event.target.value;
         setSelectedDateTimes(newDateTimes);
@@ -48,14 +48,54 @@ export default function EditMeetingForm({
     };
 
     // Function to remove a datetime input
-    const removeDateTimeInput = (index) => {
+    const removeDateTimeInput = (index: number) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes.splice(index, 1);
         setSelectedDateTimes(newDateTimes);
     };
 
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
+
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name: string) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
+        };
+
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
+
+    // Function to handle form submission
+    const handleSubmit = async (event: any) => {
+        event.preventDefault(); // Prevent default form submission
+
+        // Create FormData object
+        const formData = new FormData(event.target);
+        formData.append('actor_id', actor_id);
+        formData.append('access_token', access_token);
+        formData.append('id', meetingform.id);
+
+        //// Call createMeetingForm function with form data and actor_id
+        //const result = await updateMeetingForm( state, formData);
+
+        // Update state with result
+        dispatch(formData);
+    };
+
   return (
-      <form action={dispatch}>
+      <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Meeting Title */}
@@ -146,7 +186,7 @@ export default function EditMeetingForm({
         {/* Duration (minutes) */}
         <div className="mb-4">
             <label htmlFor="duration" className="mb-2 block text-sm font-medium">
-                Enter your meeting's duration
+                Enter your meeting duration
             </label>
             <div className="relative mt-2 rounded-md">
                 <div className="relative">
@@ -197,7 +237,7 @@ export default function EditMeetingForm({
         >
           Cancel
         </Link>
-        <Button type="submit">Edit Invoice</Button>
+        <Button type="submit">Edit Schedule</Button>
       </div>
     </form>
   );

@@ -18,14 +18,12 @@ namespace FinalProject_API.Services
 {
     public interface IMeetingServices
     {
-        Task<string> CreateForm(MeetingFormCreating creating, string actor_id);
-        Task<MeetingForm> GetForm(string form_id, string actor_id);
-        Task<List<MeetingForm>> GetAllForm(string actor_id);
-        Task<PagedResponse<List<MeetingForm>>> SearchForm(MeetingFormSearching searching, string actor_id);
-        Task<bool> Delete(string id, string actor_id);
-        Task<bool> VoteForm(MeetingFormVoting voting);
-        Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id);
-        Task<bool> UpdateForm(MeetingFormUpdating updating, string actor_id);
+        Task<Meeting> GetMeeting(string form_id, string actor_id);
+        Task<List<Meeting>> GetAllMeeting(string actor_id);
+        Task<PagedResponse<List<Meeting>>> SearchMeeting(MeetingSearching searching, string actor_id);
+        Task<bool> DeleteMeeting(string id, string actor_id);
+        Task<bool> UpdateMeeting(MeetingUpdating updating, string actor_id);
+        Task<bool> CancelMeeting(string id, string actor_id);
     }
     public class MeetingServices : IMeetingServices
     {
@@ -43,113 +41,98 @@ namespace FinalProject_API.Services
             _onlineMeetingServices = onlineMeetingServices;
         }
 
-        public async Task<string> CreateForm(MeetingFormCreating creating, string actor_id)
+        public async Task<bool> UpdateMeeting(MeetingUpdating updating, string actor_id)
         {
-            var new_meeting_form = new MeetingForm();
-            new_meeting_form.ID = SlugID.New();
-            new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
-            new_meeting_form.trangthai = (int)trangthai_MeetingForm.Moi;
-            new_meeting_form.meeting_title = creating.meeting_title;
-            new_meeting_form.meeting_description = creating.meeting_description;
-            new_meeting_form.location = creating.location;
-            new_meeting_form.platform = creating.platform;
-            new_meeting_form.duration = creating.duration;
-            new_meeting_form.owner_id = actor_id;
-
-            var meetingtimes = new List<MeetingTime>();
-
-            foreach (var time in creating.times)
+            if (updating.attendees != null && updating.attendees.GroupBy(a => a.email).Any(g => g.Count() > 1))
             {
-                var meetingtime = new MeetingTime();
-
-                meetingtime.ID = SlugID.New();
-                meetingtime.meetingform_id = new_meeting_form.ID;
-                meetingtime.time = time;
-                meetingtime.duration = creating.duration;
-                meetingtime.trangthai = (int)trangthai_MeetingTime.moi;
-
-                meetingtimes.Add(meetingtime);
-
-                _context.meetingtimes.Add(meetingtime);
+                throw new InvalidProgramException("Không được phép trùng email");
             }
 
-            new_meeting_form.times = meetingtimes;
-            _context.meetingforms.Add(new_meeting_form);
+            var meeting = await GetMeeting(updating.id, actor_id);
 
-            await _context.SaveChangesAsync();
+            meeting.meeting_title = updating.meeting_title;
+            meeting.meeting_description = updating.meeting_description;
+            meeting.location = updating.location;
+            meeting.duration = updating.duration;
+            meeting.starttime = updating.starttime;
 
-            return new_meeting_form.ID;
-        }
+            var oldAttendees = await _context.attendees.Where(o => o.meeting_id == updating.id).ToListAsync();
+            var oldAttendees_emails = oldAttendees.Select(o => o.email).ToList();
 
-        public async Task<bool> UpdateForm(MeetingFormUpdating updating, string actor_id)
-        {
-            var meetingForm = await _context.meetingforms.AsNoTracking().FirstOrDefaultAsync(o => o.ID == updating.id);
-            if (meetingForm != null)
+            var deletedAttendees =  oldAttendees.Where(o => !updating.attendees.Select(t => t.email).ToList().Contains(o.email)).ToList();
+            _context.attendees.RemoveRange(deletedAttendees);
+
+            if (updating.attendees != null)
             {
-                meetingForm.meeting_title = updating.meeting_title;
-                meetingForm.meeting_description = updating.meeting_description;
-                meetingForm.location = updating.location;
-                meetingForm.platform = updating.platform;
-                meetingForm.duration = updating.duration;
-                meetingForm.owner_id = actor_id;
-
-                var oldMeetingTimes = await _context.meetingtimes.Where(o => o.meetingform_id == updating.id).ToListAsync();
-                _context.meetingtimes.RemoveRange(oldMeetingTimes);
-
-                var meetingtimes = new List<MeetingTime>();
-                foreach (var time in updating.times)
+                var newAttendees = updating.attendees.Where(o => !oldAttendees_emails.Contains(o.email)).ToList();
+                foreach (var attendee in newAttendees)
                 {
-                    var meetingtime = new MeetingTime();
+                    var new_attendee = new Attendee();
 
-                    meetingtime.ID = SlugID.New();
-                    meetingtime.meetingform_id = meetingForm.ID;
-                    meetingtime.time = time;
-                    meetingtime.duration = updating.duration;
-                    meetingtime.trangthai = (int)trangthai_MeetingTime.moi;
+                    new_attendee.ID = SlugID.New();
+                    new_attendee.email = attendee.email;
+                    new_attendee.name = attendee.name;
+                    new_attendee.meeting_id = meeting.ID;
+                    new_attendee.meetingform_id = meeting.meetingform_id;
 
-                    meetingtimes.Add(meetingtime);
-
-                    _context.meetingtimes.Add(meetingtime);
+                    _context.attendees.Add(new_attendee);
                 }
 
-                meetingForm.times = meetingtimes;
+                var nameChangedAttendee = updating.attendees.Where(o => oldAttendees_emails.Contains(o.email)).ToList();
+                foreach (var attendee in nameChangedAttendee)
+                {
+                    var updateAttendee = await _context.attendees.FirstOrDefaultAsync(o => o.email == attendee.email);
+                    if (updateAttendee != null)
+                    {
+                        updateAttendee.email = attendee.email;
+                        updateAttendee.name = attendee.name;
 
-                _context.meetingforms.Update(meetingForm);
-                return await _context.SaveChangesAsync() > 0;
+                        _context.attendees.Update(updateAttendee);
+                    }
+                }
             }
-            throw new InvalidProgramException("Cuộc họp không tồn tại");
+
+            _context.meetings.Update(meeting);
+            await _context.SaveChangesAsync();
+
+            if (string.IsNullOrWhiteSpace(meeting.event_id))
+            {
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+            }
+            await _onlineMeetingServices.UpdateGoogleMeetMeeting(meeting.event_id, actor_id, meeting);
+
+            return true;
         }
 
-        public async Task<MeetingForm> GetForm(string form_id, string actor_id)
+        public async Task<Meeting> GetMeeting(string form_id, string actor_id)
         {
-            var form = await _context.meetingforms.Include(o => o.times).Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == form_id);
-            if(form != null)
+            var meeting = await _context.meetings.Include(o => o.attendees).Include(o => o.owner).FirstOrDefaultAsync(o => o.ID == form_id);
+            if(meeting != null)
             {
-                return form;
+                return meeting;
             }
             else
             {
-                throw new InvalidProgramException("Không tìm thấy lịch họp");
+                throw new InvalidProgramException("Không tìm thấy cuộc họp");
             }
         }
 
-        public async Task<List<MeetingForm>> GetAllForm(string actor_id)
+        public async Task<List<Meeting>> GetAllMeeting(string actor_id)
         {
-            var forms = await _context.meetingforms.Include(o => o.attendee).Where(o => o.owner_id == actor_id).ToListAsync();
-            return forms;
+            var meetings = await _context.meetings.Include(o => o.attendees).Include(o => o.owner).Where(o => o.owner_id == actor_id).ToListAsync();
+            return meetings;
         }
 
-        public async Task<PagedResponse<List<MeetingForm>>> SearchForm(MeetingFormSearching searching, string actor_id)
+        public async Task<PagedResponse<List<Meeting>>> SearchMeeting(MeetingSearching searching, string actor_id)
         {
-            var pagedDatas = new PagedResponse<List<MeetingForm>>
+            var pagedDatas = new PagedResponse<List<Meeting>>
             {
                 PageNumber = searching.PageNumber,
                 PageSize = searching.PageSize
             };
 
-            var query = _context.meetingforms
-                        .Include(o => o.attendee)
-                        .Include(o => o.times)
+            var query = _context.meetings
+                        .Include(o => o.attendees)
                         .Where(o => o.owner_id == actor_id)
                         .AsQueryable();
 
@@ -163,74 +146,34 @@ namespace FinalProject_API.Services
             return pagedDatas;
         }
 
-        public async Task<bool> VoteForm(MeetingFormVoting voting)
+        public async Task<bool> DeleteMeeting(string id, string actor_id)
         {
-            var attendee = _context.attendees.Where(o => o.meetingform_id == voting.meetingform_id && o.email == voting.email);
-            if(attendee.Count() > 0)
-            {
-                throw new InvalidProgramException("Email đã được sử dụng cho cuộc họp này");
-            }
-            var new_attendee = new Attendee();
-            new_attendee.ID = SlugID.New();
-            new_attendee.email = voting.email;
-            new_attendee.name = voting.name;
-            new_attendee.meetingform_id = voting.meetingform_id;
-
-            var times = await _context.meetingtimes.Where(o => voting.meetingtime_ids.Contains(o.ID)).ToListAsync();
-            foreach (var time in times)
-            {
-                time.vote_count += 1;
-            }
-            try
-            {
-                _context.attendees.Add(new_attendee);
-                _context.meetingtimes.UpdateRange(times);
-
-                return await _context.SaveChangesAsync() > 0;
-            }
-            catch
-            {
-                throw new InvalidProgramException("Gặp lỗi trong quá trình xử lý");
-            }
-        }
-
-        public async Task<bool> BookMeeting(MeetingFormBooking booking, string actor_id)
-        {
-            var form = await _context.meetingforms.Include(o => o.attendee).FirstOrDefaultAsync(o => o.ID == booking.meetingform_id);
-            var prefered_time = await _context.meetingtimes.Where(o => o.meetingform_id == booking.meetingform_id).OrderByDescending(o => o.vote_count).FirstOrDefaultAsync();
-
-            form.starttime = prefered_time.time;
-            form.duration = prefered_time.duration;
-            form.trangthai = (int)trangthai_MeetingForm.KetThuc;
-
-            var meeting = _mapper.Map<MeetingForm, Meeting>(form);
-            meeting.starttime = form.starttime ?? DateTime.Now;
-            meeting.duration = form.duration;
-            meeting.ID = SlugID.New();
-            meeting.trangthai = (int)trangthai_Meeting.Moi;
-
-            foreach(var attendee in form.attendee)
-            {
-                attendee.meeting_id = meeting.ID;
-                _context.attendees.Update(attendee);
-            }
-            _context.meetings.Add(meeting);
-
+            var meeting = await GetMeeting(id, actor_id);
+            var meetingEventID = meeting.event_id;
+            var attendees = await _context.attendees.Where(a => a.meeting_id == id).ToListAsync();
+            attendees.ForEach(a => a.meeting_id = null);
             await _context.SaveChangesAsync();
-
-            return await _onlineMeetingServices.CreateGoogleMeetMeeting(meeting, actor_id);
+            await _context.meetings.Where(o => o.ID == id).ExecuteDeleteAsync();
+            await _context.attendees.Where(o => o.meetingform_id == null && o.meeting_id == null).ExecuteDeleteAsync();
+            if (string.IsNullOrWhiteSpace(meetingEventID))
+            {
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+            }
+            await _onlineMeetingServices.DeleteGoogleMeetMeeting(meetingEventID, actor_id);
+            return true;
         }
 
-        public async Task<bool> Delete(string id, string actor_id)
+        public async Task<bool> CancelMeeting(string id, string actor_id)
         {
-            var form = await _context.meetingforms.FirstOrDefaultAsync(o => o.ID == id);
-            if (form != null)
+            var meeting = await GetMeeting(id, actor_id);
+            if (string.IsNullOrWhiteSpace(meeting.event_id))
             {
-                await _context.meetingtimes.Where(o => o.meetingform_id == id).ExecuteDeleteAsync();
-                await _context.meetingforms.Where(o => o.ID == id).ExecuteDeleteAsync();
-                return true;
+                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
             }
-            throw new InvalidProgramException("Mẫu cuộc họp không tồn tại");
+            await _onlineMeetingServices.CancelGoogleMeetMeeting(meeting.event_id, actor_id);
+            meeting.trangthai = (int)trangthai_Meeting.Canceled;
+            _context.meetings.Update(meeting);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

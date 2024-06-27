@@ -18,6 +18,7 @@ namespace FinalProject_Data
             modelBuilder.ApplyConfiguration(new Meeting_configuration());
             modelBuilder.ApplyConfiguration(new MeetingForm_configuration());
             modelBuilder.ApplyConfiguration(new MeetingTime_configuration());
+            modelBuilder.ApplyConfiguration(new VotingHistory_configuration());
 
             //Attendee
             modelBuilder.ApplyConfiguration(new Attendee_configuration());
@@ -35,5 +36,6 @@ namespace FinalProject_Data
         public DbSet<MeetingTime> meetingtimes { get; set; }
         public DbSet<Attendee> attendees { get; set; }
         public DbSet<GoogleMeetCredentials> googlemeetcredentials { get; set; }
+        public DbSet<VotingHistory> votinghistories { get; set; }
     }
 }

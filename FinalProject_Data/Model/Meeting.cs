@@ -8,7 +8,7 @@ namespace FinalProject_Data.Model
 {
     public class Meeting : Meeting_properties
     {
-        public ICollection<Attendee>? attendee { get; set; }
+        public ICollection<Attendee>? attendees { get; set; }
         public User owner { get; set; }
     }
     public class Meeting_properties : Entity
@@ -22,12 +22,15 @@ namespace FinalProject_Data.Model
         public int trangthai { get; set; }
         public string owner_id { get; set; }
         public string? meeting_link { get;set; }
+        public string? event_id { get;set; }
+        public string? meetingform_id { get; set; }
+        public bool? is_active { get; set; } = true;
     }
     public class Meeting_configuration : IEntityTypeConfiguration<Meeting>
     {
         public void Configure(EntityTypeBuilder<Meeting> builder)
         {
-            builder.HasOne(m => m.owner).WithMany().HasForeignKey(m => m.owner_id).OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(m => m.owner).WithMany().HasForeignKey(m => m.owner_id).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

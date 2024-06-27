@@ -18,6 +18,8 @@ using eArchive.Service.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
+using Google;
 
 namespace FinalProject_API
 {
@@ -35,11 +37,14 @@ namespace FinalProject_API
         {
             services.AddControllers();
 
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1"}));
+
             /* services */
-            services.AddTransient<IMeetingServices, MeetingServices>();
+            services.AddTransient<IMeetingFormServices, MeetingFormServices>();
             services.AddTransient<IAccountServices, AccountServices>();
             services.AddTransient<IUserServices, UserServices>();
             services.AddTransient<IOnlineMeetingServices, OnlineMeetingServices>();
+            services.AddTransient<IMeetingServices, MeetingServices>();
 
             /* auto mapper */
             services.AddAutoMapper(k => k.AddProfile<AutoMapperProfile>(), typeof(Startup));
@@ -63,9 +68,7 @@ namespace FinalProject_API
                 };
             });
 
-            var connectionString = "Server=VVT;Database=FinalProject_MeetingScheduler;User Id=vvt1508;Password=123456a@;Trusted_Connection=False;Encrypt=True;TrustServerCertificate=True";
-
-            services.AddDbContext<DatabaseContext>(option => option.UseSqlServer(connectionString));
+            services.AddDbContext<DatabaseContext>(option => option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
@@ -76,6 +79,8 @@ namespace FinalProject_API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("http://localhost:7057/swagger/v1/swagger.json", "My API V1"));
             }
 
             app.UseHttpsRedirection();
@@ -89,6 +94,7 @@ namespace FinalProject_API
             {
                 endpoints.MapControllers();
             });
+
         }
 
         

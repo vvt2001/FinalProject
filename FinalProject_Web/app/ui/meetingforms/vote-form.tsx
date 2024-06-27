@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { voteMeetingForm } from '@/app/lib/actions';
+import {
+    ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export default function VoteMeetingForm({
     meetingform
@@ -13,12 +16,13 @@ export default function VoteMeetingForm({
 }) {
 
     console.log(meetingform);
-    const [selectedTimes, setSelectedTimes] = useState([]);
+    const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    const platformOptions = ["Google Meet"];
+    const [error, setError] = useState('');
 
-    const handleCheckboxChange = (timeId) => {
+    const handleCheckboxChange = (timeId: any) => {
         if (selectedTimes.includes(timeId)) {
             setSelectedTimes(selectedTimes.filter((id) => id !== timeId));
         } else {
@@ -26,7 +30,7 @@ export default function VoteMeetingForm({
         }
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body
@@ -37,8 +41,17 @@ export default function VoteMeetingForm({
             email: email
         };
 
-        // Send request to vote on meeting times
-        voteMeetingForm(requestBody);
+        try {
+            const { message } = await voteMeetingForm(requestBody);
+
+            if (message != 'Voted') {
+                setError(message);
+            } 
+
+        } catch (error) {
+            setError('Failed to vote.');
+        }
+
     };
 
     return (
@@ -147,15 +160,18 @@ export default function VoteMeetingForm({
                         </div>
                     </div>
                 </div>
+
                 {/* Render select list with checkboxes for meeting times */}
                 <div className="mb-4">
                     <label className="mb-2 block text-sm font-medium">
                         Vote for a meeting time
                     </label>
                     {meetingform.times.map((time, index) => (
-                        <div key={index} className="mb-4 ">
-                            <div className="flex flex-col md:flex-row items-start md:items-center">
-
+                        <div key={index} className="mb-4">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-200 mr-4">
+                                    <span className="text-sm font-medium">{time.vote_count}</span>
+                                </div>
                                 <div className="relative mt-2 rounded-md">
                                     <div className="relative">
                                         <label htmlFor={`time-${index}`} className="peer inline-block w-80 rounded-md border border-gray-200 py-2 pl-10 pr-2 text-sm outline-2 placeholder:text-gray-500 overflow-hidden">
@@ -207,7 +223,7 @@ export default function VoteMeetingForm({
                             <input
                                 id="email"
                                 name="email"
-                                type="string"
+                                type="email"
                                 step="0.01"
                                 placeholder="Enter your email"
                                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -217,6 +233,19 @@ export default function VoteMeetingForm({
                             />
                         </div>
                     </div>
+                </div>
+
+                <div
+                    className="flex h-8 items-end space-x-1"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
+                    {error && (
+                        <>
+                            <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                            <p className="text-sm text-red-500">{error}</p>
+                        </>
+                    )}
                 </div>
 
                 {/* Render submit button */}

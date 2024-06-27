@@ -1,22 +1,50 @@
 'use client';
 
 import { MeetingForm } from '@/app/lib/definitions';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { bookMeetingForm } from '@/app/lib/actions';
+import {
+    ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
+
+interface Time { id: any; time: string | number | Date; vote_count: any; }
 
 export default function BookMeetingForm({
     meetingform
 }: {
     meetingform: MeetingForm;
 }) {
-
-    console.log(meetingform);
+    console.log(meetingform.times);
     const [selectedTimes, setSelectedTimes] = useState([]);
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
-    const handleSubmit = (event) => {
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
+    const [error, setError] = useState('');
+
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name: string) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
+
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
+        };
+
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
+
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body
@@ -24,8 +52,17 @@ export default function BookMeetingForm({
             meetingform_id: meetingform.id,
         };
 
-        // Send request to book meeting
-        bookMeetingForm(requestBody);
+        try {
+            const { message } = await bookMeetingForm(requestBody, actor_id, access_token);
+
+            if (message != 'Booked') {
+                setError(message);
+            }
+
+        } catch (error) {
+            setError('Failed to book meeting.');
+        }
+
     };
 
     return (
@@ -139,10 +176,12 @@ export default function BookMeetingForm({
                     <label className="mb-2 block text-sm font-medium">
                         Vote for a meeting time
                     </label>
-                    {meetingform.times.map((time, index) => (
-                        <div key={index} className="mb-4 ">
-                            <div className="flex flex-col md:flex-row items-start md:items-center">
-
+                    {meetingform.times.map((time: Time, index) => (
+                        <div key={index} className="mb-4">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-200 mr-4">
+                                    <span className="text-sm font-medium">{time.vote_count}</span>
+                                </div>
                                 <div className="relative mt-2 rounded-md">
                                     <div className="relative">
                                         <label htmlFor={`time-${index}`} className="peer inline-block w-80 rounded-md border border-gray-200 py-2 pl-10 pr-2 text-sm outline-2 placeholder:text-gray-500 overflow-hidden">
@@ -153,6 +192,19 @@ export default function BookMeetingForm({
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div
+                    className="flex h-8 items-end space-x-1"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
+                    {error && (
+                        <>
+                            <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                            <p className="text-sm text-red-500">{error}</p>
+                        </>
+                    )}
                 </div>
 
                 {/* Render submit button */}

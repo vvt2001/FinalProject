@@ -6,7 +6,9 @@ namespace FinalProject_Data.Enum.Meeting
 {
     public enum trangthai_Meeting
     {
-        Moi = 1,
-        KetThuc,
+        Waiting = 1,
+        Ongoing = 2,
+        Ended = 3,
+        Canceled = 4,
     }
 }

@@ -50,7 +50,7 @@ namespace FinalProject_API.Services
             {
                 return user;
             }
-            throw new InvalidProgramException("Tài khoản không tồn tại");
+            throw new InvalidProgramException("Can't find user");
         }
 
         public bool VerifyPassword(User user, string password)
@@ -58,7 +58,7 @@ namespace FinalProject_API.Services
             /* valid password */
             if (!Crypto.Verify(password, user.salt, user.hash))
             {
-                throw new InvalidProgramException($"Mật khẩu không chính xác.");
+                throw new InvalidProgramException("Wrong password");
             }
 
             return true;
@@ -69,7 +69,7 @@ namespace FinalProject_API.Services
             /*** validate password ***/
             if (!ValidatePassword(passwordText))
             {
-                throw new InvalidProgramException("Mật khẩu không hợp lệ");
+                throw new InvalidProgramException("Password invalid");
             }
             /*************************/
             var result = new UserHash();

@@ -3,6 +3,7 @@ using FinalProject_API.View.Meeting;
 using FinalProject_API.View.User;
 using FinalProject_API.Wrappers;
 using FinalProject_Data.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -35,6 +36,7 @@ namespace FinalProject_API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("Update")]
         public async Task<ActionResult> Update([FromBody] UserUpdating updating, string actor_id)
         {
@@ -67,6 +69,34 @@ namespace FinalProject_API.Controllers
             try
             {
                 return Ok(new Response<LoginResponse>(await _userServices.Authenticate(request)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("remove-credentials")]
+        public async Task<ActionResult> RemoveCredentials(string user_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _userServices.RemoveCredentials(user_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("add-credentials")]
+        public async Task<ActionResult> AddCredentials(string user_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _userServices.AddCredentials(user_id)));
             }
             catch (Exception ex)
             {

@@ -23,6 +23,7 @@ namespace FinalProject_Data.Model
         public int trangthai { get; set; }
         public string hash { get; set; }
         public string salt { get; set; }
+        public bool has_googlecredentials { get; set; }
     }
 
     public class User_configuration : IEntityTypeConfiguration<User>
@@ -31,6 +32,8 @@ namespace FinalProject_Data.Model
         {
             builder.Property(o => o.username).HasMaxLength(200);
             builder.HasIndex(o => o.email).IsUnique();
+            builder.HasIndex(o => o.username).IsUnique();
+            builder.HasIndex(o => o.name).IsUnique();
         }
     }
 }

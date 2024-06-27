@@ -10,19 +10,20 @@ import {
 import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
-import { useState } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
+import { MeetingFormState } from '@/app/lib/definitions';
 
 export default function Form() {
     const initialState = { message: null, errors: {} };
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
-    const platformOptions = ["Zoom", "Microsoft Teams", "Google Meet"];
+    const platformOptions = ["Google Meet"];
 
     // State to store the selected datetime values
-    const [selectedDateTimes, setSelectedDateTimes] = useState([]);
+    const [selectedDateTimes, setSelectedDateTimes] = useState<string[]>([]);
 
     // Function to handle changes in the datetime input
-    const handleDateTimeChange = (index, event) => {
-        const newDateTimes = [...selectedDateTimes];
+    const handleDateTimeChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+        const newDateTimes: string[] = [...selectedDateTimes];
         newDateTimes[index] = event.target.value;
         setSelectedDateTimes(newDateTimes);
     };
@@ -33,33 +34,53 @@ export default function Form() {
     };
 
     // Function to remove a datetime input
-    const removeDateTimeInput = (index) => {
+    const removeDateTimeInput = (index: number) => {
         const newDateTimes = [...selectedDateTimes];
         newDateTimes.splice(index, 1);
         setSelectedDateTimes(newDateTimes);
     };
 
-    //// Function to handle form submission
-    //const handleSubmit = async (event) => {
-    //    event.preventDefault(); // Prevent default form submission
+    // State to store the actor_id
+    const [actor_id, setActorId] = useState('');
+    const [access_token, setAccessToken] = useState('');
 
-    //    // Create FormData object
-    //    const formData = new FormData(event.target);
+    // Retrieve actor_id and access_token from cookies
+    useEffect(() => {
+        const getCookie = (name: string) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts != undefined && parts.length === 2) {
+                return parts.pop()?.split(';').shift();
+            }
 
-    //    // Append selectedDateTimes to formData
-    //    selectedDateTimes.forEach((times, index) => {
-    //        formData.append(`times`, times);
-    //    });
+            // Return undefined if parts is undefined or length is not equal to 2
+            return undefined;
+        };
 
-    //    // Call createMeetingForm function with form data
-    //    const result = await createMeetingForm(state, formData);
+        const actorIdFromCookie = getCookie("actor_id");
+        const accessTokenFromCookie = getCookie("access_token");
+        setActorId(actorIdFromCookie || '');
+        setAccessToken(accessTokenFromCookie || '');
+    }, []);
 
-    //    // Update state with result
-    //    dispatch(result);
-    //};
+    // Function to handle form submission
+    const handleSubmit = async (event: any) => {
+        event.preventDefault(); // Prevent default form submission
+
+        // Create FormData object
+        const formData = new FormData(event.target);
+        formData.append('actor_id', actor_id);
+        formData.append('access_token', access_token);
+
+        //// Call createMeetingForm function with form data and actor_id
+        //const result = await createMeetingForm(state, formData);
+
+        // Update state with result
+        dispatch(formData);
+    };
 
     return (
-    <form action={dispatch}>
+    <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
 
         {/* Meeting Title */}
@@ -192,6 +213,9 @@ export default function Form() {
         ))}
 
       </div>
+            {state.message && (
+                <div className="text-red-500 mt-4">{state.message}</div>
+            )}
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/meetingforms"
@@ -199,7 +223,7 @@ export default function Form() {
         >
           Cancel
         </Link>
-        <Button type="submit">Create Invoice</Button>
+        <Button type="submit">Create Schedule</Button>
       </div>
     </form>
   );

@@ -11,8 +11,9 @@ namespace FinalProject_Data.Model
     public class MeetingForm : MeetingForm_properties
     {
         public ICollection<MeetingTime> times { get; set; }
-        public ICollection<Attendee>? attendee { get; set; }
+        public ICollection<Attendee>? attendees { get; set; }
         public User owner { get; set; }
+        public ICollection<VotingHistory> voting_histories { get; set; }
     }
     public class MeetingForm_properties : Entity
     {
@@ -25,12 +26,13 @@ namespace FinalProject_Data.Model
         public int platform { get; set; }
         public int trangthai { get; set; }
         public string owner_id { get; set; }
+        public bool? is_active { get; set; } = true;
     }
     public class MeetingForm_configuration : IEntityTypeConfiguration<MeetingForm>
     {
         public void Configure(EntityTypeBuilder<MeetingForm> builder)
         {
-            builder.HasOne(mf => mf.owner).WithMany().HasForeignKey(mf => mf.owner_id);
+            builder.HasOne(mf => mf.owner).WithMany().HasForeignKey(mf => mf.owner_id).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -3,6 +3,8 @@ import { UpdateMeetingForm, DeleteMeetingForm, CopyVoteUrl, BookMeeting } from '
 import MeetingFormStatus from '@/app/ui/meetingforms/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredMeetingForms } from '@/app/lib/data';
+import { cookies } from "next/headers";
+import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
 
 export default async function MeetingFormsTable({
     query,
@@ -11,16 +13,17 @@ export default async function MeetingFormsTable({
     query: string;
     currentPage: number;
 }) {
-    const meetingforms = await fetchFilteredMeetingForms(query, currentPage);
+    const cookieStore = cookies();
+    const actor_id = cookieStore.get("actor_id")?.value;
 
-    console.log(meetingforms);
+    const meetingforms = await fetchFilteredMeetingForms(query, currentPage, actor_id);
 
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            {meetingforms?.map((meetingform) => (
+            {meetingforms?.map((meetingform: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; url: string; }) => (
               <div
                 key={meetingform.id}
                 className="mb-2 w-full rounded-md bg-white p-4"
@@ -37,7 +40,7 @@ export default async function MeetingFormsTable({
                 <div className="flex w-full items-center justify-between pt-4">
                   <div>
                     <p className="text-xl font-medium">
-                      {meetingform.attendee.length}
+                      {meetingform.attendees.length}
                     </p>
                     <p>{meetingform.duration}</p>
                   </div>
@@ -75,7 +78,7 @@ export default async function MeetingFormsTable({
               </tr>
             </thead>
             <tbody className="bg-white">
-              {meetingforms?.map((meetingform) => (
+              {meetingforms?.map((meetingform: { id: string; meeting_title: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; meeting_description: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; duration: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; trangthai: number; attendees: string | any[]; url: string; }) => (
                 <tr
                   key={meetingform.id}
                   className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
@@ -95,7 +98,7 @@ export default async function MeetingFormsTable({
                     <MeetingFormStatus status={meetingform.trangthai} />
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 text-center">
-                    {meetingform.attendee.length}
+                    {meetingform.attendees.length}
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3 text-center">
                     <div className="flex justify-end gap-3">
