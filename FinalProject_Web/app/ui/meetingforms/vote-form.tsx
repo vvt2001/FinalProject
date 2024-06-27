@@ -8,6 +8,7 @@ import { voteMeetingForm } from '@/app/lib/actions';
 import {
     ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 export default function VoteMeetingForm({
     meetingform
@@ -21,6 +22,7 @@ export default function VoteMeetingForm({
     const [email, setEmail] = useState('');
     const platformOptions = ["Google Meet"];
     const [error, setError] = useState('');
+    const router = useRouter();
 
     const handleCheckboxChange = (timeId: any) => {
         if (selectedTimes.includes(timeId)) {
@@ -44,7 +46,11 @@ export default function VoteMeetingForm({
         try {
             const { message } = await voteMeetingForm(requestBody);
 
-            if (message != 'Voted') {
+            if (message === 'Voted') {
+                // Redirect to the dashboard
+                router.push('/guest/success');
+            }
+            else {
                 setError(message);
             } 
 

@@ -8,6 +8,7 @@ import { bookMeetingForm } from '@/app/lib/actions';
 import {
     ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 interface Time { id: any; time: string | number | Date; vote_count: any; }
 
@@ -24,6 +25,8 @@ export default function BookMeetingForm({
     const [actor_id, setActorId] = useState('');
     const [access_token, setAccessToken] = useState('');
     const [error, setError] = useState('');
+
+    const router = useRouter();
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
@@ -55,7 +58,11 @@ export default function BookMeetingForm({
         try {
             const { message } = await bookMeetingForm(requestBody, actor_id, access_token);
 
-            if (message != 'Booked') {
+            if (message === 'Booked') {
+                // Redirect to the dashboard
+                router.push('/dashboard');
+            }
+            else {
                 setError(message);
             }
 
