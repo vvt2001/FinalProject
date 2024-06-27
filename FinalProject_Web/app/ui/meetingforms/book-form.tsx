@@ -5,6 +5,9 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { bookMeetingForm } from '@/app/lib/actions';
+import {
+    ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
 
 interface Time { id: any; time: string | number | Date; vote_count: any; }
 
@@ -20,6 +23,7 @@ export default function BookMeetingForm({
     // State to store the actor_id
     const [actor_id, setActorId] = useState('');
     const [access_token, setAccessToken] = useState('');
+    const [error, setError] = useState('');
 
     // Retrieve actor_id and access_token from cookies
     useEffect(() => {
@@ -40,7 +44,7 @@ export default function BookMeetingForm({
         setAccessToken(accessTokenFromCookie || '');
     }, []);
 
-    const handleSubmit = (event: { preventDefault: () => void; }) => {
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body
@@ -48,8 +52,17 @@ export default function BookMeetingForm({
             meetingform_id: meetingform.id,
         };
 
-        // Send request to book meeting
-        bookMeetingForm(requestBody, actor_id, access_token);
+        try {
+            const { message } = await bookMeetingForm(requestBody, actor_id, access_token);
+
+            if (message != 'Booked') {
+                setError(message);
+            }
+
+        } catch (error) {
+            setError('Failed to book meeting.');
+        }
+
     };
 
     return (
@@ -179,6 +192,19 @@ export default function BookMeetingForm({
                             </div>
                         </div>
                     ))}
+                </div>
+
+                <div
+                    className="flex h-8 items-end space-x-1"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
+                    {error && (
+                        <>
+                            <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                            <p className="text-sm text-red-500">{error}</p>
+                        </>
+                    )}
                 </div>
 
                 {/* Render submit button */}

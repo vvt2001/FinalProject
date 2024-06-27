@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { Button } from '@/app/ui/button';
 import Link from 'next/link';
 import { voteMeetingForm } from '@/app/lib/actions';
+import {
+    ExclamationCircleIcon,
+} from '@heroicons/react/24/outline';
 
 export default function VoteMeetingForm({
     meetingform
@@ -17,6 +20,7 @@ export default function VoteMeetingForm({
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const platformOptions = ["Google Meet"];
+    const [error, setError] = useState('');
 
     const handleCheckboxChange = (timeId: any) => {
         if (selectedTimes.includes(timeId)) {
@@ -26,7 +30,7 @@ export default function VoteMeetingForm({
         }
     };
 
-    const handleSubmit = (event: any) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Prepare the request body
@@ -37,8 +41,17 @@ export default function VoteMeetingForm({
             email: email
         };
 
-        // Send request to vote on meeting times
-        voteMeetingForm(requestBody);
+        try {
+            const { message } = await voteMeetingForm(requestBody);
+
+            if (message != 'Voted') {
+                setError(message);
+            } 
+
+        } catch (error) {
+            setError('Failed to vote.');
+        }
+
     };
 
     return (
@@ -210,7 +223,7 @@ export default function VoteMeetingForm({
                             <input
                                 id="email"
                                 name="email"
-                                type="string"
+                                type="email"
                                 step="0.01"
                                 placeholder="Enter your email"
                                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
@@ -220,6 +233,19 @@ export default function VoteMeetingForm({
                             />
                         </div>
                     </div>
+                </div>
+
+                <div
+                    className="flex h-8 items-end space-x-1"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
+                    {error && (
+                        <>
+                            <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                            <p className="text-sm text-red-500">{error}</p>
+                        </>
+                    )}
                 </div>
 
                 {/* Render submit button */}

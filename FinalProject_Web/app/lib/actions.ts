@@ -214,6 +214,19 @@ export async function voteMeetingForm(requestBody: { meetingform_id: any; meetin
             }),
         });
 
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            return { message: 'Voted' };
+        } else {
+            const errorResponse = await response.json();
+            console.error('API Request Error:', errorResponse);
+
+            // Extract the 'detail' field and include it in the returned message
+            const errorMessage = errorResponse.detail || 'Failed to vote.';
+
+            return { message: errorMessage, error: errorResponse };
+        }
+
     } catch (error) {
 
         // Handle any errors that occur during the request
@@ -224,8 +237,8 @@ export async function voteMeetingForm(requestBody: { meetingform_id: any; meetin
     }
     if (response.ok) {
         // Revalidate the cache for the invoices page and redirect the user.
-        revalidatePath('/dashboard');
-        redirect('/dashboard');
+        revalidatePath('/guest/success');
+        redirect('/guest/success');
     }
 }
 
@@ -260,13 +273,17 @@ export async function bookMeetingForm(requestBody: { meetingform_id: any; }, act
             }),
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Book Meeting error:', errorData);
-            return {
-                message: `Book Meeting error: ${errorData.detail || response.statusText}`,
-                errors: errorData.errors || {},
-            };
+        if (response.ok) {
+            // Optionally handle any revalidation or additional logic after successful deletion
+            return { message: 'Booked' };
+        } else {
+            const errorResponse = await response.json();
+            console.error('API Request Error:', errorResponse);
+
+            // Extract the 'detail' field and include it in the returned message
+            const errorMessage = errorResponse.detail || 'Failed to book meeting.';
+
+            return { message: errorMessage, error: errorResponse };
         }
 
     } catch (error) {

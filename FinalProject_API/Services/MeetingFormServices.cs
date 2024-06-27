@@ -60,6 +60,10 @@ namespace FinalProject_API.Services
             {
                 throw new InvalidProgramException("Google credentials invalid");
             }
+            if (creating.times == null || creating.times.Count() < 2)
+            {
+                throw new InvalidProgramException("Must add atleast 2 meeting times");
+            }
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
             new_meeting_form.URL = $"http://{_configuration["EC2_IP"]}:3000/guest/{new_meeting_form.ID}/vote";
@@ -194,6 +198,11 @@ namespace FinalProject_API.Services
             {
                 attendees.name = voting.name;
                 _context.attendees.Update(attendees);
+
+                if (voting.meetingtime_ids == null || voting.meetingtime_ids.Count < 1)
+                {
+                    throw new InvalidProgramException("Must vote for atleast 1 meeting time(s)");
+                }
 
                 var voting_history = await _context.votinghistories.Where(o => o.attendee_id == attendees.ID && o.meetingform_id == voting.meetingform_id).ToListAsync();
                 var removed_voting_history = voting_history.Where(o => !voting.meetingtime_ids.Contains(o.meetingtime_id)).ToList();
