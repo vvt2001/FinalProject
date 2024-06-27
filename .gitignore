@@ -34,3 +34,4 @@
 # Custom
 FinalProject_Data/DbContextFactory.cs
 *.vsidx
+FinalProject_API/bin/Debug/net6.0/FinalProject_API.dll
