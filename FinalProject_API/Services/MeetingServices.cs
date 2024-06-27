@@ -24,6 +24,7 @@ namespace FinalProject_API.Services
         Task<bool> DeleteMeeting(string id, string actor_id);
         Task<bool> UpdateMeeting(MeetingUpdating updating, string actor_id);
         Task<bool> CancelMeeting(string id, string actor_id);
+        Task<bool> AddNote(MeetingNote note, string actor_id);
     }
     public class MeetingServices : IMeetingServices
     {
@@ -45,7 +46,7 @@ namespace FinalProject_API.Services
         {
             if (updating.attendees != null && updating.attendees.GroupBy(a => a.email).Any(g => g.Count() > 1))
             {
-                throw new InvalidProgramException("Không được phép trùng email");
+                throw new InvalidProgramException("Emails must be unique");
             }
 
             var meeting = await GetMeeting(updating.id, actor_id);
@@ -97,7 +98,7 @@ namespace FinalProject_API.Services
 
             if (string.IsNullOrWhiteSpace(meeting.event_id))
             {
-                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+                throw new InvalidProgramException("Meeting not found");
             }
             await _onlineMeetingServices.UpdateGoogleMeetMeeting(meeting.event_id, actor_id, meeting);
 
@@ -113,13 +114,13 @@ namespace FinalProject_API.Services
             }
             else
             {
-                throw new InvalidProgramException("Không tìm thấy cuộc họp");
+                throw new InvalidProgramException("Meeting not found");
             }
         }
 
         public async Task<List<Meeting>> GetAllMeeting(string actor_id)
         {
-            var meetings = await _context.meetings.Include(o => o.attendees).Include(o => o.owner).Where(o => o.owner_id == actor_id).ToListAsync();
+            var meetings = await _context.meetings.Include(o => o.attendees).Where(o => o.owner_id == actor_id).ToListAsync();
             return meetings;
         }
 
@@ -157,7 +158,7 @@ namespace FinalProject_API.Services
             await _context.attendees.Where(o => o.meetingform_id == null && o.meeting_id == null).ExecuteDeleteAsync();
             if (string.IsNullOrWhiteSpace(meetingEventID))
             {
-                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+                throw new InvalidProgramException("Meeting not found");
             }
             await _onlineMeetingServices.DeleteGoogleMeetMeeting(meetingEventID, actor_id);
             return true;
@@ -168,11 +169,21 @@ namespace FinalProject_API.Services
             var meeting = await GetMeeting(id, actor_id);
             if (string.IsNullOrWhiteSpace(meeting.event_id))
             {
-                throw new InvalidProgramException("Không tìm thấy thông tin lịch họp");
+                throw new InvalidProgramException("Meeting not found");
             }
             await _onlineMeetingServices.CancelGoogleMeetMeeting(meeting.event_id, actor_id);
             meeting.trangthai = (int)trangthai_Meeting.Canceled;
             _context.meetings.Update(meeting);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> AddNote(MeetingNote note, string actor_id)
+        {
+            var meeting = await GetMeeting(note.meeting_id, actor_id);
+
+            meeting.note = note.content;
+            _context.meetings.Update(meeting);
+
             return await _context.SaveChangesAsync() > 0;
         }
     }

@@ -105,5 +105,19 @@ namespace FinalProject_API.Controllers
                 return HandleException(ex);
             }
         }
+
+        [Authorize]
+        [HttpPut("add-note")]
+        public async Task<ActionResult> AddNote([FromBody] MeetingNote note, string actor_id)
+        {
+            try
+            {
+                return Ok(new Response<bool>(await _meetingServices.AddNote(note, actor_id)));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
+        }
     }
 }

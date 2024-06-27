@@ -25,6 +25,7 @@ namespace FinalProject_Data.Model
         public string? event_id { get;set; }
         public string? meetingform_id { get; set; }
         public bool? is_active { get; set; } = true;
+        public string? note { get; set; }
     }
     public class Meeting_configuration : IEntityTypeConfiguration<Meeting>
     {

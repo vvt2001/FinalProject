@@ -5,7 +5,7 @@ namespace FinalProject_API.View.Meeting
 {
     public class MeetingUpdating
     {
-        [Required(ErrorMessage = "Không xác định được cuộc họp")]
+        [Required(ErrorMessage = "Meeting not found")]
         public string id { get; set; }
         public string meeting_title { get; set; }
         public string? meeting_description { get; set; }

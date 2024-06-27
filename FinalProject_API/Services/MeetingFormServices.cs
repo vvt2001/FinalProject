@@ -337,7 +337,7 @@ namespace FinalProject_API.Services
 
                 return true;
             }
-            throw new InvalidProgramException("Mẫu cuộc họp không tồn tại");
+            throw new InvalidProgramException("Meeting schedule not found");
         }
     }
 }

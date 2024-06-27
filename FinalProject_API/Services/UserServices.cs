@@ -229,7 +229,6 @@ namespace FinalProject_API.Services
                 user.has_googlecredentials = false;
                 _context.users.Update(user);
 
-
                 var client = new HttpClient();
                 var revokeTokenEndpoint = $"https://oauth2.googleapis.com/revoke?token={credentials.OrderByDescending(o => o.IssuedUtc).FirstOrDefault().AccessToken}";
 

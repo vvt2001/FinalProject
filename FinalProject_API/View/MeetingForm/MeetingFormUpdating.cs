@@ -4,7 +4,7 @@ namespace FinalProject_API.View.MeetingForm
 {
     public class MeetingFormUpdating : MeetingFormCreating
     {
-        [Required(ErrorMessage = "Không xác định được lịch họp")]
+        [Required(ErrorMessage = "Meeting schedule not found")]
         public string id { get; set; }
     }
 }

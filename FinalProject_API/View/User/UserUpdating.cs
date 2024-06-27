@@ -4,12 +4,12 @@ namespace FinalProject_API.View.User
 {
     public class UserUpdating
     {
-        [Required(ErrorMessage = "Không xác định được người dùng")]
+        [Required(ErrorMessage = "User not found")]
         public string id { get; set; }
-        [Required(ErrorMessage = "Họ và tên không được trống")]
+        [Required(ErrorMessage = "Name is required")]
         public string name { get; set; }
 
-        [Required(ErrorMessage = "Tên tài khoản không được trống")]
+        [Required(ErrorMessage = "Email is required")]
         public string email { get; set; }
     }
 }

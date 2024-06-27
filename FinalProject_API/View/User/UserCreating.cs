@@ -4,16 +4,16 @@ namespace FinalProject_API.View.User
 {
     public class UserCreating
     {
-        [Required(ErrorMessage = "Họ và tên không được để trống")]
+        [Required(ErrorMessage = "Name is required")]
         public string name { get; set; }
 
-        [Required(ErrorMessage = "Tên tài khoản không được để trống")]
+        [Required(ErrorMessage = "Username is required")]
         public string username { get; set; }
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        [Required(ErrorMessage = "Password is required")]
         public string password { get; set; }
-        [Required(ErrorMessage = "Xác nhận mật khẩu không được để trống")]
+        [Required(ErrorMessage = "Confirm password is required")]
         public string confirm_password { get; set; }
-        [Required(ErrorMessage = "Email không được để trống")]
+        [Required(ErrorMessage = "Email is required")]
         public string email { get; set; }
 
     }

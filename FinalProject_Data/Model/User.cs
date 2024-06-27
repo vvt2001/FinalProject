@@ -15,9 +15,9 @@ namespace FinalProject_Data.Model
 
     public class User_properties : Entity
     {
-        [Required(ErrorMessage = "Họ và tên không được trống")]
+        [Required(ErrorMessage = "Name is required")]
         public string name { get; set; }
-        [Required(ErrorMessage = "Tên đăng nhập không được trống")]
+        [Required(ErrorMessage = "Username is required")]
         public string username { get; set; }
         public string email { get; set; }
         public int trangthai { get; set; }
