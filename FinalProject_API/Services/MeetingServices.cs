@@ -49,6 +49,11 @@ namespace FinalProject_API.Services
                 throw new InvalidProgramException("Emails must be unique");
             }
 
+            if (updating.starttime < DateTime.Now)
+            {
+                throw new InvalidProgramException("Can't set past times");
+            }
+
             var meeting = await GetMeeting(updating.id, actor_id);
 
             meeting.meeting_title = updating.meeting_title;

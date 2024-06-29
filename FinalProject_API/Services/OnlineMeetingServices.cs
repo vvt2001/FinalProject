@@ -352,35 +352,35 @@ namespace FinalProject_API.Services
             }
         }
 
-        private async Task<UserCredential> AuthenticateUserCalendarAsync()
-        {
-            var dataStore = new FileDataStore(ApplicationName);
+        //private async Task<UserCredential> AuthenticateUserCalendarAsync()
+        //{
+        //    var dataStore = new FileDataStore(ApplicationName);
 
-            // Clear existing credentials
-            await dataStore.ClearAsync();
+        //    // Clear existing credentials
+        //    await dataStore.ClearAsync();
 
-            return await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GetClientSecrets(),
-                CalendarScopes,
-                "user",
-                CancellationToken.None,
-                dataStore);
-        }
+        //    return await GoogleWebAuthorizationBroker.AuthorizeAsync(
+        //        GetClientSecrets(),
+        //        CalendarScopes,
+        //        "user",
+        //        CancellationToken.None,
+        //        dataStore);
+        //}
 
-        private async Task<UserCredential> AuthenticateUserEmailAsync()
-        {
-            var dataStore = new FileDataStore(ApplicationName);
+        //private async Task<UserCredential> AuthenticateUserEmailAsync()
+        //{
+        //    var dataStore = new FileDataStore(ApplicationName);
 
-            // Clear existing credentials
-            await dataStore.ClearAsync();
+        //    // Clear existing credentials
+        //    await dataStore.ClearAsync();
 
-            return await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                GetClientSecrets(),
-                EmailScopes,
-                "user",
-                CancellationToken.None,
-                dataStore);
-        }
+        //    return await GoogleWebAuthorizationBroker.AuthorizeAsync(
+        //        GetClientSecrets(),
+        //        EmailScopes,
+        //        "user",
+        //        CancellationToken.None,
+        //        dataStore);
+        //}
 
         private async Task<bool> SaveTokensToDatabase(UserCredential credential, string actor_id)
         {
@@ -470,22 +470,20 @@ namespace FinalProject_API.Services
                 // Refresh the token if it has expired
                 if (credential.Token.IsExpired(flow.Clock))
                 {
-                    if (await credential.RefreshTokenAsync(CancellationToken.None))
-                    {
+                    //if (await credential.RefreshTokenAsync(CancellationToken.None))
+                    //{
                         await SaveTokensToDatabase(credential, actor_id);
-                    }
-                    else
-                    {
-                        credential = await AuthenticateUserCalendarAsync();
-                        await SaveTokensToDatabase(credential, actor_id);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    credential = await AuthenticateUserCalendarAsync();
+                    //    await SaveTokensToDatabase(credential, actor_id);
+                    //}
                 }
             }
             else
             {
-                // Authenticate the user and save the token to the database
-                credential = await AuthenticateUserCalendarAsync();
-                await SaveTokensToDatabase(credential, actor_id);
+                throw new InvalidProgramException("No credentials found");
             }
 
             return credential;
@@ -525,22 +523,20 @@ namespace FinalProject_API.Services
                 // Refresh the token if it has expired
                 if (credential.Token.IsExpired(flow.Clock))
                 {
-                    if (await credential.RefreshTokenAsync(CancellationToken.None))
-                    {
+                    //if (await credential.RefreshTokenAsync(CancellationToken.None))
+                    //{
                         await SaveTokensToDatabase(credential, actor_id);
-                    }
-                    else
-                    {
-                        credential = await AuthenticateUserCalendarAsync();
-                        await SaveTokensToDatabase(credential, actor_id);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    credential = await AuthenticateUserCalendarAsync();
+                    //    await SaveTokensToDatabase(credential, actor_id);
+                    //}
                 }
             }
             else
             {
-                // Authenticate the user and save the token to the database
-                credential = await AuthenticateUserEmailAsync();
-                await SaveTokensToDatabase(credential, actor_id);
+                throw new InvalidProgramException("No credentials found");
             }
 
             return credential;

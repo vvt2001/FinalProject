@@ -51,15 +51,31 @@ export default function EditUser({ user }: { user: User }) {
         // Update state with result
         dispatch(formData);
     };
+
     console.log(user.has_googlecredentials);
+
     // Function to handle Google credentials
     const handleGoogleCredentials = async () => {
         try {
             let result;
             if (user.has_googlecredentials) {
                 result = await RemoveCredentials(actor_id, access_token);
+            // Function to handle setting cookie
             } else {
-                result = await AddCredentials(actor_id, access_token);
+
+                //this part will handle the add credentials
+
+                const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+                const redirectUri = 'http://localhost:7057/api/auth/google/callback'; // API endpoint
+                const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar');
+                const responseType = 'code';
+                const state = encodeURIComponent(actor_id); // Encode the user ID to ensure it is safely included in the URL
+
+                const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&state=${state}&access_type=offline&prompt=consent`;
+
+                window.location.href = authUrl;
+
+                result = { message: "Await Authentication"};
             }
 
             if (result.message) {

@@ -13,5 +13,6 @@ namespace FinalProject_API.View.MeetingForm
         public List<DateTime> times { get; set; }
         public int duration { get; set; }
         public int platform { get;set; }
+        public string? user_id { get; set; }
     }
 }

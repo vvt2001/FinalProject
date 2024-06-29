@@ -3,14 +3,15 @@
     "",
     "\\app",
     "\\app\\dashboard",
+    "\\app\\dashboard\\meetingforms",
     "\\app\\dashboard\\meetingforms\\[id]",
-    "\\app\\dashboard\\meetingforms\\[id]\\book",
     "\\app\\dashboard\\meetingforms\\[id]\\edit",
-    "\\app\\login",
-    "\\app\\register",
-    "\\app\\ui",
-    "\\app\\ui\\meetingforms"
+    "\\app\\dashboard\\user",
+    "\\app\\dashboard\\user\\[id]",
+    "\\app\\dashboard\\user\\[id]\\edit",
+    "\\app\\lib",
+    "\\app\\login"
   ],
-  "SelectedNode": "\\app\\ui\\meetingforms\\note-popup.js",
+  "SelectedNode": "\\app\\dashboard\\meetingforms\\[id]\\edit\\page.tsx",
   "PreviewInSolutionExplorer": false
 }

@@ -11,9 +11,9 @@ import { Button } from '@/app/ui/button';
 import { createMeetingForm } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { useState, useEffect, ChangeEvent } from 'react';
-import { MeetingFormState } from '@/app/lib/definitions';
+import { MeetingFormState, User } from '@/app/lib/definitions';
 
-export default function Form() {
+export default function Form({ user }: { user: User }) {
     const initialState = { message: null, errors: {} };
     const [state, dispatch] = useFormState(createMeetingForm, initialState);
     const platformOptions = ["Google Meet"];
@@ -59,6 +59,7 @@ export default function Form() {
 
         const actorIdFromCookie = getCookie("actor_id");
         const accessTokenFromCookie = getCookie("access_token");
+
         setActorId(actorIdFromCookie || '');
         setAccessToken(accessTokenFromCookie || '');
     }, []);
@@ -75,8 +76,36 @@ export default function Form() {
         //// Call createMeetingForm function with form data and actor_id
         //const result = await createMeetingForm(state, formData);
 
-        // Update state with result
-        dispatch(formData);
+        if (user.has_googlecredentials)
+            // Update state with result
+            dispatch(formData);
+        else {
+            //this part will handle the add credentials
+
+            const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+            const redirectUri = 'http://localhost:7057/api/auth/google/callback/create-meeting'; // API endpoint
+            const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar');
+            const responseType = 'code';
+            const state = encodeURIComponent(JSON.stringify({
+                //meeting_title: formData.get('meeting_title'),
+                //meeting_description: formData.get('meeting_description'),
+                //location: formData.get('location'),
+                //times: formData.getAll('times'),
+                //duration: parseInt(formData.get('duration')?.toString() || '0', 10),
+                //platform: parseInt(formData.get('platform')?.toString() || '0', 10),
+                meeting_title: formData.get('meeting_title'),
+                meeting_description: formData.get('meeting_description'),
+                location: formData.get('location'),
+                times: formData.getAll('times'),
+                duration: formData.get('duration'),
+                platform: formData.get('platform'),
+                user_id: formData.get('actor_id'),
+            })); // Encode the user ID to ensure it is safely included in the URL
+
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&state=${state}&access_type=offline&prompt=consent`;
+
+            window.location.href = authUrl;
+        }
     };
 
     return (

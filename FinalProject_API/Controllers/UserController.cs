@@ -90,18 +90,18 @@ namespace FinalProject_API.Controllers
             }
         }
 
-        [Authorize]
-        [HttpPost("add-credentials")]
-        public async Task<ActionResult> AddCredentials(string user_id)
-        {
-            try
-            {
-                return Ok(new Response<bool>(await _userServices.AddCredentials(user_id)));
-            }
-            catch (Exception ex)
-            {
-                return HandleException(ex);
-            }
-        }
+        //[Authorize]
+        //[HttpPost("add-credentials")]
+        //public async Task<ActionResult> AddCredentials(string user_id)
+        //{
+        //    try
+        //    {
+        //        return Ok(new Response<bool>(await _userServices.AddCredentials(user_id)));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return HandleException(ex);
+        //    }
+        //}
     }
 }

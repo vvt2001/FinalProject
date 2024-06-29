@@ -64,9 +64,24 @@ namespace FinalProject_API.Services
             {
                 throw new InvalidProgramException("Must add atleast 2 meeting times");
             }
+            if (creating.times.Any(d => d < DateTime.Now))
+            {
+                throw new InvalidProgramException("Can't select past times");
+            }
+            var duplicates = creating.times
+                .GroupBy(d => d)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicates.Any())
+            {
+                // Handle the error condition, e.g., throw an exception
+                throw new InvalidProgramException("Can't select duplicated times");
+            }
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
-            new_meeting_form.URL = $"http://{_configuration["EC2_IP"]}:3000/guest/{new_meeting_form.ID}/vote";
+            new_meeting_form.URL = $"http://{_configuration["EC2_IP"]}/guest/{new_meeting_form.ID}/vote";
             new_meeting_form.trangthai = (int)trangthai_MeetingForm.New;
             new_meeting_form.meeting_title = creating.meeting_title;
             new_meeting_form.meeting_description = creating.meeting_description;
@@ -102,7 +117,27 @@ namespace FinalProject_API.Services
 
         public async Task<bool> UpdateForm(MeetingFormUpdating updating, string actor_id)
         {
+            if (updating.times == null || updating.times.Count() < 2)
+            {
+                throw new InvalidProgramException("Must add atleast 2 meeting times");
+            }
+            if (updating.times.Any(d => d < DateTime.Now))
+            {
+                throw new InvalidProgramException("Can't select past times");
+            }
+            var duplicates = updating.times
+                .GroupBy(d => d)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            if (duplicates.Any())
+            {
+                throw new InvalidProgramException("Can't select duplicated times");
+            }
+
             var meetingForm = await _context.meetingforms.AsNoTracking().FirstOrDefaultAsync(o => o.ID == updating.id);
+
             if (meetingForm != null)
             {
                 meetingForm.meeting_title = updating.meeting_title;
