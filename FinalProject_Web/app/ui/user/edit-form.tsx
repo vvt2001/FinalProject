@@ -66,7 +66,7 @@ export default function EditUser({ user }: { user: User }) {
                 //this part will handle the add credentials
 
                 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-                const redirectUri = 'http://localhost:7057/api/auth/google/callback'; // API endpoint
+                const redirectUri = 'http://scheduler.id.vn:7057/api/auth/google/callback'; // API endpoint
                 const scope = encodeURIComponent('https://www.googleapis.com/auth/calendar');
                 const responseType = 'code';
                 const state = encodeURIComponent(actor_id); // Encode the user ID to ensure it is safely included in the URL
