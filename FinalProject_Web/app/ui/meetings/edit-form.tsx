@@ -235,6 +235,11 @@ export default function EditMeeting({ meeting }: { meeting: Meeting }) {
                     <Button type="button" onClick={handleAddAttendee}>Add Attendee</Button>
                 </div>
             </div>
+
+            {state.message && (
+                <div className="text-red-500 mt-4">{state.message}</div>
+            )}
+
             <div className="mt-6 flex justify-end gap-4">
                 <Link
                     href="/dashboard/meetings"

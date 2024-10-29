@@ -81,7 +81,7 @@ namespace FinalProject_API.Services
             }
             var new_meeting_form = new MeetingForm();
             new_meeting_form.ID = SlugID.New();
-            new_meeting_form.URL = $"http://{_configuration["EC2_IP"]}/guest/{new_meeting_form.ID}/vote";
+            new_meeting_form.URL = $"http://localhost:3000/guest/{new_meeting_form.ID}/vote";
             new_meeting_form.trangthai = (int)trangthai_MeetingForm.New;
             new_meeting_form.meeting_title = creating.meeting_title;
             new_meeting_form.meeting_description = creating.meeting_description;

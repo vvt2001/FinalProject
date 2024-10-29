@@ -34,7 +34,7 @@ namespace FinalProject_API.Services
         Task<List<User>> GetAll();
         Task<bool> Update(UserUpdating updating, string actor_id);
         Task<bool> RemoveCredentials(string user_id);
-        //Task<bool> AddCredentials(string user_id);
+        Task<bool> AddCredentials(string user_id);
         Task<bool> AddCredentials(string user_id, UserCredential credential);
     }
 
@@ -242,36 +242,36 @@ namespace FinalProject_API.Services
             throw new InvalidProgramException("Can't find user's credentials");
         }
 
-        //public async Task<bool> AddCredentials(string user_id)
-        //{
-        //    var user = await Get(user_id, user_id);
-        //    var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
-        //    if (credentials != null)
-        //    {
-        //        throw new InvalidProgramException("User's already authenticated");
-        //    }
+        public async Task<bool> AddCredentials(string user_id)
+        {
+            var user = await Get(user_id, user_id);
+            var credentials = await _context.googlemeetcredentials.FirstOrDefaultAsync(o => o.user_id == user_id);
+            if (credentials != null)
+            {
+                throw new InvalidProgramException("User's already authenticated");
+            }
 
-        //    // Authenticate the user and save the token to the database
-        //    UserCredential credential = await AuthenticateUserCalendarAsync();
-        //    await SaveTokensToDatabase(credential, user_id);
+            // Authenticate the user and save the token to the database
+            UserCredential credential = await AuthenticateUserCalendarAsync();
+            await SaveTokensToDatabase(credential, user_id);
 
-        //    var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
-        //    var meetings = await _meetingServices.GetAllMeeting(user_id);
+            var meeting_forms = await _meetingFormServices.GetAllForm(user_id);
+            var meetings = await _meetingServices.GetAllMeeting(user_id);
 
-        //    foreach (var meeting_form in meeting_forms)
-        //    {
-        //        meeting_form.is_active = true;
-        //        _context.meetingforms.Update(meeting_form);
-        //    }
+            foreach (var meeting_form in meeting_forms)
+            {
+                meeting_form.is_active = true;
+                _context.meetingforms.Update(meeting_form);
+            }
 
-        //    foreach (var meeting in meetings)
-        //    {
-        //        meeting.is_active = true;
-        //        _context.meetings.Update(meeting);
-        //    }
+            foreach (var meeting in meetings)
+            {
+                meeting.is_active = true;
+                _context.meetings.Update(meeting);
+            }
 
-        //    return await _context.SaveChangesAsync() > 0;
-        //}
+            return await _context.SaveChangesAsync() > 0;
+        }
 
         public async Task<bool> AddCredentials(string user_id, UserCredential credential)
         {

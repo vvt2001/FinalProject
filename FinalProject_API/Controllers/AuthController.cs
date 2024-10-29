@@ -64,7 +64,7 @@ public class AuthController : ControllerBase
         await _userServices.AddCredentials(userId, userCredential);
 
         // Redirect to a success page or send a response
-        return Redirect($"http://{_configuration["EC2_IP"]}/dashboard/user/{userId}/edit"); // Replace with your actual success URL
+        return Redirect($"http://localhost:3000/dashboard/user/{userId}/edit"); // Replace with your actual success URL
     }
 
     [HttpGet("google/callback/create-meeting")]
@@ -118,6 +118,6 @@ public class AuthController : ControllerBase
         await _meetingFormServices.CreateForm(meetingForm, userId);
 
         // Redirect to a success page or send a response
-        return Redirect($"http://{_configuration["EC2_IP"]}/dashboard"); // Replace with your actual success URL
+        return Redirect($"http://localhost:3000/dashboard"); // Replace with your actual success URL
     }
 }

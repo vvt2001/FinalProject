@@ -2,14 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\app",
-    "\\app\\dashboard",
     "\\app\\dashboard\\meetingforms",
-    "\\app\\dashboard\\meetingforms\\create",
-    "\\app\\dashboard\\user",
-    "\\app\\dashboard\\user\\[id]",
-    "\\app\\dashboard\\user\\[id]\\edit",
-    "\\app\\lib",
+    "\\app\\dashboard\\meetingforms\\[id]",
+    "\\app\\dashboard\\meetingforms\\[id]\\book",
+    "\\app\\dashboard\\meetingforms\\[id]\\edit",
+    "\\app\\dashboard\\meetings",
+    "\\app\\dashboard\\meetings\\[id]",
+    "\\app\\dashboard\\meetings\\[id]\\edit",
     "\\app\\login"
   ],
+  "SelectedNode": "\\app\\login\\page.tsx",
   "PreviewInSolutionExplorer": false
 }
